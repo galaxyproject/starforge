@@ -1,0 +1,6 @@
+#!/bin/sh
+
+[ -z "$1" ] && echo "usage: $(basename $0) PACKAGE" && exit 1
+[ ! -d "$1" ] && echo "$1: not found" && exit 1
+
+docker run -v $(readlink -f $1)/:/host/ debian:squeeze /bin/sh /host/build.sh
