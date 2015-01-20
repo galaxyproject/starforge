@@ -1,6 +1,12 @@
 #!/bin/sh
 
+build_image_repository='natefoo/build'
+
 [ -z "$1" ] && echo "usage: $(basename $0) PACKAGE" && exit 1
 [ ! -d "$1" ] && echo "$1: not found" && exit 1
 
-docker run -v $(readlink -f $1)/:/host/ debian:squeeze /bin/sh /host/build.sh
+build_image_id=$(docker images -q $build_image_repository)
+
+[ -z "$build_image_id" ] && docker build -t "$build_image_repository" ./image
+
+docker run -v $(readlink -f $1)/:/host/ $build_image_repository
