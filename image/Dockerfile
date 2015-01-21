@@ -9,4 +9,4 @@ VOLUME ["/host"]
 RUN apt-get -qq update && \
     apt-get install --no-install-recommends -y wget build-essential gfortran bzip2 patch
 
-ENTRYPOINT ["/bin/sh", "/host/build.sh"]
+ENTRYPOINT ["/bin/bash", "/host/build.sh"]
