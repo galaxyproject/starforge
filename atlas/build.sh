@@ -36,4 +36,4 @@ apt-get -qq update &&
         -Si cputhrchk 0 && \
     make && \
     make install && \
-    tar zcf /host/atlas-${version}-Linux-x86_64.tar.gz * -C /build/dest
+    tar zcf /host/atlas-${version}-Linux-x86_64.tar.gz -C /build/dest .

@@ -24,5 +24,5 @@ apt-get -qq update &&
     cp libbam.a bcftools/libbcf.a /build/dest/lib &&
     cp *.h /build/dest/include/bam &&
     cp bcftools/*.h /build/dest/include/bcf &&
-    tar zcf /host/samtools-${version}-Linux-x86_64.tar.gz * -C /build/dest
+    tar zcf /host/samtools-${version}-Linux-x86_64.tar.gz -C /build/dest .
 
