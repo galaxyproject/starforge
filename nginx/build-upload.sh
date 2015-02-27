@@ -33,11 +33,27 @@ apt-get -qq update &&
         -e 's%^ #\( Homepage: https://github.com/vkholodkov/nginx-upload-module\)$% \1/tree/2.2%' \
         -e "s/^ # Version: 2.2.0.*$/  Version: 2.2.1-${upload_module_shortrev}/" \
         -i nginx-${nginx_version}/debian/modules/README.Modules-versions &&
-    sed -e 's#\(^\t    --add-module=$(MODULESDIR)/nginx-upload-progress \\\)#\t    --add-module=$(MODULESDIR)/nginx-upload \\\n\1#' \
-        -i nginx-${nginx_version}/debian/rules &&
     cd nginx-${nginx_version} &&
+    patch -p0 </host/rules.patch &&
+    patch -p0 </host/control.patch &&
+    head -1 debian/changelog | sed -e 's/nginx (\(.*\)) .*/\1/' >../nginxSourceDebVersion &&
+    ( for name in core extras full light; do
+        for f in debian/nginx-${name}.*; do
+            ext="${f##*.}"
+            base="${f%.*}"
+            if [ $f == nginx-${name}.install ]; then
+                sed -i -e "s#^debian/build-${name}/#debian/build-${name}-upload/#" nginx-${name}.install
+            fi
+            mv $f ${base}-upload.${ext}
+        done
+    done ) &&
     dch -v ${ppa_version} -D ${dch_dist} "${dch_message}" &&
     debuild -S -sd -us -uc &&
+    # build binary packages
+    #apt-get install --no-install-recommends -y autotools-dev dh-systemd \
+    #  libexpat-dev libgd2-dev libgeoip-dev liblua5.1-dev libmhash-dev \
+    #  libpam0g-dev libpcre3-dev libperl-dev libssl-dev libxslt1-dev zlib1g-dev && 
+    #debuild -sd -us -uc &&
     echo "To sign: debsign -S ${pkg}_${ppa_version}_source.changes" &&
     echo "To push: dput ppa:natefoo/nginx ${pkg}_${ppa_version}_source.changes" &&
     echo "To push: dput ppa:galaxyproject/nginx ${pkg}_${ppa_version}_source.changes"
