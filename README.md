@@ -1,16 +1,40 @@
-# Build things in docker
+# Build things in Docker
 
-Mostly for [Galaxy Tool Shed](https://toolshed.g2.bx.psu.edu) dependencies, although I'd like to use this for rebuilding debian source packages a la [vadebuildsible](https://github.com/natefoo/vadebuildsible), the [Galaxy rebuild of nginx-extras](https://launchpad.net/~galaxyproject/+archive/ubuntu/nginx), the rpms of nginx for usegalaxy.org, and so forth.
+Things you can do with docker-build:
 
-The base image for Galaxy packages is Debian Squeeze. This will hopefully produce binaries usable on Galaxy's targeted platforms (at time of writing: CentOS 6+, Debian 6.0+, Ubuntu 12.04+).
+- Build [Galaxy Tool Shed](https://toolshed.g2.bx.psu.edu) dependencies
+- Rebuild Debian or Ubuntu source packages (for modifications)
 
-To use, install Docker, then:
+The base image for Galaxy packages is Debian Squeeze. This will hopefully
+produce binaries usable on Galaxy's targeted platforms (at time of writing:
+CentOS 6+, Debian 6.0+, Ubuntu 12.04+).
+
+To use, install Docker. Then, for Tool Shed dependencies:
 
 ```console
-$ ./build <package>
+$ ./build galaxy <package>
 ```
 e.g.
 
 ```console
-$ ./build samtools
+$ ./build galaxy samtools
 ```
+
+For building dpkgs, use:
+
+```console
+$ ./build <dist>[:tag] <package>
+```
+
+e.g.:
+
+```console
+$ ./build ubuntu:trusty nginx
+```
+
+## TODO
+
+- The build scripts themselves are targeted at whatever specific dist/release I
+  am building them for at the moment and are not generalized to work on others.
+- Some things in the build scripts probably belong in some sort of build script
+  library.

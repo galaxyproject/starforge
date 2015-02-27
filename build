@@ -1,12 +1,60 @@
-#!/bin/sh
+#!/bin/bash
 
-build_image_repository='natefoo/build'
+usage="usage: $(basename $0) <galaxy|ubuntu[:tag]|debian[:tag]> <PACKAGE>"
 
-[ -z "$1" ] && echo "usage: $(basename $0) PACKAGE" && exit 1
-[ ! -d "$1" ] && echo "$1: not found" && exit 1
+[ -z "$2" ] && echo "$usage" && exit 2
 
-build_image_id=$(docker images -q $build_image_repository)
+repo_arr=(${1//:/ })
+case ${#repo_arr[@]} in
+    1)
+        repo=$1
+        tag=latest
+        ;;
+    2)
+        repo=${repo_arr[0]}
+        tag=${repo_arr[1]}
+        ;;
+    3)
+        echo "$usage"
+        exit 2
+        ;;
+esac
 
-[ -z "$build_image_id" ] && docker build -t "$build_image_repository" ./image
 
-docker run -v $(readlink -f $1)/:/host/ $build_image_repository
+case "$repo" in
+    galaxy)
+        baseimg='debian:squeeze'
+        build_image_repository='natefoo/galaxy_build'
+        buildpkgs='gfortran bzip2 patch'
+        ;;
+    ubuntu|debian)
+        baseimg="$1"
+        build_image_repository="natefoo/${repo}_build"
+        buildpkgs='devscripts debhelper socat quilt fakeroot ca-certificates'
+        ;;
+    *)
+        echo "$usage"
+        exit 2
+        ;;
+esac
+
+[ ! -d "$2" ] && echo "$2: not found" && exit 1
+
+for image_id in $(docker images -q $build_image_repository); do
+    for image_tag in $(docker images | awk "\$1 == \"$build_image_repository\" {print \$2}"); do
+        if [ "$tag" == "$image_tag" ]; then
+            build_image_id=$image_id
+        fi
+    done
+done
+
+[ "$tag" != "latest" ] && build_image_repository="$build_image_repository:$tag"
+
+if [ -z "$build_image_id" ]; then
+    sed -e "s/BASE_NAME_AND_TAG/$baseimg/" -e "s/ADDITIONAL_BUILD_PACKAGES/$buildpkgs/" ./image/Dockerfile.in >./image/Dockerfile &&
+    docker build -t "$build_image_repository" ./image
+fi
+
+runcmd="docker run -v $(readlink -f $2)/:/host/ $build_image_repository"
+echo "$runcmd"
+$runcmd
