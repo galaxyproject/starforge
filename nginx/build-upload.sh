@@ -36,13 +36,13 @@ apt-get -qq update &&
     cd nginx-${nginx_version} &&
     patch -p0 </host/rules.patch &&
     patch -p0 </host/control.patch &&
-    head -1 debian/changelog | sed -e 's/nginx (\(.*\)) .*/\1/' >../nginxSourceDebVersion &&
+    head -1 debian/changelog | sed -e 's/nginx (\(.*\)) .*/\1/' >debian/nginxSourceDebVersion &&
     ( for name in core extras full light; do
         for f in debian/nginx-${name}.*; do
             ext="${f##*.}"
             base="${f%.*}"
-            if [ $f == nginx-${name}.install ]; then
-                sed -i -e "s#^debian/build-${name}/#debian/build-${name}-upload/#" nginx-${name}.install
+            if [ $f == debian/nginx-${name}.install ]; then
+                sed -i -e "s#^debian/build-${name}/#debian/build-${name}-upload/#" $f
             fi
             mv $f ${base}-upload.${ext}
         done
@@ -55,5 +55,4 @@ apt-get -qq update &&
     #  libpam0g-dev libpcre3-dev libperl-dev libssl-dev libxslt1-dev zlib1g-dev && 
     #debuild -sd -us -uc &&
     echo "To sign: debsign -S ${pkg}_${ppa_version}_source.changes" &&
-    echo "To push: dput ppa:natefoo/nginx ${pkg}_${ppa_version}_source.changes" &&
-    echo "To push: dput ppa:galaxyproject/nginx ${pkg}_${ppa_version}_source.changes"
+    echo "To push: dput ppa:natefoo/nginx-upload ${pkg}_${ppa_version}_source.changes"

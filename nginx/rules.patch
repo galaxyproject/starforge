@@ -4,7 +4,7 @@
  
  debian_cflags:=$(shell dpkg-buildflags --get CFLAGS | sed 's/-O3/-O2/') $(shell dpkg-buildflags --get CPPFLAGS)
  debian_ldflags:=$(shell dpkg-buildflags --get LDFLAGS)
-+nginxSourceDebVersion:=$(shell cat /build/nginxSourceDebVersion)
++nginxSourceDebVersion:=$(shell cat debian/nginxSourceDebVersion)
  
  # export necessary for (hardening) flags for perl
  # (src/http/modules/perl/Makefile.PL).
