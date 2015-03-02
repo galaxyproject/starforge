@@ -19,6 +19,7 @@ apt-get -qq update &&
     mkdir -p $HOME/bin/${arch}/ /build/dest/bin /build/dest/lib &&
     tar xfvz EMBOSS-${version}.tar.gz &&
     cd EMBOSS-${version} &&
-    ./configure --prefix /build/dest --without-x && make && make install &&
+    ORIGIN='$ORIGIN' &&
+    export ORIGIN &&
+    LDFLAGS='-Wl,-rpath,$${ORIGIN}/../lib' ./configure --prefix /build/dest --without-x && make && make install &&
     tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C /build/dest .
-
