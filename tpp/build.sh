@@ -23,11 +23,9 @@ apt-get -qq update &&
     echo "TPP_ROOT=${build_dir}" > Makefile.config.incl &&
     echo "TPP_WEB=${build_dir}/web/" >> Makefile.config.incl &&
     echo "CGI_USER_DIR=${build_dir}/cgi-bin/" >> Makefile.config.incl &&
-    #echo "OBJ_ARCH=${build_dir}" >> Makefile.config.incl &&
     echo "HTMLDOC_BIN=" >> Makefile.config.incl &&
     echo "LINK=shared" >> Makefile.config.incl &&
     echo "LIBEXT=a" >> Makefile.config.incl &&
     make ARCH=linux-${arch} && make install ARCH=linux-${arch} &&
-    #make && make install &&
     tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C /build/dest .
 
