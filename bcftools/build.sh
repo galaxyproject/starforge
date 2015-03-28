@@ -3,15 +3,15 @@
 . /util/utility_functions.sh
 
 if [ -z $2 ] ; then
-    pkg=$2
-else
     pkg=bcftools
+else
+    pkg=$2
 fi
 
 if [ -z $3 ] ; then
-    version=$3
-else
     version=1.0
+else
+    version=$3
 fi
 
 build_deps="libc6-dev zlib1g-dev"
