@@ -55,6 +55,8 @@ if [ -z "$build_image_id" ]; then
     docker build -t "$build_image_repository" ./image
 fi
 
-runcmd="docker run -v $(readlink -f $2)/:/host/ $build_image_repository"
-echo "$runcmd"
-$runcmd
+base=$(readlink -f $2)
+
+runcmd="docker run --volume=$base/:/host/ --volume=`pwd`/util/:/util/ $build_image_repository"
+echo "$runcmd $@"
+$runcmd $@
