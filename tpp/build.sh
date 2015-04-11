@@ -27,5 +27,9 @@ apt-get -qq update &&
     echo "LINK=shared" >> Makefile.config.incl &&
     echo "LIBEXT=a" >> Makefile.config.incl &&
     make ARCH=linux-${arch} && make install ARCH=linux-${arch} &&
-    tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C /build/dest .
 
+    cp /lib/libbz2.so.1.0.4 /build/dest/lib &&
+    cd /build/dest/lib/ &&
+    ln -s ./libbz2.so.1.0.4 ./libbz2.so &&
+    ln -s ./libbz2.so.1.0.4 ./libbz2.so.1.0 &&
+    tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C /build/dest .
