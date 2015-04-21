@@ -19,38 +19,36 @@ def main(package, version, dryrun=False):
         image_data = yaml.load(handle)
 
     DOCKER_TEMPLATE = """
-    FROM %(image)s
-    MAINTAINER Nare Coraor <nate@bx.psu.edu>
+FROM %(image)s
+MAINTAINER Nare Coraor <nate@bx.psu.edu>
 
-    ENV DEBIAN_FRONTEND noninteractive
-    %(env_string)s
+ENV DEBIAN_FRONTEND noninteractive
+%(env_string)s
 
-    VOLUME ["/host"]
-    # Pre-build packages
-    %(prebuild_packages)s
+VOLUME ["/host"]
+# Pre-build packages
+%(prebuild_packages)s
 
-    # Pre-build commands
-    %(prebuild_commands)s
+# Pre-build commands
+%(prebuild_commands)s
 
-    ENTRYPOINT ["/bin/bash", "/host/build.sh"]
+ENTRYPOINT ["/bin/bash", "/host/build.sh"]
     """
 
-    SCRIPT_TEMPLATE = """
-    #!/bin/sh
-    urls="
-    {url_list}
-    "
+    SCRIPT_TEMPLATE = """#!/bin/sh
+urls="
+{url_list}
+"
 
-    mkdir -p /build/ && cd /build/;
+mkdir -p /build/ && cd /build/;
 
-    ( for url in $urls; do
-        wget "$url" || false || exit
-    done)
+( for url in $urls; do
+    wget "$url" || false || exit
+done)
 
-    {commands}
-    """
+{commands}"""
 
-    template_values = {'image': 'ubuntu'}
+    template_values = {'image': 'ubuntu', 'prebuild_commands': "", 'env_string': ""}
     # ENVIRONMENT
     # TODO: expose base image as an argparse argument
     docker_env = {}
@@ -86,14 +84,16 @@ def main(package, version, dryrun=False):
         script.write(SCRIPT_TEMPLATE.format(url_list=' '.join(urls),
                                             commands='\n'.join(commands)))
 
+    image_name = re.sub('[^A-Za-z0-9_]', '_', '%s:%s' % (package, version))
+    command = ['docker', 'build', '-t', image_name, '.']
+    runcmd = ['docker', 'run', '--volume=%s/:/host/' % build_dir, image_name]
     if not dryrun:
-        image_name = re.sub('[^A-Za-z0-9_]', '_', '%s:%s' % (package, version))
-        command = ['docker', 'build', '-t', image_name, '.']
         execute(command, cwd=build_dir)
-
-        runcmd = ['docker', 'run', '--volume=%s/:/host/' % build_dir, image_name]
         print ' '.join(runcmd)
         execute(runcmd, cwd=build_dir)
+    else:
+        print ' '.join(command)
+        print ' '.join(runcmd)
 
 
 def execute(command, cwd=None):
