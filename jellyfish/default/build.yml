@@ -13,4 +13,4 @@ build:
         - ./configure --prefix=/build/dest
         - make
         - make install
-        - tar zcf /host/${pkg}-${version}-Linux-x86_64.tar.gz -C /build/dest .
+        - tar zcf /host/jellyfish-${version}-Linux-x86_64.tar.gz -C /build/dest .
