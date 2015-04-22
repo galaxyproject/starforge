@@ -4,5 +4,9 @@ syntax: glob
 *.*.swp
 *.tar.gz
 image/Dockerfile
+
 */*/Dockerfile
 */*/build.sh
+
+chado/*/*.sql
+tbl2asn/*/*tbl2asn*

@@ -1,0 +1,21 @@
+meta:
+    image: 'ubuntu'
+    pkg: tbl2asn
+prebuild:
+    packages: wget
+build:
+    urls:
+        # I'm not convinced that these will all be at the same version # but....well...there's not a lot to do.
+        - ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/linux.tbl2asn.gz
+        - ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/linux64.tbl2asn.gz
+        - ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/mac.tbl2asn.gz
+        - ftp://ftp.ncbi.nih.gov/toolbox/ncbi_tools/converters/by_program/tbl2asn/win.tbl2asn.zip
+    commands:
+        - gunzip linux64.tbl2asn.gz
+        - chmod +x linux64.tbl2asn
+        - version=$(./linux64.tbl2asn p | egrep 'tbl2asn ([^ ]*)' -o | sed 's/tbl2asn //g')
+        - gzip linux64.tbl2asn
+        - mv linux.tbl2asn.gz   /host/linux.tbl2asn.$version.gz
+        - mv linux64.tbl2asn.gz /host/linux64.tbl2asn.$version.gz
+        - mv mac.tbl2asn.gz     /host/mac.tbl2asn.$version.gz
+        - mv win.tbl2asn.zip    /host/win.tbl2asn.$version.zip
