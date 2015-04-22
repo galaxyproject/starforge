@@ -92,6 +92,8 @@ done)
         print ' '.join(runcmd)
         execute(runcmd, cwd=build_dir)
     else:
+        # I am *lazy* during debugging phase
+        runcmd = runcmd[0:3] + ['-it', '--entrypoint=/bin/bash'] + runcmd[3:]
         print ' '.join(command)
         print ' '.join(runcmd)
 
