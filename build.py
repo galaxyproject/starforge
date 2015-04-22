@@ -94,7 +94,7 @@ done)
     if version == 'default':
         version = image_data['meta'].get('version', 'default')
 
-    prebuild_packages = ['wget', 'build-essential']
+    prebuild_packages = ['wget', 'openssl', 'ca-certificates', 'build-essential']
     if 'prebuild' in image_data and 'packages' in image_data['prebuild']:
         prebuild_packages.extend(image_data['prebuild']['packages'].strip().split())
 
