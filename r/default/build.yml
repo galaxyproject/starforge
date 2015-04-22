@@ -1,0 +1,32 @@
+meta:
+    image: 'debian:squeeze'
+    version: 3.0.1
+prebuild:
+    packages: |
+        libreadline-dev libncurses5-dev gfortran libpng-dev libcairo-dev
+        libpixman-1-dev libfreetype6-dev
+build:
+    urls:
+        - http://cran.ms.unimelb.edu.au/src/base/R-3/R-${version}.tar.gz
+    commands:
+        - tar xfz R-${version}.tar.gz
+        - cd R-${version}
+        - mkdir -p /build/dest/lib /build/dest/bin /build/dest/share
+        - |
+            ./configure LDFLAGS="-lreadline -lncurses -lpixman-1 -lpng -lfreetype" \
+                --with-tcltk \
+                --with-blas \
+                --with-lapack \
+                --with-readline \
+                --with-cairo \
+                --with-libpng \
+                --without-x \
+                --enable-R-shlib  \
+                --disable-R-framework \
+                --libdir=/build/dest/lib/ \
+                --prefix=/build/dest/ \
+                --bindir=/build/dest/bin/ \
+                --datarootdir=/build/dest/share/
+        - make
+        - make install
+        - tar zcf /host/R-${version}-Linux-x86_64.tar.gz -C /build/dest .
