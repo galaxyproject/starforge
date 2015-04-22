@@ -6,9 +6,21 @@ import sys
 import os
 import argparse
 
-def main(package, version, dryrun=False):
+
+def main(package, version='default', image=None, dryrun=False):
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, package, version)
+
+    if not os.path.exists(build_dir):
+        if os.path.exists(os.path.join(parent_dir, package, 'default')):
+            build_dir = os.path.join(parent_dir, package, 'default')
+        else:
+            if version == 'default':
+                print "Default recipe for %s not found" % image
+            else:
+                print "Neither a default recipe, nor a recipe at version %s were found" % version
+            sys.exit(4)
+
     tentative_yaml_path = os.path.join(build_dir, 'build.yml')
 
     if not os.path.exists(tentative_yaml_path) and not os.path.isdir(tentative_yaml_path):
@@ -50,17 +62,33 @@ done)
 
     template_values = {'image': 'ubuntu', 'prebuild_commands': "", 'env_string': ""}
     # ENVIRONMENT
-    # TODO: expose base image as an argparse argument
     docker_env = {}
+    # If there's a 'meta' section, copy that into the environment, as we've
+    # stored things like OS/package name/version there historically. Useful now
+    # for the 'default' images which have a version hardcoded.
     if 'meta' in image_data:
         docker_env.update(image_data['meta'])
-        # If there's an image name, use that.
         template_values['image'] = image_data['meta'].get('image', 'ubuntu')
 
+    # If an image is sepecified, we overwrite the Dockerfile's FROM with that
+    # image
+    if image is not None:
+        template_values['image'] = image
+    # Additionally we store the actual image that the package is built with in
+    # the environment, so it's accessible to build scripts.
+    docker_env['image'] = template_values['image']
+
+    # The docker environment (in the Dockerfile) is built from the image_data's
+    # meta, and 'env' sections.
     if 'env' in image_data:
         docker_env.update(image_data['env'])
     template_values['env_string'] = '\n'.join(['ENV %s %s' % (key, docker_env[key])
-                                            for key in docker_env])
+                                               for key in docker_env])
+
+    # Version is often used to construct downloads, if it's set to "default",
+    # then re-set it to the value in the default image's metadat
+    if version == 'default':
+        version = image_data['meta'].get('version', 'default')
 
     prebuild_packages = ['wget', 'build-essential']
     if 'prebuild' in image_data and 'packages' in image_data['prebuild']:
@@ -84,9 +112,10 @@ done)
         script.write(SCRIPT_TEMPLATE.format(url_list=' '.join(urls),
                                             commands='\n'.join(commands)))
 
-    image_name = re.sub('[^A-Za-z0-9_]', '_', '%s:%s' % (package, version))
+    image_name = re.sub('[^A-Za-z0-9_]', '_', 'docker_build_%s_%s' % (package, template_values['image']))
     command = ['docker', 'build', '-t', image_name, '.']
-    runcmd = ['docker', 'run', '--volume=%s/:/host/' % build_dir, image_name]
+    runcmd = ['docker', 'run', '--volume=%s/:/host/' % build_dir, '--env=pkg=%s' % package,
+              '--env=version=%s' % version, image_name]
     if not dryrun:
         execute(command, cwd=build_dir)
         print ' '.join(runcmd)
@@ -110,7 +139,9 @@ def execute(command, cwd=None):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Build things inside of docker')
     parser.add_argument('package', help='Name of the package, should be a folder')
-    parser.add_argument('version', help='Version of the package, should be a folder inside package')
+    parser.add_argument('--version', help='Version of the package, should be a folder inside package, or "default" for versionless recipes',
+                        default='default')
     parser.add_argument('--dryrun', action='store_true', help='Only generate files, does not build and run the image')
+    parser.add_argument('--image', help='Build image against a different target OS, e.g. "debian:squeeze"')
     args = parser.parse_args()
     main(**vars(args))

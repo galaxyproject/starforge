@@ -1,0 +1,21 @@
+meta:
+    image: 'debian:squeeze'
+    version: 6.6.0
+env:
+    arch: x86_64
+prebuild:
+    packages: |
+        libc6-dev zlib1g-dev libncurses5-dev
+build:
+    urls:
+        - ftp://emboss.open-bio.org/pub/EMBOSS/EMBOSS-${version}.tar.gz
+    commands:
+        - mkdir -p $HOME/bin/${arch}/ /build/dest/bin /build/dest/lib/
+        - tar xvfz EMBOSS-${version}.tar.gz
+        - cd EMBOSS-${version}
+        - export ORIGIN='$ORIGIN'
+        - export LDFLAGS='-Wl,-rpath,$${ORIGIN}/../lib'
+        - ./configure --prefix /build/dest --without-x
+        - make
+        - make install
+        - tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C /build/dest .

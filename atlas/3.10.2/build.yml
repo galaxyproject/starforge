@@ -1,7 +1,5 @@
 meta:
     image: 'debian:squeeze'
-    pkg: atlas
-    version: 3.10.2
 prebuild:
     packages: |
         libgfortran3

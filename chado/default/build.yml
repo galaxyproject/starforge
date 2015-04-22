@@ -1,7 +1,6 @@
 meta:
     image: 'postgres:8.4'
-    pkg: chado
-    version: 1.0
+    version: master
 env:
     OBO_ONTOLOGIES: 1,2,3,4,5
     CHADO_DB_NAME: postgres
@@ -12,7 +11,6 @@ env:
     POSTGRES_PASSWORD: postgres
     GMOD_ROOT: /usr/share/gmod/
     PGDATA: /var/lib/postgresql/9.4/
-    CHADO_REVISION: master
 prebuild:
     packages: |
         build-essential libpng-dev zlib1g zlib1g-dev build-essential make
@@ -40,10 +38,10 @@ prebuild:
         - mkdir -p $PGDATA
 build:
     urls:
-        - https://github.com/GMOD/Chado/archive/${CHADO_REVISION}.tar.gz
+        - https://github.com/GMOD/Chado/archive/${version}.tar.gz
     commands:
-        - tar xvfz ${CHADO_REVISION}.tar.gz
-        - cd Chado-${CHADO_REVISION}/chado/
+        - tar xvfz ${version}.tar.gz
+        - cd Chado-${version}/chado/
         - yes | perl Makefile.PL GMOD_ROOT=$GMOD_ROOT DEFAULTS=1 RECONFIGURE=1
         - make
         - make install
