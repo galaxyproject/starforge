@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import subprocess
+import shutil
 import re
 import yaml
 import sys
@@ -11,15 +12,26 @@ def main(package, version='default', image=None, dryrun=False):
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, package, version)
 
+    _store_new_version = False
     if not os.path.exists(build_dir):
         if os.path.exists(os.path.join(parent_dir, package, 'default')):
             build_dir = os.path.join(parent_dir, package, 'default')
+            # In this case it's an "unknown" version, so we'll just be friendly
+            # and serialize their yaml into a new versioned directory for them.
+            _store_new_version = True
         else:
             if version == 'default':
                 print "Default recipe for %s not found" % image
             else:
                 print "Neither a default recipe, nor a recipe at version %s were found" % version
             sys.exit(4)
+
+    if _store_new_version:
+        target = os.path.join(parent_dir, package, version)
+        # Clone the default
+        shutil.copytree(build_dir, target)
+        # Update other variables.
+        build_dir = target
 
     tentative_yaml_path = os.path.join(build_dir, 'build.yml')
 
