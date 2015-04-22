@@ -35,6 +35,7 @@ FROM %(image)s
 MAINTAINER Nare Coraor <nate@bx.psu.edu>
 
 ENV DEBIAN_FRONTEND noninteractive
+%(meta_env_string)s
 %(env_string)s
 
 VOLUME ["/host"]
@@ -62,12 +63,13 @@ done)
 
     template_values = {'image': 'ubuntu', 'prebuild_commands': "", 'env_string': ""}
     # ENVIRONMENT
+    meta_env = {}
     docker_env = {}
     # If there's a 'meta' section, copy that into the environment, as we've
     # stored things like OS/package name/version there historically. Useful now
     # for the 'default' images which have a version hardcoded.
     if 'meta' in image_data:
-        docker_env.update(image_data['meta'])
+        meta_env = image_data['meta']
         template_values['image'] = image_data['meta'].get('image', 'ubuntu')
 
     # If an image is sepecified, we overwrite the Dockerfile's FROM with that
@@ -84,6 +86,8 @@ done)
         docker_env.update(image_data['env'])
     template_values['env_string'] = '\n'.join(['ENV %s %s' % (key, docker_env[key])
                                                for key in docker_env])
+    template_values['meta_env_string'] = '\n'.join(['ENV %s %s' % (key, meta_env[key])
+                                                    for key in meta_env])
 
     # Version is often used to construct downloads, if it's set to "default",
     # then re-set it to the value in the default image's metadat
