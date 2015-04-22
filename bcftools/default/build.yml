@@ -6,11 +6,11 @@ prebuild:
         libc6-dev zlib1g-dev
 build:
     urls:
-        - https://github.com/samtools/${pkg}/releases/download/${version}/${pkg}-${version}.tar.bz2
+        - https://github.com/samtools/bcftools/releases/download/${version}/bcftools-${version}.tar.bz2
     commands:
-        - tar jxf ${pkg}-${version}.tar.bz2
-        - cd ${pkg}-${version}
+        - tar jxf bcftools-${version}.tar.bz2
+        - cd bcftools-${version}
         - sed -i.bak 's#/usr/local#/build/dest#' Makefile
         - make
         - make install
-        - tar zcf /host/${pkg}-${version}-Linux-x86_64.tar.gz -C /build/dest .
+        - tar zcf /host/bcftools-${version}-Linux-x86_64.tar.gz -C /build/dest .
