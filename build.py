@@ -8,7 +8,7 @@ import os
 import argparse
 
 
-def main(package, version='default', image=None, dryrun=False):
+def main(package, version='default', image=None, dryrun=False, clone=False):
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, package, version)
 
@@ -26,7 +26,7 @@ def main(package, version='default', image=None, dryrun=False):
                 print "Neither a default recipe, nor a recipe at version %s were found" % version
             sys.exit(4)
 
-    if _store_new_version:
+    if _store_new_version and clone:
         target = os.path.join(parent_dir, package, version)
         # Clone the default
         shutil.copytree(build_dir, target)
@@ -108,7 +108,14 @@ done)
 
     prebuild_packages = ['wget', 'openssl', 'ca-certificates', 'build-essential']
     if 'prebuild' in image_data and 'packages' in image_data['prebuild']:
-        prebuild_packages.extend(image_data['prebuild']['packages'].strip().split())
+        pkgs = image_data['prebuild']['packages']
+        if isinstance(pkgs, str):
+            prebuild_packages.extend(pkgs.strip().split())
+        elif isinstance(pkgs, list):
+            prebuild_packages.extend(pkgs)
+        else:
+            print "Unknown data type for /prebuild/packages, please use a space delimited string of package names, or a list of strings"
+            sys.exit(5)
 
     template_values['prebuild_packages'] = "RUN apt-get -qq update && apt-get install --no-install-recommends -y %s" % ' '.join(prebuild_packages)
 
@@ -159,5 +166,6 @@ if __name__ == '__main__':
                         default='default')
     parser.add_argument('--dryrun', action='store_true', help='Only generate files, does not build and run the image')
     parser.add_argument('--image', help='Build image against a different target OS, e.g. "debian:squeeze"')
+    parser.add_argument('--clone', action='store_true', help='When building a default image with a different version, clone the build.yml and hardcode the version')
     args = parser.parse_args()
     main(**vars(args))
