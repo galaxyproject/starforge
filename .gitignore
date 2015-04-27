@@ -10,3 +10,4 @@ image/Dockerfile
 
 chado/*/*.sql
 tbl2asn/*/*tbl2asn*
+*/build.log

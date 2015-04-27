@@ -11,6 +11,7 @@ import argparse
 def main(package, version='default', image=None, dryrun=False, clone=False):
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, package, version)
+    log_file = os.path.join(parent_dir, package, 'build.log')
 
     _store_new_version = False
     if not os.path.exists(build_dir):
@@ -140,9 +141,10 @@ done)
     runcmd = ['docker', 'run', '--volume=%s/:/host/' % build_dir, '--env=pkg=%s' % package,
               '--env=version=%s' % version, image_name]
     if not dryrun:
-        execute(command, cwd=build_dir)
-        print ' '.join(runcmd)
-        execute(runcmd, cwd=build_dir)
+        with open(log_file, 'w') as handle:
+            execute(command, cwd=build_dir, log=handle)
+            print ' '.join(runcmd)
+            execute(runcmd, cwd=build_dir, log=handle)
     else:
         # I am *lazy* during debugging phase
         runcmd = runcmd[0:3] + ['-it', '--entrypoint=/bin/bash'] + runcmd[3:]
@@ -150,11 +152,18 @@ done)
         print ' '.join(runcmd)
 
 
-def execute(command, cwd=None):
+def execute(command, cwd=None, log=None):
     popen = subprocess.Popen(command, stdout=subprocess.PIPE, cwd=cwd)
     for line in iter(popen.stdout.readline, b""):
         try:
-            print line,
+            # Log output on demand, rather than just stdout
+
+            # I don't know why I write these features when I only use them one
+            # way, and it's ugly, non-reusable code in the first place
+            if log is not None:
+                log.write(line)
+            else:
+                print line,
         except KeyboardInterrupt:
             sys.exit()
 
