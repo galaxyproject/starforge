@@ -8,7 +8,7 @@ import os
 import argparse
 
 
-def main(package, version='default', image=None, dryrun=False, clone=False):
+def main(package, version='default', image=None, dryrun=False, clone=False, quiet=False):
     parent_dir = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(parent_dir, package, version)
     log_file = os.path.join(parent_dir, package, 'build.log')
@@ -142,9 +142,10 @@ done)
               '--env=version=%s' % version, image_name]
     if not dryrun:
         with open(log_file, 'w') as handle:
-            execute(command, cwd=build_dir, log=handle)
-            print ' '.join(runcmd)
-            execute(runcmd, cwd=build_dir, log=handle)
+            execute(command, cwd=build_dir, log=handle, quiet=quiet)
+            if not quiet:
+                print ' '.join(runcmd)
+            execute(runcmd, cwd=build_dir, log=handle, quiet=quiet)
     else:
         # I am *lazy* during debugging phase
         runcmd = runcmd[0:3] + ['-it', '--entrypoint=/bin/bash'] + runcmd[3:]
@@ -152,7 +153,7 @@ done)
         print ' '.join(runcmd)
 
 
-def execute(command, cwd=None, log=None):
+def execute(command, cwd=None, log=None, quiet=False):
     popen = subprocess.Popen(command, stdout=subprocess.PIPE, cwd=cwd)
     for line in iter(popen.stdout.readline, b""):
         try:
@@ -162,7 +163,8 @@ def execute(command, cwd=None, log=None):
             # way, and it's ugly, non-reusable code in the first place
             if log is not None:
                 log.write(line)
-            else:
+
+            if not quiet:
                 print line,
         except KeyboardInterrupt:
             sys.exit()
@@ -176,5 +178,6 @@ if __name__ == '__main__':
     parser.add_argument('--dryrun', action='store_true', help='Only generate files, does not build and run the image')
     parser.add_argument('--image', help='Build image against a different target OS, e.g. "debian:squeeze"')
     parser.add_argument('--clone', action='store_true', help='When building a default image with a different version, clone the build.yml and hardcode the version')
+    parser.add_argument('--quiet', action='store_false', help='Be a bit quieter')
     args = parser.parse_args()
     main(**vars(args))
