@@ -68,7 +68,7 @@ urls="
 mkdir -p /build/ && cd /build/;
 
 ( for url in $urls; do
-    wget "$url" || false || exit
+    wget --quiet "$url" || false || exit
 done)
 
 {commands}"""
