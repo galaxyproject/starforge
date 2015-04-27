@@ -1,5 +1,6 @@
 meta:
     image: 'debian:squeeze'
+    version: 3.10.2
 prebuild:
     packages: |
         libgfortran3
