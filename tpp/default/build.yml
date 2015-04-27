@@ -13,7 +13,7 @@ build:
     commands:
         - export build_dir=/build/dest/
         - mkdir -p ${build_dir}/bin ${build_dir}/lib
-        - tar xfvz TPP_${version}-src.tgz
+        - tar xfz TPP_${version}-src.tgz
         - cd TPP-${version}/trans_proteomic_pipeline/src/
         - echo "TPP_ROOT=${build_dir}" > Makefile.config.incl
         - echo "TPP_WEB=${build_dir}/web/" >> Makefile.config.incl

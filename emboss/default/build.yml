@@ -11,7 +11,7 @@ build:
         - ftp://emboss.open-bio.org/pub/EMBOSS/EMBOSS-${version}.tar.gz
     commands:
         - mkdir -p $HOME/bin/${arch}/ /build/dest/bin /build/dest/lib/
-        - tar xvfz EMBOSS-${version}.tar.gz
+        - tar xfz EMBOSS-${version}.tar.gz
         - cd EMBOSS-${version}
         - export ORIGIN='$ORIGIN'
         - export LDFLAGS='-Wl,-rpath,$${ORIGIN}/../lib'

@@ -8,7 +8,7 @@ build:
     urls:
         - http://www.cbcb.umd.edu/software/jellyfish/jellyfish-${version}.tar.gz
     commands:
-        - tar xvfz jellyfish-${version}.tar.gz
+        - tar xfz jellyfish-${version}.tar.gz
         - cd jellyfish-${version}
         - ./configure --prefix=/build/dest
         - make

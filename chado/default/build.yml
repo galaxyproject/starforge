@@ -40,7 +40,7 @@ build:
     urls:
         - https://github.com/GMOD/Chado/archive/${version}.tar.gz
     commands:
-        - tar xvfz ${version}.tar.gz
+        - tar xfz ${version}.tar.gz
         - cd Chado-${version}/chado/
         - yes | perl Makefile.PL GMOD_ROOT=$GMOD_ROOT DEFAULTS=1 RECONFIGURE=1
         - make
