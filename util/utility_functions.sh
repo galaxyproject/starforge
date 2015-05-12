@@ -9,6 +9,8 @@ extract_tarball() {
             tar jxf $tarball ;;
         xz)
             tar Jxf $tarball ;;
+        zip)
+            unzip $tarball ;;
     esac
 }
 
