@@ -15,7 +15,7 @@ build:
         - chmod +x linux64.tbl2asn
         - version=$(./linux64.tbl2asn p | egrep 'tbl2asn ([^ ]*)' -o | sed 's/tbl2asn //g')
         - gzip linux64.tbl2asn
-        - mv linux.tbl2asn.gz   /host/linux.tbl2asn.$version.gz
-        - mv linux64.tbl2asn.gz /host/linux64.tbl2asn.$version.gz
-        - mv mac.tbl2asn.gz     /host/mac.tbl2asn.$version.gz
-        - mv win.tbl2asn.zip    /host/win.tbl2asn.$version.zip
+        - mv linux.tbl2asn.gz   /host/tbl2asn-${version}-Linux-x86.gz
+        - mv linux64.tbl2asn.gz /host/tbl2asn-${version}-Linux-x64.gz
+        - mv mac.tbl2asn.gz     /host/tbl2asn-${version}-Darwin-x64.gz
+        - mv win.tbl2asn.zip    /host/tbl2asn-${version}-Windows-x64.gz
