@@ -8,7 +8,7 @@ http://hgdownload.soe.ucsc.edu/admin/jksrc.v${version}.zip
 "
 
 build=/build
-dest="${pkg}_${arch}_${version}"
+dest="build/${pkg}_${arch}_${version}"
 
 apt-get -qq update &&
     apt-get install --no-install-recommends -y $build_deps &&
@@ -37,4 +37,4 @@ apt-get -qq update &&
                 ;;
         esac
     done
-    tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C ${build}/${dest} .
+    tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C ${build}/${dest}/../ .
