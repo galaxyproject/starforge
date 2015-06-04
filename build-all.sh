@@ -11,5 +11,4 @@
 ./build ubuntu tpp
 ./build ubuntu ucsc
 
-python build.py --quiet perlgd
 python build.py --quiet tbl2asn
