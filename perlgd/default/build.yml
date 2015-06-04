@@ -1,0 +1,10 @@
+meta:
+    image: 'debian:latest'
+    version: 2.56
+build:
+    urls:
+        - https://cpan.metacpan.org/authors/id/L/LD/LDS/GD-${version}.tar.gz
+    commands:
+        - tar xfz GD-${version}.tar.gz
+        - chmod ugo+w GD-${version}/bdf_scripts/*
+        - tar zcf /host/GD-${version}.tar.gz GD-${version}/

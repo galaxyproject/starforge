@@ -1,0 +1,33 @@
+meta:
+    image: 'debian:squeeze'
+    version: 2.2.12
+prebuild:
+    packages: |
+        libboost-dev libboost-test-dev libboost-program-options-dev bison flex
+        mercurial ksh
+build:
+    urls:
+        - https://launchpad.net/~bibi-help/+archive/ubuntu/bibitools/+files/bellmansgapc_2015.03.17.orig.tar.gz
+        - https://launchpad.net/~bibi-help/+archive/ubuntu/bibitools/+files/pkiss_${version}.orig.tar.gz
+    commands:
+        - mkdir -p /build/dest/bin
+        - mkdir -p /build/dest/lib
+        - tar -xf bellmansgapc_2015.03.17.orig.tar.gz
+        - tar -xf pkiss_${version}.orig.tar.gz
+        - cd bellmansgapc-2015.03.17
+        - cp config-templates/generic.mf config.mf
+        - sed -i 's|#PREFIX ?=|PREFIX = /build/gapc|g' config.mf
+        - make
+        - make install
+        - cp -r /build/gapc/lib /build/dest
+        - export PATH=$PATH:/build/gapc/bin
+        - cd ../pkiss_2.2.12/pkiss
+        - make -C Misc/Applications/pKiss all 
+        - cp -r Misc/Applications/lib/* /build/dest/lib
+        - cp Misc/Applications/pKiss/x86_64-linux-gnu/* /build/dest/bin
+        - cp Misc/Applications/pKiss/pKiss /build/dest/bin
+        # for the librna.so and librnafast.so
+        # export LD_LIBRARY_PATH=installdir/lib:$LD_LIBRARY_PATH
+        # for the binaries
+        # export PATH=installdir/bin:$PATH
+        - tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C /build/dest .

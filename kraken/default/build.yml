@@ -1,0 +1,15 @@
+meta:
+    image: 'ubuntu'
+    version: 0.10.5-beta
+prebuild:
+    packages: |
+        libc6-dev zlib1g-dev
+build:
+    urls:
+        - https://ccb.jhu.edu/software/kraken/dl/kraken-${version}.tgz
+    commands:
+        - tar xfz kraken-${version}.tar.gz
+        - cd kraken-${version}
+        - mkdir -p /build/dest/bin
+        - sh install_kraken.sh /build/dest/bin/
+        - tar zcf /host/kraken-${version}-Linux-x86_64.tar.gz -C /build/dest .

@@ -1,0 +1,116 @@
+Description: Create full featured static libblas.a and liblapack.a
+ The resulting BLAS library will use the threaded flavour if the build has been
+ configured to create them. Otherwise, the serial library is used.
+Author: David Evans
+Last-Update: 2013-06-05
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/Make.top
++++ b/Make.top
+@@ -14,6 +14,9 @@
+ build:
+ 	cd bin/ ; $(MAKE) xatlas_build
+ 	cd bin/ ; ./xatlas_build $(INSTFLAGS)
++	cd lib/ ; $(MAKE) atlas/libblas.a
++	cd lib/ ; $(MAKE) atlas/liblapack.a
++
+ time: 
+ 	./xatlbench -dc $(BLDdir)/bin/INSTALL_LOG -dp $(BLDdir)/ARCHS/$(ARCH)
+ C_sanity_test:
+@@ -401,6 +404,7 @@
+ 	$(MAKE) -f Make.top leafstart leaf=src/blas/reference/level1
+ 	$(MAKE) -f Make.top leafstart leaf=src/auxil
+ 	$(MAKE) -f Make.top leafstart leaf=src/testing
++	$(MAKE) -f Make.top leafstart leaf=lib/atlas
+ 	$(MAKE) -f Make.top leafstart leaf=lib
+ 	$(MAKE) -f Make.top leafstart leaf=bin
+ 	cd src/threads ; touch atomic.inc
+@@ -591,6 +595,7 @@
+ 
+ lib :
+ 	mkdir lib
++	mkdir lib/atlas
+ 
+ include:
+ 	mkdir include
+@@ -654,12 +659,17 @@
+ 	chmod 0644 $(INSTdir)/cblas.h $(INSTdir)/clapack.h
+ 	cp $(INCAdir)/* $(INSTdir)/atlas/.
+ 	- chmod 0644 $(INSTdir)/atlas/*
+-install_lib:
++
++install_static_lib:
+ 	cp $(LIBdir)/libatlas.a $(INSTdir)/.
+ 	cp $(LIBdir)/libcblas.a $(INSTdir)/.
+ 	cp $(LIBdir)/liblapack.a $(INSTdir)/.
++	mkdir -p $(INSTdir)/atlas
++	cp $(LIBdir)/atlas/libblas.a $(INSTdir)/atlas/.
++	cp $(LIBdir)/atlas/liblapack.a $(INSTdir)/atlas/.
+ 	chmod 0644 $(INSTdir)/libatlas.a  $(INSTdir)/liblapack.a \
+-                   $(INSTdir)/libcblas.a 
++                   $(INSTdir)/libcblas.a $(INSTdir)/atlas/libblas.a \
++		   $(INSTdir)/atlas/liblapack.a 
+ 	- cp $(LIBdir)/libf77blas.a $(INSTdir)/.
+ 	- chmod 0644 $(INSTdir)/libf77blas.a
+ 	- cp $(LIBdir)/libptcblas.a $(INSTdir)/.
+--- a/makes/Make.lib
++++ b/makes/Make.lib
+@@ -175,6 +175,35 @@
+            LIBS="$(LIBS)" LIBINSTdir="$(LIBINSTdir)" ; \
+         fi
+ 
++
++# Build full netlib blas/lapack libraries:
++atlas/libblas.a: libatlas.a
++	mkdir tmp
++	cd tmp && \
++		ar x ../libatlas.a && \
++		if test -f ../libptf77blas.a -a -f ../libptcblas.a; then \
++			ar x ../libptf77blas.a && \
++			ar x ../libptcblas.a; \
++		else \
++			ar x ../libf77blas.a && \
++			ar x ../libcblas.a; \
++		fi
++	ar r $@ tmp/*.o
++	rm -rf tmp
++
++atlas/liblapack.a: liblapack.a libatlas.a
++	mkdir tmp
++	cd tmp && \
++		ar x ../liblapack.a && \
++		if test -f ../libptcblas.a; then \
++			ar x ../libptcblas.a; \
++		else \
++			ar x ../libcblas.a; \
++		fi
++	ar r $@ tmp/*.o
++	rm -rf tmp
++
++
+ #
+ # Builds one shared lib from all ATLAS files
+ #
+--- a/CONFIG/src/Makefile
++++ b/CONFIG/src/Makefile
+@@ -575,7 +575,7 @@
+ 	chmod 0755 $(LIBINSTdir)
+ install : $(INCINSTdir) $(LIBINSTdir) $(INCINSTdir)/atlas
+ 	$(MAKE) -f Make.top install_inc INSTdir=$(INCINSTdir) 
+-	$(MAKE) -f Make.top install_lib INSTdir=$(LIBINSTdir)
++	$(MAKE) -f Make.top install_static_lib INSTdir=$(LIBINSTdir)
+ 
+ confclean: $(CLEANdep)
+ 	rm -f *core* *.o config?.out
+--- a/CONFIG/src/SpewMakeInc.c
++++ b/CONFIG/src/SpewMakeInc.c
+@@ -604,6 +604,9 @@
+    }
+    fprintf(fpout, "   TESTlib = $(LIBdir)/libtstatlas.a\n\n");
+ 
++   fprintf(fpout, "   FULLBLASlib = $(LIBdir)/atlas/libblas.a\n");
++   fprintf(fpout, "   FULLLAPACKlib = $(LIBdir)/atlas/liblapack.a\n");
++
+    fprintf(fpout, "#  -------------------------------------------\n");
+    fprintf(fpout, "#  Upper bound on largest cache size, in bytes\n");
+    fprintf(fpout, "#  -------------------------------------------\n");

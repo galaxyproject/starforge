@@ -4,3 +4,9 @@ syntax: glob
 *.*.swp
 *.tar.gz
 image/Dockerfile
+
+*/*/Dockerfile
+*/*/build.sh
+
+*/build.log
+*.gz
