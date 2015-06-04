@@ -18,4 +18,4 @@ build:
         - mv linux.tbl2asn.gz   /host/tbl2asn-${version}-Linux-x86.gz
         - mv linux64.tbl2asn.gz /host/tbl2asn-${version}-Linux-x64.gz
         - mv mac.tbl2asn.gz     /host/tbl2asn-${version}-Darwin-x64.gz
-        - mv win.tbl2asn.zip    /host/tbl2asn-${version}-Windows-x64.gz
+        - mv win.tbl2asn.zip    /host/tbl2asn-${version}-Windows-x64.zip
