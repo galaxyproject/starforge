@@ -1,1 +1,316 @@
-default/control.patch
+--- debian/control.orig	2015-02-26 20:39:55.592321023 -0500
++++ debian/control	2015-02-26 21:48:02.044147424 -0500
+@@ -32,16 +32,24 @@
+ 
+ Package: nginx
+ Architecture: all
+-Depends: nginx-core   (>= ${source:Version}) |
+-         nginx-full   (>= ${source:Version}) |
+-         nginx-light  (>= ${source:Version}) |
+-         nginx-extras (>= ${source:Version}) |
+-         nginx-naxsi  (>= ${source:Version}) ,
+-         nginx-core   (<< ${source:Version}.1~) |
+-         nginx-full   (<< ${source:Version}.1~) |
+-         nginx-light  (<< ${source:Version}.1~) |
+-         nginx-extras (<< ${source:Version}.1~) |
+-         nginx-naxsi  (<< ${source:Version}.1~) ,
++Depends: nginx-core             (>= ${nginxSourceDebVersion}) |
++         nginx-full             (>= ${nginxSourceDebVersion}) |
++         nginx-light            (>= ${nginxSourceDebVersion}) |
++         nginx-extras           (>= ${nginxSourceDebVersion}) |
++         nginx-naxsi            (>= ${nginxSourceDebVersion}) |
++         nginx-core-upload      (>= ${source:Version}) |
++         nginx-full-upload      (>= ${source:Version}) |
++         nginx-light-upload     (>= ${source:Version}) |
++         nginx-extras-upload    (>= ${source:Version}) ,
++         nginx-core             (<< ${nginxSourceDebVersion}.1~) |
++         nginx-full             (<< ${nginxSourceDebVersion}.1~) |
++         nginx-light            (<< ${nginxSourceDebVersion}.1~) |
++         nginx-extras           (<< ${nginxSourceDebVersion}.1~) |
++         nginx-naxsi            (<< ${nginxSourceDebVersion}.1~) |
++         nginx-core-upload      (<< ${source:Version}.1~) |
++         nginx-full-upload      (<< ${source:Version}.1~) |
++         nginx-light-upload     (<< ${source:Version}.1~) |
++         nginx-extras-upload    (<< ${source:Version}.1~) ,
+          ${misc:Depends}
+ Description: small, powerful, scalable web/proxy server
+  Nginx ("engine X") is a high-performance web and reverse proxy server
+@@ -51,45 +59,16 @@
+  This is a dependency package to install either nginx-core (by default),
+  nginx-full, nginx-light, nginx-extras, or nginx-naxsi.
+ 
+-Package: nginx-doc
+-Architecture: all
+-Section: doc
+-Depends: lsb-base (>= 3.2-14), ${misc:Depends}
+-Description: small, powerful, scalable web/proxy server - documentation
+- Nginx ("engine X") is a high-performance web and reverse proxy server
+- created by Igor Sysoev. It can be used both as a standalone web server
+- and as a proxy to reduce the load on back-end HTTP or mail servers.
+- .
+- This package provides extra documentation to help unleash the power of Nginx.
+-
+-Package: nginx-common
+-Architecture: all
+-Depends: lsb-base (>= 3.2-14), ${misc:Depends}
+-Replaces: nginx (<< 0.8.54-4),
+-          nginx-extras (<< 0.8.54-4),
+-          nginx-full (<< 0.8.54-4),
+-          nginx-light (<< 0.8.54-4)
+-Breaks: nginx (<< 0.8.54-4),
+-        nginx-extras (<< 0.8.54-4),
+-        nginx-full (<< 0.8.54-4),
+-        nginx-light (<< 0.8.54-4)
+-Suggests: fcgiwrap, nginx-doc
+-Description: small, powerful, scalable web/proxy server - common files
+- Nginx ("engine X") is a high-performance web and reverse proxy server
+- created by Igor Sysoev. It can be used both as a standalone web server
+- and as a proxy to reduce the load on back-end HTTP or mail servers.
+- .
+- This package contains base configuration files used by all versions of
+- nginx.
+-
+-Package: nginx-core
++Package: nginx-core-upload
+ Architecture: any
+-Depends: nginx-common (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
++Depends: nginx-common (= ${nginxSourceDebVersion}), ${misc:Depends}, ${shlibs:Depends}
+ Breaks: nginx (<< 1.4.5-1)
+ Provides: httpd, httpd-cgi, nginx
+-Conflicts: nginx-extras, nginx-light, nginx-naxsi, nginx-full
+-Suggests: nginx-doc (= ${source:Version})
+-Description: nginx web/proxy server (core version)
++Conflicts: nginx-extras, nginx-light, nginx-naxsi, nginx-full,
++           nginx-extras-upload, nginx-light-upload,
++           nginx-full-upload
++Suggests: nginx-doc (= ${nginxSourceDebVersion})
++Description: nginx web/proxy server (core+upload version)
+  Nginx ("engine X") is a high-performance web and reverse proxy server
+  created by Igor Sysoev. It can be used both as a standalone web server
+  and as a proxy to reduce the load on back-end HTTP or mail servers.
+@@ -109,16 +88,20 @@
+  .
+  MAIL MODULES: Mail Core, IMAP, POP3, SMTP, SSL.
+  .
+- NOTE: This is identical to the -full build, but without any third party
+- modules built in.
++ THIRD PARTY MODULES: Upload.
++ .
++ NOTE: This is identical to the -full build, but with only the upload third
++ party module built in.
+ 
+-Package: nginx-core-dbg
++Package: nginx-core-upload-dbg
+ Architecture: any
+ Section: debug
+ Priority: extra
+-Depends: nginx-core (= ${binary:Version}), ${misc:Depends}
+-Conflicts: nginx-extras-dbg, nginx-light-dbg, nginx-naxsi-dbg, nginx-full-dbg
+-Description: nginx web/proxy server (core version) - debugging symbols
++Depends: nginx-core-upload (= ${binary:Version}), ${misc:Depends}
++Conflicts: nginx-extras-dbg, nginx-light-dbg, nginx-naxsi-dbg, nginx-full-dbg,
++           nginx-extras-upload-dbg, nginx-light-upload-dbg,
++           nginx-full-upload-dbg
++Description: nginx web/proxy server (core+upload version) - debugging symbols
+  Nginx ("engine X") is a high-performance web and reverse proxy server
+  created by Igor Sysoev. It can be used both as a standalone web server
+  and as a proxy to reduce the load on back-end HTTP or mail servers.
+@@ -126,14 +109,15 @@
+  This package provides debugging symbols for nginx-core, to assist in debugging
+  issues that you may find. It should not be required for normal operation.
+ 
+-Package: nginx-full
++Package: nginx-full-upload
+ Architecture: any
+-Depends: nginx-common (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
++Depends: nginx-common (= ${nginxSourceDebVersion}), ${misc:Depends}, ${shlibs:Depends}
+ Breaks: nginx (<< 1.4.5-1)
+ Provides: httpd, httpd-cgi, nginx
+-Conflicts: nginx-extras, nginx-light, nginx-naxsi, nginx-core
+-Suggests: nginx-doc (= ${source:Version})
+-Description: nginx web/proxy server (standard version)
++Conflicts: nginx-extras, nginx-light, nginx-naxsi, nginx-core,
++           nginx-extras-upload, nginx-light-upload, nginx-core-upload
++Suggests: nginx-doc (= ${nginxSourceDebVersion})
++Description: nginx web/proxy server (standard+upload version)
+  Nginx ("engine X") is a high-performance web and reverse proxy server
+  created by Igor Sysoev. It can be used both as a standalone web server
+  and as a proxy to reduce the load on back-end HTTP or mail servers.
+@@ -154,15 +138,17 @@
+  MAIL MODULES: Mail Core, IMAP, POP3, SMTP, SSL.
+  .
+  THIRD PARTY MODULES: Auth PAM, DAV Ext, Echo, HTTP Substitution Filter,
+- Upstream Fair Queue.
++ Upstream Fair Queue, Upload.
+ 
+-Package: nginx-full-dbg
++Package: nginx-full-upload-dbg
+ Architecture: any
+ Section: debug
+ Priority: extra
+-Depends: nginx-full (= ${binary:Version}), ${misc:Depends}
+-Conflicts: nginx-extras-dbg, nginx-light-dbg, nginx-naxsi-dbg, nginx-core-dbg
+-Description: nginx web/proxy server (standard version) - debugging symbols
++Depends: nginx-full-upload (= ${binary:Version}), ${misc:Depends}
++Conflicts: nginx-extras-dbg, nginx-light-dbg, nginx-naxsi-dbg, nginx-core-dbg,
++           nginx-extras-upload-dbg, nginx-light-upload-dbg,
++           nginx-core-upload-dbg
++Description: nginx web/proxy server (standard+upload version) - debugging symbols
+  Nginx ("engine X") is a high-performance web and reverse proxy server
+  created by Igor Sysoev. It can be used both as a standalone web server
+  and as a proxy to reduce the load on back-end HTTP or mail servers.
+@@ -170,15 +156,16 @@
+  This package provides debugging symbols for nginx-full, to assist in debugging
+  issues that you may find. It should not be required for normal operation.
+ 
+-Package: nginx-light
++Package: nginx-light-upload
+ Architecture: any
+ Priority: extra
+-Depends: nginx-common (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
++Depends: nginx-common (= ${nginxSourceDebVersion}), ${misc:Depends}, ${shlibs:Depends}
+ Breaks: nginx (<< 1.4.5-1)
+ Provides: httpd, httpd-cgi, nginx
+-Conflicts: nginx-extras, nginx-full, nginx-naxsi, nginx-core
+-Suggests: nginx-doc (= ${source:Version})
+-Description: nginx web/proxy server (basic version)
++Conflicts: nginx-extras, nginx-full, nginx-naxsi, nginx-core,
++           nginx-extras-upload, nginx-full-upload, nginx-core-upload
++Suggests: nginx-doc (= ${nginxSourceDebVersion})
++Description: nginx web/proxy server (basic+upload version)
+  Nginx ("engine X") is a high-performance web and reverse proxy server
+  created by Igor Sysoev. It can be used both as a standalone web server
+  and as a proxy to reduce the load on back-end HTTP or mail servers.
+@@ -192,15 +179,17 @@
+  OPTIONAL HTTP MODULES: Debug, Gzip Precompression, IPv6, Real Ip, SSL,
+  Stub Status.
+  .
+- THIRD PARTY MODULES: Echo.
++ THIRD PARTY MODULES: Echo, Upload.
+ 
+-Package: nginx-light-dbg
++Package: nginx-light-upload-dbg
+ Architecture: any
+ Section: debug
+ Priority: extra
+-Depends: nginx-light (= ${binary:Version}), ${misc:Depends}
+-Conflicts: nginx-extras-dbg, nginx-full-dbg, nginx-naxsi-dbg, nginx-core-dbg
+-Description: nginx web/proxy server (basic version) - debugging symbols
++Depends: nginx-light-upload (= ${binary:Version}), ${misc:Depends}
++Conflicts: nginx-extras-dbg, nginx-full-dbg, nginx-naxsi-dbg, nginx-core-dbg,
++           nginx-extras-upload-dbg, nginx-full-upload-dbg,
++           nginx-core-upload-dbg
++Description: nginx web/proxy server (basic+upload version) - debugging symbols
+  Nginx ("engine X") is a high-performance web and reverse proxy server
+  created by Igor Sysoev. It can be used both as a standalone web server
+  and as a proxy to reduce the load on back-end HTTP or mail servers.
+@@ -209,18 +198,19 @@
+  debugging issues that you may find. It should not be required for normal
+  operation.
+ 
+-Package: nginx-extras
++Package: nginx-extras-upload
+ Architecture: any
+ Priority: extra
+-Depends: nginx-common (= ${source:Version}),
++Depends: nginx-common (= ${nginxSourceDebVersion}),
+          ${misc:Depends},
+          ${perl:Depends},
+          ${shlibs:Depends}
+ Breaks: nginx (<< 1.4.5-1)
+ Provides: httpd, httpd-cgi, nginx
+-Conflicts: nginx-full, nginx-light, nginx-naxsi, nginx-core
+-Suggests: nginx-doc (= ${source:Version})
+-Description: nginx web/proxy server (extended version)
++Conflicts: nginx-full, nginx-light, nginx-naxsi, nginx-core,
++           nginx-full-upload, nginx-light-upload, nginx-core-upload
++Suggests: nginx-doc (= ${nginxSourceDebVersion})
++Description: nginx web/proxy server (extended+upload version)
+  Nginx ("engine X") is a high-performance web and reverse proxy server
+  created by Igor Sysoev. It can be used both as a standalone web server
+  and as a proxy to reduce the load on back-end HTTP or mail servers.
+@@ -242,15 +232,15 @@
+  .
+  THIRD PARTY MODULES: Auth PAM, Chunkin, DAV Ext, Echo, Embedded Lua,
+  Fancy Index, HttpHeadersMore, HTTP Substitution Filter, http push,
+- Nginx Development Kit, Upload Progress, Upstream Fair Queue.
++ Nginx Development Kit, Upload Progress, Upstream Fair Queue, Upload.
+ 
+-Package: nginx-extras-dbg
++Package: nginx-extras-upload-dbg
+ Architecture: any
+ Section: debug
+ Priority: extra
+-Depends: nginx-extras (= ${binary:Version}), ${misc:Depends}
++Depends: nginx-extras-upload (= ${binary:Version}), ${misc:Depends}
+ Conflicts: nginx-full-dbg, nginx-light-dbg, nginx-naxsi-dbg, nginx-core-dbg
+-Description: nginx web/proxy server (extended version) - debugging symbols
++Description: nginx web/proxy server (extended+upload version) - debugging symbols
+  Nginx ("engine X") is a high-performance web and reverse proxy server
+  created by Igor Sysoev. It can be used both as a standalone web server
+  and as a proxy to reduce the load on back-end HTTP or mail servers.
+@@ -258,64 +248,3 @@
+  This package provides debugging symbols for nginx-extras, to assist in
+  debugging issues that you may find. It should not be required for normal
+  operation.
+-
+-Package: nginx-naxsi
+-Architecture: any
+-Priority: extra
+-Depends: nginx-common (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
+-Breaks: nginx (<< 1.4.5-1),
+-        nginx-naxsi-ui (<< 1.4.5-1)
+-Provides: httpd, httpd-cgi, nginx
+-Conflicts: nginx-extras, nginx-full, nginx-light, nginx-core
+-Description: nginx web/proxy server (version with naxsi)
+- Nginx ("engine X") is a high-performance web and reverse proxy server
+- created by Igor Sysoev. It can be used both as a standalone web server
+- and as a proxy to reduce the load on back-end HTTP or mail servers.
+- .
+- This package provides a version of nginx with the basic modules, plus
+- the naxsi Web Application Firewall module.
+- .
+- STANDARD HTTP MODULES: Core, Access, Auth Basic, Auto Index, Browser,
+- Charset, Core, Empty GIF, FastCGI, Geo, Gzip, Headers, Index,
+- Limit Requests, Limit Zone, Log, Map, Memcached, Proxy, Referer,
+- Rewrite, Split Clients, SSI, Upstream, User ID.
+- .
+- OPTIONAL HTTP MODULES: Debug, IPv6, Real IP, SSL, Stub Status.
+- .
+- THIRD PARTY MODULES: Naxsi, Cache Purge, Upstream Fair.
+-
+-Package: nginx-naxsi-dbg
+-Architecture: any
+-Section: debug
+-Priority: extra
+-Depends: nginx-naxsi (= ${binary:Version}), ${misc:Depends}
+-Conflicts: nginx-extras-dbg, nginx-full-dbg, nginx-light-dbg, nginx-core-dbg
+-Description: nginx web/proxy server (version with naxsi) - debugging symbols
+- Nginx ("engine X") is a high-performance web and reverse proxy server
+- created by Igor Sysoev. It can be used both as a standalone web server
+- and as a proxy to reduce the load on back-end HTTP or mail servers.
+- .
+- This package provides debugging symbols for nginx-naxsi, to assist in
+- debugging issues that you may find. It should not be required for normal
+- operation.
+-
+-Package: nginx-naxsi-ui
+-Architecture: all
+-Priority: extra
+-Depends: daemon,
+-         dbconfig-common,
+-         nginx-naxsi (>= ${source:Version}),
+-         nginx-naxsi (<< ${source:Version}.1~),
+-         python-twisted-web,
+-         ${misc:Depends}
+-Description: nginx web/proxy server - naxsi configuration front-end
+- Nginx ("engine X") is a high-performance web and reverse proxy server
+- created by Igor Sysoev. It can be used both as a standalone web server
+- and as a proxy to reduce the load on back-end HTTP or mail servers.
+- .
+- This package provides the autolearning daemon and web user interface for
+- nginx's naxsi module.
+- .
+- It includes an interceptor (listening on TCP port 8080), which monitors
+- HTTP requests from naxsi, and an extractor (running on TCP port 8081),
+- which reads the database and prints reports about blocked requests.
