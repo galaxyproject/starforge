@@ -1,0 +1,130 @@
+Description: Create shared versions of the libraries
+Author: David Evans
+        Sébastien Villemot <sebastien@debian.org>
+Last-Update: 2014-07-16
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/makes/Make.lib
++++ b/makes/Make.lib
+@@ -33,6 +33,79 @@ $(tarnam).tar.bz2 :
+ 	rm -rf $(ARCH)
+ 	$(BZIP) --best $(tarnam).tar
+ 
++fullshared: libatlas.so libcblas.so libf77blas.so liblapack.so atlas/libblas.so atlas/liblapack.so
++
++libatlas.so: libatlas.so.3
++	ln -sf $< $@ 
++
++libatlas.so.3: libatlas.so.3.0
++	ln -sf $< $@ 
++
++libatlas.so.3.0 : libatlas.a
++	ld $(LDFLAGS) -shared -soname libatlas.so.3 -o $@ \
++        --whole-archive libatlas.a --no-whole-archive -lc $(LIBS) $(F77SYSLIB)
++
++libcblas.so: libcblas.so.3
++	ln -sf $< $@ 
++
++libcblas.so.3: libcblas.so.3.0
++	ln -sf $< $@ 
++
++libcblas.so.3.0 : libcblas.a libatlas.so
++	ld $(LDFLAGS) -shared -soname libcblas.so.3 -o $@ \
++	  --whole-archive libcblas.a \
++          --no-whole-archive -L. -latlas $(F77SYSLIB) -lm -lc
++
++libf77blas.so: libf77blas.so.3
++	ln -sf $< $@ 
++
++libf77blas.so.3: libf77blas.so.3.0
++	ln -sf $< $@ 
++
++libf77blas.so.3.0 : libf77blas.a libcblas.so libatlas.so
++	ld $(LDFLAGS) -shared -soname libf77blas.so.3 -o $@ \
++	  --whole-archive libf77blas.a \
++          --no-whole-archive -L. -lcblas -latlas $(F77SYSLIB) -lm -lc
++
++liblapack.so: liblapack.so.3
++	ln -sf $< $@ 
++
++liblapack.so.3: liblapack.so.3.0
++	ln -sf $< $@ 
++
++liblapack.so.3.0 : liblapack.a libatlas.so libcblas.so libf77blas.so
++	ld $(LDFLAGS) -shared -soname liblapack.so.3 -o $@ \
++	  --whole-archive liblapack.a  \
++	  --no-whole-archive -L. -lf77blas -lcblas -latlas -lm -lc $(F77SYSLIB)
++
++atlas/libblas.so: atlas/libblas.so.3
++	(cd atlas && ln -sf libblas.so.3 libblas.so)
++
++atlas/libblas.so.3: atlas/libblas.so.3.0
++	(cd atlas && ln -sf libblas.so.3.0 libblas.so.3)
++
++atlas/libblas.so.3.0: libf77blas.a libcblas.a libatlas.so.3.0
++	if test -f libptf77blas.a -a -f libptcblas.a; then \
++		ld $(LDFLAGS) -shared -soname libblas.so.3 -o $@ \
++		   --whole-archive libptf77blas.a libptcblas.a \
++	           --no-whole-archive -L. -latlas $(F77SYSLIB) -lm -lc; \
++	else \
++		ld $(LDFLAGS) -shared -soname libblas.so.3 -o $@ \
++		   --whole-archive libf77blas.a libcblas.a \
++	           --no-whole-archive -L. -latlas $(F77SYSLIB) -lm -lc; \
++	fi
++
++atlas/liblapack.so: atlas/liblapack.so.3
++	(cd atlas && ln -sf liblapack.so.3 liblapack.so)
++
++atlas/liblapack.so.3: atlas/liblapack.so.3.0
++	(cd atlas && ln -sf liblapack.so.3.0 liblapack.so.3)
++
++atlas/liblapack.so.3.0: atlas/liblapack.a atlas/libblas.so libatlas.so.3.0
++	ld $(LDFLAGS) -shared -soname liblapack.so.3 -o $@ \
++	   --whole-archive atlas/liblapack.a \
++           --no-whole-archive -L . -L atlas -lblas -latlas $(F77SYSLIB) -lm -lc
++
+ # ===================================================================
+ # The following commands are to build dynamic/shared objects on Linux
+ # using the gnu gcc or ld
+--- a/Make.top
++++ b/Make.top
+@@ -16,6 +16,7 @@ build:
+ 	cd bin/ ; ./xatlas_build $(INSTFLAGS)
+ 	cd lib/ ; $(MAKE) atlas/libblas.a
+ 	cd lib/ ; $(MAKE) atlas/liblapack.a
++	cd lib/ ; $(MAKE) fullshared
+ 
+ time: 
+ 	./xatlbench -dc $(BLDdir)/bin/INSTALL_LOG -dp $(BLDdir)/ARCHS/$(ARCH)
+@@ -683,3 +684,21 @@ install_static_lib:
+ 	- cp $(LIBdir)/libsatlas.so $(INSTdir)/.
+ 	- cp $(LIBdir)/libtatlas.so $(INSTdir)/.
+ 
++install_shared_lib:
++	for lib in atlas cblas f77blas lapack; do \
++		cp $(LIBdir)/lib$$lib.so.3.0 $(INSTdir)/. ; \
++		( cd $(INSTdir) && ln -s lib$$lib.so.3.0 lib$$lib.so.3); \
++		( cd $(INSTdir) && ln -s lib$$lib.so.3 lib$$lib.so); \
++		chmod 0644 $(INSTdir)/lib$$lib.so ;\
++		chmod 0644 $(INSTdir)/lib$$lib.so.3 ;\
++		chmod 0644 $(INSTdir)/lib$$lib.so.3.0 ;\
++	done;
++	mkdir -p $(INSTdir)/atlas
++	for lib in blas lapack; do \
++		cp $(LIBdir)/atlas/lib$$lib.so.3.0 $(INSTdir)/atlas/. ; \
++		( cd $(INSTdir)/atlas/ && ln -s lib$$lib.so.3.0 lib$$lib.so.3); \
++		( cd $(INSTdir)/atlas/ && ln -s lib$$lib.so.3 lib$$lib.so); \
++		chmod 0644 $(INSTdir)/atlas/lib$$lib.so ;\
++		chmod 0644 $(INSTdir)/atlas/lib$$lib.so.3 ;\
++		chmod 0644 $(INSTdir)/atlas/lib$$lib.so.3.0 ;\
++	done;
+--- a/CONFIG/src/Makefile
++++ b/CONFIG/src/Makefile
+@@ -576,6 +576,7 @@ $(LIBINSTdir) :
+ install : $(INCINSTdir) $(LIBINSTdir) $(INCINSTdir)/atlas
+ 	$(MAKE) -f Make.top install_inc INSTdir=$(INCINSTdir) 
+ 	$(MAKE) -f Make.top install_static_lib INSTdir=$(LIBINSTdir)
++	$(MAKE) -f Make.top install_shared_lib INSTdir=$(LIBINSTdir)
+ 
+ confclean: $(CLEANdep)
+ 	rm -f *core* *.o config?.out

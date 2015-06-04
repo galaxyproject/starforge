@@ -1,0 +1,30 @@
+Description: Reenable the configuration flag for disable CPU throttling check
+ For the generic package, we need the ability to compile on machines with CPU
+ throttling enabled (since some buildds have that feature).
+Author: Sébastien Villemot <sebastien@debian.org>
+Forwarded: not-needed
+Last-Update: 2013-06-11
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- a/CONFIG/src/config.c
++++ b/CONFIG/src/config.c
+@@ -928,10 +928,8 @@
+         "      -Si nocygwin <0/1> : Do/don't depend on GPL cygwin library\n");
+       fprintf(stderr,
+         "                           (Windows compiler/cygwin install only)\n");
+-/* Disabled due to abuse
+       fprintf(stderr,
+         "      -Si cputhrchk <0/1> : Ignore/heed CPU throttle probe\n");
+- */
+       fprintf(stderr,
+            "   -tl <#> <list> : set # of threads, use list of affinity IDs\n");
+       fprintf(stderr,
+@@ -1129,6 +1127,8 @@
+             *NoF77 = k;
+          else if (!strcmp(sp0, "nocygwin"))
+             *NoCygwin = k;
++         else if (!strcmp(sp0, "cputhrchk"))
++            *ThrChk = k;
+          else if (!strcmp(sp0, "kern"))
+             gcc3 = sp;
+          else if (!strcmp(sp0, "ADdir") || !strcmp(sp0, "addir"))
