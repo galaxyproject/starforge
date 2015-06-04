@@ -1,14 +1,14 @@
-./build ubuntu:12.04 atlas
-./build ubuntu:12.04 bcftools
-./build ubuntu:12.04 emboos
-./build ubuntu:12.04 jellyfish
-./build ubuntu:12.04 kraken
-./build ubuntu:12.04 ngninx
-./build ubuntu:12.04 openms
-./build ubuntu:12.04 pkiss
-./build ubuntu:12.04 rnashapes
-./build ubuntu:12.04 samtools
-./build ubuntu:12.04 tpp
-./build ubuntu:12.04 ucsc
+./build debian:squeeze atlas
+./build debian:squeeze bcftools
+./build debian:squeeze emboos
+./build debian:squeeze jellyfish
+./build debian:squeeze kraken
+./build debian:squeeze ngninx
+./build debian:squeeze openms
+./build debian:squeeze pkiss
+./build debian:squeeze rnashapes
+./build debian:squeeze samtools
+./build debian:squeeze tpp
+./build debian:squeeze ucsc
 
 python build.py --quiet tbl2asn
