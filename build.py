@@ -178,6 +178,6 @@ if __name__ == '__main__':
     parser.add_argument('--dryrun', action='store_true', help='Only generate files, does not build and run the image')
     parser.add_argument('--image', help='Build image against a different target OS, e.g. "debian:squeeze"')
     parser.add_argument('--clone', action='store_true', help='When building a default image with a different version, clone the build.yml and hardcode the version')
-    parser.add_argument('--quiet', action='store_false', help='Be a bit quieter')
+    parser.add_argument('--quiet', action='store_true', help='Be a bit quieter')
     args = parser.parse_args()
     main(**vars(args))
