@@ -15,9 +15,7 @@ else
 fi
 
 build_deps="libc6-dev zlib1g-dev tcl-dev tk-dev libblas-dev liblapack-dev libcairo2-dev libpng12-dev libtiff4-dev libjpeg-dev libreadline-dev default-jre"
-urls="
-http://cran.rstudio.com/src/base/R-3/$pkg-$version.tar.gz"
-
+urls="http://cran.rstudio.com/src/base/R-3/$pkg-$version.tar.gz"
 
 apt-get -qq update &&
     apt-get install --no-install-recommends -y $build_deps &&
