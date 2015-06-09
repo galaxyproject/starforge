@@ -8,6 +8,8 @@ http://hgdownload.soe.ucsc.edu/admin/jksrc.v${version}.zip
 "
 
 build=/build
+build_identifier="${pkg}-${version}-Linux-${arch}"
+dest="build/${build_identifier}"
 
 apt-get -qq update &&
     apt-get install --no-install-recommends -y $build_deps &&
@@ -18,7 +20,7 @@ apt-get -qq update &&
         wget "$url" || false || exit
     done ) &&
 
-    mkdir -p $HOME/bin/${arch}/ ${build}/dest/bin ${build}/dest/lib &&
+    mkdir -p $HOME/bin/${arch}/ ${build}/${dest}/bin ${build}/${dest}/lib &&
     unzip jksrc.v${version}.zip &&
     cd kent/src/lib/ &&
     make &&
@@ -27,13 +29,13 @@ apt-get -qq update &&
     ORIGIN='$ORIGIN'
     export COPT ORIGIN &&
     find . -type d -maxdepth 1 -mindepth 1 -exec make -C '{}' \; &&
-    mv $HOME/bin/${arch}/* ${build}/dest/bin/ &&
-    for lib in $(ldd ${build}/dest/bin/faToTwoBit | grep -o '=> /[^ ]*' | sed 's/=> //g'); do
+    mv $HOME/bin/${arch}/* ${build}/${dest}/bin/ &&
+    for lib in $(ldd ${build}/${dest}/bin/faToTwoBit | grep -o '=> /[^ ]*' | sed 's/=> //g'); do
         case $lib in
             */libcrypto.so*|*/libgcc_s.so*|*/libmysqlclient.so*|*/libssl.so*|*/libstdc++.so*)
                 echo "including $lib"
-                cp $lib ${build}/dest/lib/
+                cp $lib ${build}/${dest}/lib/
                 ;;
         esac
     done
-    tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C ${build}/dest .
+    tar zcf /host/${build_identifier}.tar.gz -C ${build}/${dest}/../ .
