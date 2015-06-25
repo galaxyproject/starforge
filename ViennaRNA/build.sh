@@ -35,7 +35,7 @@ apt-get -qq update &&
 
     cd ${pkg}-${version} &&
 	export LDFLAGS='-Wl,-rpath,\$$ORIGIN/../lib'
-    ./configure --prefix=/build/dest &&
+    ./configure --prefix=/build/dest --without-doc &&
     make &&
     make install &&
     cp /usr/lib/libgomp* /build/dest/lib/ &&
