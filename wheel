@@ -6,5 +6,5 @@ usage="usage: $(basename $0) <NAME-VERSION> <SOURCE-URL>"
 
 base=$(readlink -f wheels)
 
-docker run --volume=$base/:/host/ natefoo/wheel64:squeeze $1 $2 &&
-docker run --volume=$base/:/host/ natefoo/wheel32:squeeze $1 $2
+docker run --volume=$base/:/host/ natefoo/wheel64:squeeze /bin/bash /host/build.sh $1 $2 &&
+docker run --volume=$base/:/host/ natefoo/wheel32:squeeze /bin/bash /host/build.sh $1 $2

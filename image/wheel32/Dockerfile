@@ -16,12 +16,16 @@ RUN apt-key adv --keyserver pgp.mit.edu --recv-keys 8B48AD6246925553 && \
     tar zxf Python-2.6.9.tgz && \
     tar zxf Python-2.7.10.tgz && \
     cd /build/Python-2.6.9 && \
+    cp Modules/posixmodule.c Modules/posixmodule.c.orig && \
+    sed -e 's/u.machine/"i686"/' Modules/posixmodule.c.orig >Modules/posixmodule.c && \
     ./configure --prefix=/python/2.6-ucs2 --enable-unicode=ucs2 && \
     make install && \
     make distclean && \
     ./configure --prefix=/python/2.6-ucs4 --enable-unicode=ucs4 && \
     make install && \
     cd /build/Python-2.7.10 && \
+    cp Modules/posixmodule.c Modules/posixmodule.c.orig && \
+    sed -e 's/u.machine/"i686"/' Modules/posixmodule.c.orig >Modules/posixmodule.c && \
     ./configure --prefix=/python/2.7-ucs2 --enable-unicode=ucs2 && \
     make install && \
     make distclean && \
