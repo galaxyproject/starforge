@@ -1,0 +1,10 @@
+#!/bin/bash
+
+usage="usage: $(basename $0) <NAME-VERSION> <SOURCE-URL>"
+
+[ -z "$2" ] && echo "$usage" && exit 2
+
+base=$(readlink -f wheels)
+
+docker run --volume=$base/:/host/ natefoo/wheel64:squeeze $1 $2 &&
+docker run --volume=$base/:/host/ natefoo/wheel32:squeeze $1 $2

@@ -1,0 +1,4 @@
+base image created with:
+
+sudo debootstrap --arch=i386 squeeze squeeze32 http://carroll.aset.psu.edu/pub/linux/distributions/debian/
+sudo tar -C squeeze32 -c . | sudo docker import - galaxy/squeeze32
