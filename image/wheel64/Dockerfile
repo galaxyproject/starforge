@@ -8,7 +8,7 @@ VOLUME ["/host"]
 
 RUN apt-key adv --keyserver pgp.mit.edu --recv-keys 8B48AD6246925553 && \
     apt-get -qq update && \
-    apt-get install --no-install-recommends -y build-essential ca-certificates wget mercurial zlib1g-dev libssl-dev && \
+    apt-get install --no-install-recommends -y build-essential ca-certificates wget mercurial zlib1g-dev libssl-dev libbz2-dev && \
     mkdir /build && \
     cd /build && \
     wget https://www.python.org/ftp/python/2.6.9/Python-2.6.9.tgz && \
