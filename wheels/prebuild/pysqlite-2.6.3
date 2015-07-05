@@ -1,0 +1,13 @@
+# source me
+
+amalgamation="sqlite-autoconf-3081002" &&
+
+wget https://sqlite.org/2015/${amalgamation}.tar.gz &&
+tar zxf ${amalgamation}.tar.gz &&
+#mkdir amalgamation &&
+for f in sqlite3.h sqlite3.c sqlite3ext.h; do
+    cp ${amalgamation}/$f $f || return 1
+done &&
+sed -i '/from distutils.core import setup, Extension, Command/iimport setuptools' setup.py &&
+echo "include_dirs=." >>setup.cfg
+build_args="build_static"
