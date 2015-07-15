@@ -1,0 +1,12 @@
+# source me
+
+DEBIAN_FRONTEND=noninteractive apt-get install -y git &&
+git clone -b linux-wheels https://github.com/natefoo/pip &&
+cd pip &&
+
+( for py in 2.6-ucs2 2.6-ucs4 2.7-ucs2 2.7-ucs4; do
+    /python/$py/bin/python setup.py install &&
+    /python/$py/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1
+done ) &&
+
+cd ..
