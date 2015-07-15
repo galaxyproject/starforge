@@ -1,7 +1,8 @@
 #!/bin/bash
 
-pkgvers=$1
+pkg=$1
 url=$2
+tgz=`basename $url`
 
 case `getconf LONG_BIT` in
     32)
@@ -12,22 +13,21 @@ case `getconf LONG_BIT` in
         ;;
 esac
 
-mkdir -p /host/$pkgvers &&
+mkdir -p /host/dist/$pkg &&
 mkdir /build &&
 cd /build &&
 wget --no-check-certificate $url &&
-tar zxf `basename $url` &&
-cd $pkgvers &&
-if [ -f /host/prebuild/$pkgvers ]; then
-    . /host/prebuild/$pkgvers
+dir=`tar ztf $tgz | grep / | head -1 | awk -F/ '{print $1}'` &&
+tar zxf $tgz &&
+cd $dir &&
+if [ -f /host/prebuild/$pkg ]; then
+    . /host/prebuild/$pkg
 else
     true
 fi &&
-/python/2.6-ucs2/bin/python setup.py $build_args bdist_wheel --plat-name=${plat} &&
-rm -rf build &&
-/python/2.6-ucs4/bin/python setup.py $build_args bdist_wheel --plat-name=${plat} &&
-rm -rf build &&
-/python/2.7-ucs2/bin/python setup.py $build_args bdist_wheel --plat-name=${plat} &&
-rm -rf build &&
-/python/2.7-ucs4/bin/python setup.py $build_args bdist_wheel --plat-name=${plat} &&
-mv dist/* /host/$pkgvers
+
+( for py in 2.6-ucs2 2.6-ucs4 2.7-ucs2 2.7-ucs4; do
+    /python/${py}/bin/python setup.py $build_args bdist_wheel --plat-name=${plat} &&
+    rm -rf build || exit 1
+done ) &&
+mv dist/* /host/dist/$pkg
