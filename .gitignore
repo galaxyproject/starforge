@@ -1,5 +1,3 @@
-syntax: glob
-
 *~
 *.*.swp
 *.tar.gz
@@ -10,3 +8,5 @@ image/Dockerfile
 
 */build.log
 *.gz
+
+wheels/dist/
