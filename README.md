@@ -4,6 +4,7 @@ Things you can do with docker-build:
 
 - Build [Galaxy Tool Shed](https://toolshed.g2.bx.psu.edu) dependencies
 - Rebuild Debian or Ubuntu source packages (for modifications)
+- Build [Python Wheels](http://pythonwheels.com/)
 
 To use, install Docker. Then for building packages there are two scripts that
 can be used, depending on the package recipes available:

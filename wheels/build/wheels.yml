@@ -1,0 +1,9 @@
+---
+
+packages:
+    PyYAML:
+        version: 3.11
+        src: https://pypi.python.org/packages/source/P/PyYAML/PyYAML-3.11.tar.gz
+        insert_setuptools: true
+        apt:
+            - libyaml-dev
