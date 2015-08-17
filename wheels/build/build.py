@@ -3,16 +3,14 @@
 import os
 import sys
 import shutil
-import urllib2
 import tarfile
 import subprocess
 from os.path import basename, join, exists
-
-# FIXME: new image w/ python-yaml preinstalled pls
-os.environ['DEBIAN_FRONTEND'] = 'noninteractive'
-subprocess.check_call(['apt-get', 'install', '-y', 'python-yaml'])
+from distutils.util import get_platform
+from platform import linux_distribution
 
 import yaml
+
 
 WHEELS_YML = join(os.sep, 'host', 'build', 'wheels.yml')
 BUILD = join(os.sep, 'build')
@@ -31,22 +29,29 @@ def execute(cmd):
 
 def build(wheel_name, wheel_dict):
     src_url = wheel_dict['src']
-    tgz = join('/build', basename(src_url))
+    tgz = join(os.sep, '/host', 'build', 'cache', basename(src_url))
 
-    bits = int(subprocess.Popen(['getconf', 'LONG_BIT'], stdout=subprocess.PIPE).stdout.read())
-
-    if bits == 64:
-        plat = 'linux_x86_64'
-    elif bits == 32:
-        plat = 'linux_i686'
+    if 'imageset' not in wheel_dict:
+        bits = int(subprocess.Popen(['getconf', 'LONG_BIT'], stdout=subprocess.PIPE).stdout.read())
+        if bits == 64:
+            plat = 'linux_x86_64'
+        elif bits == 32:
+            plat = 'linux_i686'
+        else:
+            raise Exception("Sorry, can't run on your PDP-11 (`getconf LONG_BIT` produced: %s)")
+        print 'Platform is: %s' % plat
     else:
-        raise Exception("Sorry, can't run on your PDP-11 (`getconf LONG_BIT` produced: %s)")
+        plat = None
+        print 'Using default platform for %s on %s' % (' '.join(linux_distribution()[0:2]), distutils.util.get_platform())
 
-    print 'Platform is: %s' % plat
 
-    if wheel_dict.get('apt', []):
+    distro = linux_distribution()[0]
+
+    if distro in ('Debian', 'Ubuntu') and wheel_dict.get('apt', []):
+        os.environ['DEBIAN_FRONTEND'] = 'noninteractive'
         execute(['apt-get', 'install', '-y'] + wheel_dict['apt'])
-
+    elif distro in ('CentOS',) and wheel_dict.get('yum', []):
+        execute(['yum', 'install', '-y'] + wheel_dict['yum'])
 
     dest = join(os.sep, 'host', 'dist', wheel_name)
     if not exists(dest):
@@ -54,10 +59,6 @@ def build(wheel_name, wheel_dict):
 
     if not exists(BUILD):
         os.makedirs(BUILD)
-
-    with open(tgz, 'w') as handle:
-        r = urllib2.urlopen(src_url, None, 15)
-        handle.write(r.read())
 
     tf = tarfile.open(tgz)
     roots = set()
@@ -77,7 +78,9 @@ def build(wheel_name, wheel_dict):
             handle.write(SETUPTOOLS_WRAPPER)
 
     for py in PYTHONS:
-        cmd = [join(os.sep, 'python', py, 'bin', 'python'), 'setup.py', 'bdist_wheel', '--plat-name=%s' % plat]
+        cmd = [join(os.sep, 'python', py, 'bin', 'python'), 'setup.py', 'bdist_wheel']
+        if plat is not None:
+            cmd.append('--plat-name=%s' % plat)
         execute(cmd)
         shutil.rmtree('build')
     

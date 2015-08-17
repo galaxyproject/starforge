@@ -1,5 +1,35 @@
 ---
 
+imagesets:
+    default:
+        #- natefoo/centos5:wheel
+        #- natefoo/centos5-32:wheel
+        - natefoo/debian6:wheel
+        - natefoo/debian6-32:wheel
+    full:
+        #- natefoo/centos5:wheel
+        #- natefoo/centos5-32:wheel
+        - natefoo/centos6:wheel
+        - natefoo/centos6-32:wheel
+        - natefoo/centos7:wheel
+        - natefoo/centos7-32:wheel
+        - natefoo/debian6:wheel
+        - natefoo/debian6-32:wheel
+        - natefoo/debian7:wheel
+        - natefoo/debian7-32:wheel
+        - natefoo/debian8:wheel
+        - natefoo/debian8-32:wheel
+        - natefoo/ubuntu12.04:wheel
+        - natefoo/ubuntu12.04-32:wheel
+        - natefoo/ubuntu14.04:wheel
+        - natefoo/ubuntu14.04-32:wheel
+
+images:
+    natefoo/centos5:
+        buildpy: /python/buildpy/bin/python
+    natefoo/centos5-32:
+        buildpy: /python/buildpy/bin/python
+
 packages:
     PyYAML:
         version: 3.11
@@ -7,3 +37,11 @@ packages:
         insert_setuptools: true
         apt:
             - libyaml-dev
+    psycopg2:
+        version: 2.6.1
+        src: http://initd.org/psycopg/tarballs/PSYCOPG-2-6/psycopg2-2.6.1.tar.gz
+        imageset: full
+        apt:
+            - libpq-dev
+        yum:
+            - postgresql-devel
