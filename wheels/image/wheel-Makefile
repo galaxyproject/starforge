@@ -1,0 +1,21 @@
+TAG		:= REPLACE_TAG
+FROM		:= REPLACE_FROM
+BITS		:= REPLACE_BITS
+RUN		:= REPLACE_RUN
+WHEEL_VERSION	:= REPLACE_WHEEL_VERSION
+
+
+image-id: Dockerfile .dockerignore
+	docker build -t $(TAG) .
+	docker images -q $(TAG) >$@
+
+.dockerignore:
+	echo 'Makefile' >$@
+
+Dockerfile: ../Dockerfile-wheel-$(BITS).in
+	sed -e 's#FROM_IMAGE#$(FROM)#' \
+		-e 's#WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#RUN_CMD#$(RUN)#' ../Dockerfile-wheel-$(BITS).in >$@
+
+clean:
+	rm -f Dockerfile .dockerignore image-id

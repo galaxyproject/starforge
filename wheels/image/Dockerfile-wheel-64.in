@@ -1,16 +1,9 @@
-#
-# build with:
-#
-#     docker build -t natefoo/debian6:wheel
-#
-
-FROM natefoo/debian6:latest
+FROM FROM_IMAGE
 MAINTAINER Nate Coraor <nate@bx.psu.edu>
 ENV DEBIAN_FRONTEND noninteractive
+ENV LDFLAGS -L/usr/lib/x86_64-linux-gnu
 VOLUME ["/host"]
-RUN apt-key adv --keyserver pgp.mit.edu --recv-keys 8B48AD6246925553 && \
-    apt-get -qq update && \
-    apt-get install --no-install-recommends -y build-essential curl zlib1g-dev libssl-dev libbz2-dev python-yaml && \
+RUN RUN_CMD && \
     mkdir /build && \
     cd /build && \
     curl -O https://www.python.org/ftp/python/2.6.9/Python-2.6.9.tgz && \
@@ -41,9 +34,9 @@ RUN apt-key adv --keyserver pgp.mit.edu --recv-keys 8B48AD6246925553 && \
     rm -rf build && \
     /python/2.7-ucs4/bin/python setup.py install && \
     cd .. && \
-    curl -O https://bitbucket.org/natefoo/wheel/get/2759ea9686ee.tar.gz && \
-    tar zxf 2759ea9686ee.tar.gz && \
-    cd natefoo-wheel-2759ea9686ee && \
+    curl -O https://bitbucket.org/natefoo/wheel/get/WHEEL_VERSION.tar.gz && \
+    tar zxf WHEEL_VERSION.tar.gz && \
+    cd natefoo-wheel-WHEEL_VERSION && \
     /python/2.6-ucs2/bin/python setup.py install && \
     rm -rf build && \
     /python/2.6-ucs4/bin/python setup.py install && \

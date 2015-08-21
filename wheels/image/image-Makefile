@@ -1,0 +1,42 @@
+TAG		:= REPLACE_TAG
+DIST		:= REPLACE_DIST
+BITS		:= REPLACE_BITS
+ARCH		:= REPLACE_ARCH
+RELEASE		:= REPLACE_RELEASE
+URL		:= REPLACE_URL
+VERSION		:= REPLACE_VERSION
+DASHBITS	:= REPLACE_DASHBITS
+
+
+image-id: Dockerfile .dockerignore $(DIST).tar
+	docker build -t $(TAG) .
+	docker images -q $(TAG) >$@
+
+.dockerignore:
+	echo '*.dest' >$@
+	echo 'Makefile' >>$@
+
+Dockerfile: ../Dockerfile-$(BITS).in
+	sed -e 's#IMAGE_TAR#$(DIST)#' ../Dockerfile-$(BITS).in >$@
+
+$(DIST).tar: $(DIST).dest
+	sudo tar -C $(DIST).dest -cf $(DIST).tar .
+
+debian.dest:
+	sudo debootstrap --arch=$(ARCH) $(RELEASE) $(DIST).dest $(URL)
+
+centos.dest: $(DIST)$(VERSION).dest
+	ln -s $(DIST)$(VERSION).dest centos.dest
+
+centos6.dest:
+	sudo yumbootstrap --verbose --include=setarch --groups=Core centos-$(VERSION)$(DASHBITS) $@
+
+centos7.dest:
+	sudo yumbootstrap --verbose --groups=Core centos-$(VERSION)$(DASHBITS) $@
+
+clean:
+	rm -f Dockerfile .dockerignore
+	sudo rm -f $(DIST).tar
+	sudo rm -rf $(DIST)$(VERSION).dest $(DIST).dest
+
+.PHONY: clean

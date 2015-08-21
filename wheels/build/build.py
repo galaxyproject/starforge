@@ -27,7 +27,7 @@ def execute(cmd):
     subprocess.check_call(cmd)
 
 
-def build(wheel_name, wheel_dict):
+def build(wheel_name, wheel_dict, plat):
     src_url = wheel_dict['src']
     tgz = join(os.sep, '/host', 'build', 'cache', basename(src_url))
 
@@ -40,17 +40,18 @@ def build(wheel_name, wheel_dict):
         else:
             raise Exception("Sorry, can't run on your PDP-11 (`getconf LONG_BIT` produced: %s)")
         print 'Platform is: %s' % plat
+    elif plat is not None:
+        print 'Using platform from wheels.yml: %s' % plat
     else:
-        plat = None
-        print 'Using default platform for %s on %s' % (' '.join(linux_distribution()[0:2]), distutils.util.get_platform())
+        print 'Using default platform for %s on %s' % (' '.join(linux_distribution()[0:2]), get_platform())
 
 
-    distro = linux_distribution()[0]
+    distro = linux_distribution()[0].lower()
 
-    if distro in ('Debian', 'Ubuntu') and wheel_dict.get('apt', []):
+    if distro in ('debian', 'ubuntu') and wheel_dict.get('apt', []):
         os.environ['DEBIAN_FRONTEND'] = 'noninteractive'
         execute(['apt-get', 'install', '-y'] + wheel_dict['apt'])
-    elif distro in ('CentOS',) and wheel_dict.get('yum', []):
+    elif distro in ('centos', 'centos linux') and wheel_dict.get('yum', []):
         execute(['yum', 'install', '-y'] + wheel_dict['yum'])
 
     dest = join(os.sep, 'host', 'dist', wheel_name)
@@ -93,13 +94,13 @@ def main():
     with open(WHEELS_YML, 'r') as handle:
         wheels = yaml.load(handle)
 
-    build(build_wheel, wheels['packages'][build_wheel])
+    try:
+        tag = sys.argv[2]
+    except:
+        tag = None
+    plat = wheels.get('images', {}).get(tag, {}).get('plat_name', None)
 
-    if not build_wheel:
-        for wheel_name, wheel_dict in wheels['packages'].items():
-            build(wheel_name, wheel_dict)
-    else:
-        build(build_wheel, wheels['packages'][build_wheel])
+    build(build_wheel, wheels['packages'][build_wheel], plat)
 
 
 if __name__ == '__main__':

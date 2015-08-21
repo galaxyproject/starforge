@@ -2,33 +2,34 @@
 
 imagesets:
     default:
-        #- natefoo/centos5:wheel
-        #- natefoo/centos5-32:wheel
-        - natefoo/debian6:wheel
-        - natefoo/debian6-32:wheel
+        # note: these are currently just extra tags on debian6-wheel*
+        - natefoo/base-wheel
+        - natefoo/base-wheel-32
     full:
-        #- natefoo/centos5:wheel
-        #- natefoo/centos5-32:wheel
-        - natefoo/centos6:wheel
-        - natefoo/centos6-32:wheel
-        - natefoo/centos7:wheel
-        - natefoo/centos7-32:wheel
-        - natefoo/debian6:wheel
-        - natefoo/debian6-32:wheel
-        - natefoo/debian7:wheel
-        - natefoo/debian7-32:wheel
-        - natefoo/debian8:wheel
-        - natefoo/debian8-32:wheel
-        - natefoo/ubuntu12.04:wheel
-        - natefoo/ubuntu12.04-32:wheel
-        - natefoo/ubuntu14.04:wheel
-        - natefoo/ubuntu14.04-32:wheel
+        - natefoo/centos6-wheel
+        - natefoo/centos6-wheel-32
+        - natefoo/centos7-wheel
+        - natefoo/debian6-wheel
+        - natefoo/debian6-wheel-32
+        - natefoo/debian7-wheel
+        - natefoo/debian7-wheel-32
+        - natefoo/debian8-wheel
+        - natefoo/debian8-wheel-32
+        - natefoo/ubuntu12.04-wheel
+        - natefoo/ubuntu12.04-wheel-32
+        - natefoo/ubuntu14.04-wheel
+        - natefoo/ubuntu14.04-wheel-32
 
 images:
-    natefoo/centos5:
-        buildpy: /python/buildpy/bin/python
-    natefoo/centos5-32:
-        buildpy: /python/buildpy/bin/python
+    natefoo/base-wheel:
+        plat_name: linux_x86_64
+    natefoo/base-wheel-32:
+        plat_name: linux_i686
+    # Currently `stretch/sid`, gonna have to fix this in pip
+    natefoo/debian9-wheel:
+        plat_name: linux_x86_64_debian_9
+    natefoo/debian9-wheel-32:
+        plat_name: linux_i686_debian_9
 
 packages:
     PyYAML:
@@ -40,6 +41,7 @@ packages:
     psycopg2:
         version: 2.6.1
         src: http://initd.org/psycopg/tarballs/PSYCOPG-2-6/psycopg2-2.6.1.tar.gz
+        insert_setuptools: true
         imageset: full
         apt:
             - libpq-dev
