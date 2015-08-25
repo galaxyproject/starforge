@@ -1,4 +1,4 @@
-BASE_TAGS	= debian6 debian7 debian8 debian9 ubuntu12.04 ubuntu14.04 centos6 centos7
+BASE_TAGS	= debian6 debian7 debian8 debian9 ubuntu12.04 ubuntu14.04 centos6 centos7 opensuse13
 BASE_TAGS_32	= $(BASE_TAGS:=-32)
 WHEEL_TAGS 	= $(BASE_TAGS:=-wheel)
 WHEEL_TAGS_32 	= $(WHEEL_TAGS:=-32)
@@ -14,7 +14,9 @@ DEBIAN_RUN_32	= apt-key adv --keyserver pgp.mit.edu --recv-keys 8B48AD6246925553
 CENTOS_PKGS	= curl zlib-devel openssl-devel bzip2-devel PyYAML
 CENTOS_RUN	= yum groupinstall -y "Development Tools" \\\&\\\& yum install -y $(CENTOS_PKGS)
 CENTOS_RUN_32	= linux32 yum groupinstall -y "Development Tools" \\\&\\\& linux32 yum install -y $(CENTOS_PKGS)
-WHEEL_VERSION	= 35e48cf7c4af
+OPENSUSE_PKGS	= python tar gcc gcc-c++ make glibc-devel ca-certificates-mozilla curl zlib-devel libopenssl-devel libbz2-devel python-PyYAML
+OPENSUSE_RUN	= zypper --non-interactive --gpg-auto-import-keys ref \\\&\\\& zypper --non-interactive in $(OPENSUSE_PKGS)
+WHEEL_VERSION	= 3f496bdf2708
 
 all: $(BASE_TAGS) $(BASE_TAGS_32) $(WHEEL_TAGS) $(WHEEL_TAGS_32)
 
@@ -283,5 +285,13 @@ centos7-wheel/Makefile: wheel-Makefile
 		-e 's#REPLACE_BITS#64#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
 		-e 's#REPLACE_RUN#$(CENTOS_RUN)#' wheel-Makefile >$@
+
+opensuse13-wheel/Makefile: wheel-Makefile
+	mkdir -p $(@D)
+	sed -e 's#REPLACE_TAG#natefoo/$(@D)#' \
+		-e 's#REPLACE_FROM#opensuse:13.2#' \
+		-e 's#REPLACE_BITS#64#' \
+		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_RUN#$(OPENSUSE_RUN)#' wheel-Makefile >$@
 
 .PHONY: $(BASE_TAGS) $(BASE_TAGS_32) $(WHEEL_TAGS) $(WHEEL_TAGS_32) all clean distclean

@@ -15,21 +15,19 @@ imagesets:
         - natefoo/debian7-wheel-32
         - natefoo/debian8-wheel
         - natefoo/debian8-wheel-32
+        - natefoo/debian9-wheel
+        - natefoo/debian9-wheel-32
         - natefoo/ubuntu12.04-wheel
         - natefoo/ubuntu12.04-wheel-32
         - natefoo/ubuntu14.04-wheel
         - natefoo/ubuntu14.04-wheel-32
+        - natefoo/opensuse13-wheel
 
 images:
     natefoo/base-wheel:
         plat_name: linux_x86_64
     natefoo/base-wheel-32:
         plat_name: linux_i686
-    # Currently `stretch/sid`, gonna have to fix this in pip
-    natefoo/debian9-wheel:
-        plat_name: linux_x86_64_debian_9
-    natefoo/debian9-wheel-32:
-        plat_name: linux_i686_debian_9
 
 packages:
     PyYAML:
@@ -38,6 +36,10 @@ packages:
         insert_setuptools: true
         apt:
             - libyaml-dev
+        yum:
+            - libyaml-devel
+        zypper:
+            - libyaml-devel
     psycopg2:
         version: 2.6.1
         src: http://initd.org/psycopg/tarballs/PSYCOPG-2-6/psycopg2-2.6.1.tar.gz
@@ -46,4 +48,6 @@ packages:
         apt:
             - libpq-dev
         yum:
+            - postgresql-devel
+        zypper:
             - postgresql-devel

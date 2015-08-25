@@ -7,9 +7,11 @@ import tarfile
 import subprocess
 from os.path import basename, join, exists
 from distutils.util import get_platform
-from platform import linux_distribution
 
 import yaml
+
+from wheel.pep425tags import get_platforms
+from wheel.platform import get_specific_platform
 
 
 WHEELS_YML = join(os.sep, 'host', 'build', 'wheels.yml')
@@ -43,16 +45,21 @@ def build(wheel_name, wheel_dict, plat):
     elif plat is not None:
         print 'Using platform from wheels.yml: %s' % plat
     else:
-        print 'Using default platform for %s on %s' % (' '.join(linux_distribution()[0:2]), get_platform())
+        print 'Using default platform: %s' % get_platforms(major_only=True)[0]
 
 
-    distro = linux_distribution()[0].lower()
+    distro = get_specific_platform()
+    if distro is not None:
+        distro = distro[0]
 
     if distro in ('debian', 'ubuntu') and wheel_dict.get('apt', []):
         os.environ['DEBIAN_FRONTEND'] = 'noninteractive'
-        execute(['apt-get', 'install', '-y'] + wheel_dict['apt'])
-    elif distro in ('centos', 'centos linux') and wheel_dict.get('yum', []):
+        execute(['apt-get', '-qq', 'update'])
+        execute(['apt-get', 'install', '--no-install-recommends', '-y'] + wheel_dict['apt'])
+    elif distro in ('centos', 'rhel') and wheel_dict.get('yum', []):
         execute(['yum', 'install', '-y'] + wheel_dict['yum'])
+    elif distro in ('opensuse', 'sles') and wheel_dict.get('zypper', []):
+        execute(['zypper', '-n', 'in'] + wheel_dict['zypper'])
 
     dest = join(os.sep, 'host', 'dist', wheel_name)
     if not exists(dest):
