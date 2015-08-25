@@ -27,6 +27,8 @@ RUN RUN_CMD && \
     curl -O https://pypi.python.org/packages/source/s/setuptools/setuptools-18.0.1.tar.gz && \
     tar zxf setuptools-18.0.1.tar.gz && \
     cd setuptools-18.0.1 && \
+    linux32 python setup.py install && \
+    rm -rf build && \
     linux32 /python/2.6-ucs2/bin/python setup.py install && \
     rm -rf build && \
     linux32 /python/2.6-ucs4/bin/python setup.py install && \
@@ -38,6 +40,8 @@ RUN RUN_CMD && \
     curl -O https://bitbucket.org/natefoo/wheel/get/WHEEL_VERSION.tar.gz && \
     tar zxf WHEEL_VERSION.tar.gz && \
     cd natefoo-wheel-WHEEL_VERSION && \
+    linux32 python setup.py install && \
+    rm -rf build && \
     linux32 /python/2.6-ucs2/bin/python setup.py install && \
     rm -rf build && \
     linux32 /python/2.6-ucs4/bin/python setup.py install && \
