@@ -151,7 +151,7 @@ ubuntu-wheel_14.04/Makefile: wheel-Makefile
 	mkdir -p $(@D)
 	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#ubuntu:14.04#' \
-		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-64.in#' \
+		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
 		wheel-Makefile >$@
