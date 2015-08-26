@@ -1,3 +1,0 @@
-# source me
-
-sed -i '/from distutils import log/iimport setuptools' setup.py

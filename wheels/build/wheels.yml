@@ -32,16 +32,25 @@ images:
         plat_name: linux_i686
 
 packages:
-    PyYAML:
-        version: 3.11
-        src: https://pypi.python.org/packages/source/P/PyYAML/PyYAML-3.11.tar.gz
-        insert_setuptools: true
+    bx-python:
+        version: 0.7.3
+        src: https://pypi.python.org/packages/source/b/bx-python/bx-python-0.7.3.tar.gz
+        prebuild: "git clone -b linux-wheels https://github.com/natefoo/pip && cd pip && for py in cp26m cp26mu cp27m cp27mu; do /python/${py}-`uname -m`/bin/python setup.py install && /python/${py}-`uname -m`/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1; done"
         apt:
-            - libyaml-dev
-        yum:
-            - libyaml-devel
-        zypper:
-            - libyaml-devel
+            - git
+    Cheetah:
+        version: 2.4.4
+        src: https://pypi.python.org/packages/source/C/Cheetah/Cheetah-2.4.4.tar.gz
+    MarkupSafe:
+        version: 0.23
+        src: https://pypi.python.org/packages/source/M/MarkupSafe/MarkupSafe-0.23.tar.gz
+    mercurial:
+        version: 3.5
+        src: https://pypi.python.org/packages/source/M/Mercurial/mercurial-3.5.tar.gz
+        insert_setuptools: true
+    numpy:
+        version: 1.9.2
+        src: https://pypi.python.org/packages/source/n/numpy/numpy-1.9.2.tar.gz
     psycopg2:
         version: 2.6.1
         src: http://initd.org/psycopg/tarballs/PSYCOPG-2-6/psycopg2-2.6.1.tar.gz
@@ -53,3 +62,22 @@ packages:
             - postgresql-devel
         zypper:
             - postgresql-devel
+    pycrypto:
+        version: 2.6.1
+        src: https://pypi.python.org/packages/source/p/pycrypto/pycrypto-2.6.1.tar.gz
+        insert_setuptools: true
+    pysqlite:
+        version: 2.7.0
+        src: https://pypi.python.org/packages/source/p/pysqlite/pysqlite-2.7.0.tar.gz
+        insert_setuptools: true
+        prebuild: "curl -O https://sqlite.org/2015/sqlite-autoconf-3081002.tar.gz && tar zxf sqlite-autoconf-3081002.tar.gz && for f in sqlite3.h sqlite3.c sqlite3ext.h; do cp sqlite-autoconf-3081002/$f $f || return 1; done && echo 'include_dirs=.' >>setup.cfg"
+        build_args: build_static bdist_wheel
+    PyYAML:
+        version: 3.11
+        src: https://pypi.python.org/packages/source/P/PyYAML/PyYAML-3.11.tar.gz
+        insert_setuptools: true
+        apt:
+            - libyaml-dev
+    SQLAlchemy:
+        version: 1.0.8
+        src: https://pypi.python.org/packages/source/S/SQLAlchemy/SQLAlchemy-1.0.8.tar.gz

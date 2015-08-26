@@ -74,6 +74,10 @@ def build(wheel_name, wheel_dict, plat):
 
     os.chdir(join(BUILD, root))
 
+    prebuild = wheel_dict.get('prebuild', None)
+    if prebuild is not None:
+        subprocess.check_call(prebuild, shell=True)
+
     if wheel_dict.get('insert_setuptools', False):
         os.rename('setup.py', 'setup_wrapped.py')
         with open('setup.py', 'w') as handle:
@@ -81,7 +85,8 @@ def build(wheel_name, wheel_dict, plat):
 
     for py in PYTHONS:
         py = '%s-%s' % (py, os.uname()[4])
-        cmd = [join(os.sep, 'python', py, 'bin', 'python'), 'setup.py', 'bdist_wheel']
+        build_args = wheel_dict.get('build_args', 'bdist_wheel').split()
+        cmd = [join(os.sep, 'python', py, 'bin', 'python'), 'setup.py'] + build_args
         if plat is not None:
             cmd.append('--plat-name=%s' % plat)
         execute(cmd)

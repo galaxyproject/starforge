@@ -1,6 +1,0 @@
-# source me
-
-# PyYAML will gracefully fall back to the pure Python implementation if
-# libyaml-0.so.2 cannot be found
-DEBIAN_FRONTEND=noninteractive apt-get install -y libyaml-dev &&
-sed -i '/from distutils import log/iimport setuptools' setup.py

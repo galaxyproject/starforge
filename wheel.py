@@ -71,7 +71,8 @@ def main():
         expected[image] = []
         for py in ('26', '27'):
             for abi_flags in ('m', 'mu'):
-                whl = '%s-%s-cp%s-cp%s%s-%s.whl' % (args.package, version, py, py, abi_flags, plat_name)
+                norm = lambda x: x.replace('-', '_')
+                whl = '%s-%s-cp%s-cp%s%s-%s.whl' % (norm(args.package), version, py, py, abi_flags, plat_name)
                 expected[image].append(join(WHEELS_DIST_DIR, args.package, whl))
 
     for image in images:
