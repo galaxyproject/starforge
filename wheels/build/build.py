@@ -50,7 +50,7 @@ def build(wheel_name, wheel_dict, plat):
         os.environ['DEBIAN_FRONTEND'] = 'noninteractive'
         execute(['apt-get', '-qq', 'update'])
         execute(['apt-get', 'install', '--no-install-recommends', '-y'] + pkgs)
-    elif distro in ('centos', 'rhel') and wheel_dict.get('yum', []):
+    elif distro in ('centos', 'rhel', 'fedora') and wheel_dict.get('yum', []):
         execute(['yum', 'install', '-y'] + wheel_dict['yum'])
     elif distro in ('opensuse', 'sles') and wheel_dict.get('zypper', []):
         execute(['zypper', '-n', 'in'] + wheel_dict['zypper'])

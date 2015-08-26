@@ -22,6 +22,8 @@ imagesets:
         - natefoo/centos-wheel:7
         - natefoo/centos32-wheel:6
         - natefoo/opensuse-wheel:13
+        - natefoo/fedora-wheel:21
+        - natefoo/fedora-wheel:22
 
 images:
     natefoo/base-wheel:
