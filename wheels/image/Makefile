@@ -1,11 +1,11 @@
 IMAGE_TARGETS		= debian32_6 debian32_7 ubuntu32_12.04 centos32_6
-WHEEL_TARGETS		= debian-wheel_6 debian-wheel_7 debian-wheel_8 debian-wheel_stretch ubuntu-wheel_12.04 ubuntu-wheel_14.04 centos-wheel_6 centos-wheel_7 opensuse-wheel_13 fedora-wheel_20 fedora-wheel_21 fedora-wheel_22
+WHEEL_TARGETS		= debian-wheel_6 debian-wheel_7 debian-wheel_8 debian-wheel_stretch ubuntu-wheel_12.04 ubuntu-wheel_14.04 centos-wheel_6 centos-wheel_7 opensuse-wheel_13 fedora-wheel_21 fedora-wheel_22
 WHEEL_TARGETS_32	= debian32-wheel_6 debian32-wheel_7 debian32-wheel_8 debian32-wheel_stretch ubuntu32-wheel_12.04 ubuntu32-wheel_14.04 centos32-wheel_6
 ALL_TARGETS		= $(IMAGE_TARGETS) $(WHEEL_TARGETS) $(WHEEL_TARGETS_32)
 CLEAN_TARGETS		= $(ALL_TARGETS:=.clean)
 
-DEBIAN_MIRROR	?= http://carroll.aset.psu.edu/pub/linux/distributions/debian/
-UBUNTU_MIRROR	?= http://carroll.aset.psu.edu/pub/linux/distributions/ubuntu/
+DEBIAN_MIRROR	?= http://mirrors.mit.edu/debian/
+UBUNTU_MIRROR	?= http://mirrors.mit.edu/ubuntu/
 
 DEBIAN_PKGS	= make gcc g++ ca-certificates curl zlib1g-dev libssl-dev libbz2-dev python-yaml
 CENTOS_PKGS	= findutils python tar make gcc gcc-c++ curl zlib-devel openssl-devel bzip2-devel PyYAML
@@ -34,7 +34,7 @@ debian32_6/Makefile: image-Makefile
 		-e 's#REPLACE_DIST#debian#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-baseimage-32.in#' \
 		-e 's#REPLACE_RELEASE#squeeze#' \
-		-e 's#REPLACE_URL#$(DEBIAN_MIRROR)' \
+		-e 's#REPLACE_URL#$(DEBIAN_MIRROR)#' \
 		image-Makefile >$@
 
 debian32_7/Makefile: image-Makefile
@@ -43,7 +43,7 @@ debian32_7/Makefile: image-Makefile
 		-e 's#REPLACE_DIST#debian#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-baseimage-32.in#' \
 		-e 's#REPLACE_RELEASE#wheezy#' \
-		-e 's#REPLACE_URL#$(DEBIAN_MIRROR)' \
+		-e 's#REPLACE_URL#$(DEBIAN_MIRROR)#' \
 		image-Makefile >$@
 
 ubuntu32_12.04/Makefile: image-Makefile
@@ -52,7 +52,7 @@ ubuntu32_12.04/Makefile: image-Makefile
 		-e 's#REPLACE_DIST#debian#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-baseimage-32.in#' \
 		-e 's#REPLACE_RELEASE#precise#' \
-		-e 's#REPLACE_URL#$(UBUNTU_MIRROR)' \
+		-e 's#REPLACE_URL#$(UBUNTU_MIRROR)#' \
 		image-Makefile >$@
 
 centos32_6/Makefile: image-Makefile
@@ -211,22 +211,13 @@ centos32-wheel_6/Makefile: wheel-Makefile
 opensuse-wheel_13/Makefile: wheel-Makefile
 	mkdir -p $(@D)
 	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
-		-e 's#REPLACE_FROM#opensuse:13#' \
+		-e 's#REPLACE_FROM#opensuse:13.2#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-opensuse.in#' \
 		-e 's#REPLACE_PKGS#$(OPENSUSE_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
 		wheel-Makefile >$@
 
 # Fedora
-
-fedora-wheel_20/Makefile: wheel-Makefile
-	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
-		-e 's#REPLACE_FROM#fedora:20#' \
-		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-64.in#' \
-		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
-		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
-		wheel-Makefile >$@
 
 fedora-wheel_21/Makefile: wheel-Makefile
 	mkdir -p $(@D)
