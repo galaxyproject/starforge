@@ -1,3 +1,0 @@
-FROM scratch
-MAINTAINER Nate Coraor <nate@bx.psu.edu>
-ADD IMAGE_TAR.tar /

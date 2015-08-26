@@ -4,29 +4,29 @@ imagesets:
     default:
         # note: these are currently just extra tags on debian6-wheel*
         - natefoo/base-wheel
-        - natefoo/base-wheel-32
+        - natefoo/base32-wheel
     full:
-        - natefoo/centos6-wheel
-        - natefoo/centos6-wheel-32
-        - natefoo/centos7-wheel
-        - natefoo/debian6-wheel
-        - natefoo/debian6-wheel-32
-        - natefoo/debian7-wheel
-        - natefoo/debian7-wheel-32
-        - natefoo/debian8-wheel
-        - natefoo/debian8-wheel-32
-        - natefoo/debian9-wheel
-        - natefoo/debian9-wheel-32
-        - natefoo/ubuntu12.04-wheel
-        - natefoo/ubuntu12.04-wheel-32
-        - natefoo/ubuntu14.04-wheel
-        - natefoo/ubuntu14.04-wheel-32
-        - natefoo/opensuse13-wheel
+        - natefoo/debian-wheel:6
+        - natefoo/debian-wheel:7
+        - natefoo/debian-wheel:8
+        - natefoo/debian-wheel:stretch
+        - natefoo/debian32-wheel:6
+        - natefoo/debian32-wheel:7
+        - natefoo/debian32-wheel:8
+        - natefoo/debian32-wheel:stretch
+        - natefoo/ubuntu-wheel:12.04
+        - natefoo/ubuntu-wheel:14.04
+        - natefoo/ubuntu32-wheel:12.04
+        - natefoo/ubuntu32-wheel:14.04
+        - natefoo/centos-wheel:6
+        - natefoo/centos-wheel:7
+        - natefoo/centos32-wheel:6
+        - natefoo/opensuse-wheel:13
 
 images:
     natefoo/base-wheel:
         plat_name: linux_x86_64
-    natefoo/base-wheel-32:
+    natefoo/base32-wheel:
         plat_name: linux_i686
 
 packages:

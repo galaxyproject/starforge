@@ -1,0 +1,14 @@
+FROM FROM_IMAGE
+MAINTAINER Nate Coraor <nate@bx.psu.edu>
+ENV DEBIAN_FRONTEND noninteractive
+VOLUME ["/host"]
+COPY buildpy.sh /build/buildpy.sh
+RUN dpkg --add-architecture i386 && \
+    apt-get -qq update && \
+    apt-get install --no-install-recommends -y make gcc-multilib g++-multilib gfortran-multilib ca-certificates curl zlib1g-dev:amd64 libssl-dev:amd64 libbz2-dev:amd64 zlib1g-dev:i386 libssl-dev:i386 libbz2-dev:i386 python-yaml && \
+    cd /build && \
+    bash buildpy.sh && \
+    linux32 bash buildpy.sh rerun && \
+    cd / && \
+    rm -rf /build && \
+    apt-get clean 

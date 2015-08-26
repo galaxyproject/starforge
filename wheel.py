@@ -61,8 +61,8 @@ def main():
         if plat_name is None:
             if image not in platforms:
                 print 'Caching platform tag for image: %s' % image
-                cmd = [ 'docker', 'run', image, '/python/2.6-ucs2/bin/python',
-                        '-c', 'import wheel.pep425tags; print '
+                cmd = [ 'docker', 'run', image, 'python', '-c',
+                        'import wheel.pep425tags; print '
                         'wheel.pep425tags.get_platforms(major_only=True)[0]' ]
                 platforms[image] = subprocess.check_output(cmd).strip()
                 print 'Platform tag for %s is: %s' % (image, platforms[image])

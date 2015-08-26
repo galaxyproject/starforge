@@ -1,0 +1,68 @@
+#!/bin/bash
+
+abis="cp26m cp26mu cp27m cp27mu"
+arch=$(uname -m)
+
+fetch="
+https://www.python.org/ftp/python/2.6.9/Python-2.6.9.tgz
+https://www.python.org/ftp/python/2.7.10/Python-2.7.10.tgz
+https://pypi.python.org/packages/source/s/setuptools/setuptools-18.0.1.tar.gz
+https://bitbucket.org/natefoo/wheel/get/WHEEL_VERSION.tar.gz
+"
+
+case $arch in
+    i686)
+        CC='gcc -m32'
+        CXX='g++ -m32'
+        F77='gfortran -m32'
+        LDFLAGS='-L/usr/lib/i386-linux-gnu'
+        export CC CXX F77 LDFLAGS
+        ;;
+    x86_64)
+        LDFLAGS='-L/usr/lib/x86_64-linux-gnu'
+        export LDFLAGS
+        ;;
+esac
+
+( for url in $fetch; do
+    if [ ! -f `basename $url` ]; then
+        curl -O $url && \
+        tar zxf $(basename $url) || exit 1
+    fi
+done ) && \
+
+cd Python-2.6.9 && \
+    ./configure --prefix=/python/cp26m-${arch} --enable-unicode=ucs2 && \
+    make install && \
+    make distclean && \
+    ./configure --prefix=/python/cp26mu-${arch} --enable-unicode=ucs4 && \
+    make install && \
+    make distclean && \
+    cd .. && \
+
+cd Python-2.7.10 && \
+    ./configure --prefix=/python/cp27m-${arch} --enable-unicode=ucs2 && \
+    make install && \
+    make distclean && \
+    ./configure --prefix=/python/cp27mu-${arch} --enable-unicode=ucs4 && \
+    make install && \
+    make distclean && \
+    cd .. && \
+
+cd setuptools-18.0.1 && \
+    python setup.py install && \
+    rm -rf build && \
+    ( for abi in $abis; do
+        /python/${abi}-${arch}/bin/python setup.py install && \
+        rm -rf build || exit 1
+    done ) && \
+    cd .. && \
+
+cd natefoo-wheel-WHEEL_VERSION && \
+    python setup.py install && \
+    rm -rf build && \
+    ( for abi in $abis; do
+        /python/${abi}-${arch}/bin/python setup.py install && \
+        rm -rf build || exit 1
+    done ) && \
+    cd ..
