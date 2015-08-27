@@ -41,13 +41,16 @@ def main():
     if not exists(src_cache):
         os.makedirs(src_cache)
 
-    src_url = wheels['packages'][args.package]['src']
-    tgz = join(src_cache, basename(src_url))
+    src_urls = wheels['packages'][args.package]['src']
+    if isinstance(src_urls, basestring):
+        src_urls = [src_urls]
+    for src_url in src_urls:
+        tgz = join(src_cache, basename(src_url))
 
-    if not exists(tgz):
-        with open(tgz, 'w') as handle:
-            r = urllib2.urlopen(src_url, None, 15)
-            handle.write(r.read())
+        if not exists(tgz):
+            with open(tgz, 'w') as handle:
+                r = urllib2.urlopen(src_url, None, 15)
+                handle.write(r.read())
 
     plat_cache = join(src_cache, '__platform_cache.json')
     if not exists(plat_cache):
@@ -72,7 +75,7 @@ def main():
         for py in ('26', '27'):
             for abi_flags in ('m', 'mu'):
                 norm = lambda x: x.replace('-', '_')
-                whl = '%s-%s-cp%s-cp%s%s-%s.whl' % (norm(args.package), version, py, py, abi_flags, plat_name)
+                whl = '%s-%s-cp%s-cp%s%s-%s.whl' % (norm(args.package), norm(version), py, py, abi_flags, plat_name)
                 expected[image].append(join(WHEELS_DIST_DIR, args.package, whl))
 
     for image in images:

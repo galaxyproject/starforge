@@ -5,7 +5,7 @@ import sys
 import shutil
 import tarfile
 import subprocess
-from os.path import basename, join, exists
+from os.path import basename, join, exists, abspath
 from distutils.util import get_platform
 
 import yaml
@@ -30,9 +30,6 @@ def execute(cmd):
 
 
 def build(wheel_name, wheel_dict, plat):
-    src_url = wheel_dict['src']
-    tgz = join(os.sep, '/host', 'build', 'cache', basename(src_url))
-
     if plat is not None:
         print 'Using platform from wheels.yml: %s' % plat
     else:
@@ -62,21 +59,33 @@ def build(wheel_name, wheel_dict, plat):
     if not exists(BUILD):
         os.makedirs(BUILD)
 
-    tf = tarfile.open(tgz)
-    roots = set()
-    for name in tf.getnames():
-        roots.add(name.split(os.sep, 1)[0])
-    assert len(roots) == 1, "Could not determine root directory in archive"
-    root = roots.pop()
+    os.chdir(BUILD)
 
-    # TODO: insecure, but hey, it's docker, soooo
-    tf.extractall(BUILD)
+    src_urls = wheel_dict['src']
+    if isinstance(src_urls, basestring):
+        src_urls = [src_urls]
+    for i, src_url in enumerate(src_urls):
+        tgz = join(os.sep, '/host', 'build', 'cache', basename(src_url))
+        tf = tarfile.open(tgz)
+        roots = set()
+        for name in tf.getnames():
+            roots.add(name.split(os.sep, 1)[0])
+        assert len(roots) == 1, "Could not determine root directory in archive"
+        root_t = abspath(join(os.getcwd(), roots.pop()))
+        os.environ['SRC_ROOT_%d' % i] = root_t
+        # will cd to first root
+        if i == 0:
+            os.environ['SRC_ROOT'] = root_t
+            root = root_t
 
-    os.chdir(join(BUILD, root))
+        # TODO: insecure, but hey, it's docker, soooo
+        tf.extractall(BUILD)
 
     prebuild = wheel_dict.get('prebuild', None)
     if prebuild is not None:
         subprocess.check_call(prebuild, shell=True)
+
+    os.chdir(join(BUILD, root))
 
     if wheel_dict.get('insert_setuptools', False):
         os.rename('setup.py', 'setup_wrapped.py')
