@@ -24,6 +24,23 @@ case $arch in
         ;;
 esac
 
+build_and_install_py()
+{
+    cp=$1 && py=$2 && ucs=$3 && \
+    ./configure --prefix=/python/${cp}-${arch} --enable-unicode=${ucs} && \
+    make install && \
+    # remove test suite files for space
+    mv /python/${cp}-${arch}/lib/python${py}/test /python/${cp}-${arch}/lib/python${py}/test.tmp && \
+    mkdir /python/${cp}-${arch}/lib/python${py}/test && \
+    mv /python/${cp}-${arch}/lib/python${py}/test.tmp/{regrtest.py*,test_support.py*,__init__.py*,pystone.py*} \
+        /python/${cp}-${arch}/lib/python${py}/test/ && \
+    rm -rf /python/${cp}-${arch}/lib/python${py}/test.tmp && \
+    # remove extra copy of libpythonX.Y.a, save some space
+    rm /python/${cp}-${arch}/lib/libpython${py}.a && \
+    ln -s /python/${cp}-${arch}/lib/python${py}/config/libpython${py}.a /python/${cp}-${arch}/lib/libpython${py}.a && \
+    make distclean || return 1
+}
+
 ( for url in $fetch; do
     if [ ! -f `basename $url` ]; then
         curl -O $url && \
@@ -32,21 +49,13 @@ esac
 done ) && \
 
 cd Python-2.6.9 && \
-    ./configure --prefix=/python/cp26m-${arch} --enable-unicode=ucs2 && \
-    make install && \
-    make distclean && \
-    ./configure --prefix=/python/cp26mu-${arch} --enable-unicode=ucs4 && \
-    make install && \
-    make distclean && \
+    build_and_install_py cp26m 2.6 ucs2 && \
+    build_and_install_py cp26mu 2.6 ucs4 && \
     cd .. && \
 
 cd Python-2.7.10 && \
-    ./configure --prefix=/python/cp27m-${arch} --enable-unicode=ucs2 && \
-    make install && \
-    make distclean && \
-    ./configure --prefix=/python/cp27mu-${arch} --enable-unicode=ucs4 && \
-    make install && \
-    make distclean && \
+    build_and_install_py cp27m 2.7 ucs2 && \
+    build_and_install_py cp27mu 2.7 ucs4 && \
     cd .. && \
 
 cd setuptools-18.0.1 && \
