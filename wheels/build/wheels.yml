@@ -69,7 +69,8 @@ packages:
     pysam:
         version: 0.8.3-gx1
         src:  https://github.com/dannon/pysam/archive/flexible_bam_index_naming.tar.gz
-        prebuild: for py in cp26m cp26mu cp27m cp27mu; do /python/${py}-`uname -m`/bin/easy_install cython || exit 1; done && sed -i -e 's/0\.8\.3/0.8.3-gx1/' ${SRC_ROOT}/pysam/version.py
+        # https://github.com/pysam-developers/pysam/issues/164
+        prebuild: for py in cp26m cp26mu cp27m cp27mu; do /python/${py}-`uname -m`/bin/easy_install 'cython<0.23' || exit 1; done && sed -i -e 's/0\.8\.3/0.8.3-gx1/' ${SRC_ROOT}/pysam/version.py
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it
