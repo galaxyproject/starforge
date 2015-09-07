@@ -1,0 +1,12 @@
+FROM FROM_IMAGE
+MAINTAINER Nate Coraor <nate@bx.psu.edu>
+ENV DEBIAN_FRONTEND noninteractive
+VOLUME ["/host"]
+COPY buildpy.sh /build/buildpy.sh
+RUN apt-get -qq update && \
+    apt-get install --no-install-recommends -y make gcc g++ ca-certificates curl zlib1g-dev libssl-dev libbz2-dev python-yaml && \
+    cd /build && \
+    bash buildpy.sh && \
+    cd / && \
+    rm -rf /build && \
+    apt-get clean 

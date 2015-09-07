@@ -1,0 +1,4 @@
+FROM FROM_IMAGE
+MAINTAINER Nate Coraor <nate@bx.psu.edu>
+VOLUME ["/host"]
+ENTRYPOINT ["/usr/bin/linux32"]

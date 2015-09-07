@@ -1,0 +1,101 @@
+---
+
+imagesets:
+    default:
+        # note: these are currently just extra tags on debian6-wheel*
+        - natefoo/base-wheel
+        - natefoo/base32-wheel
+    full:
+        - natefoo/debian-wheel:6
+        - natefoo/debian-wheel:7
+        - natefoo/debian-wheel:8
+        - natefoo/debian-wheel:stretch
+        - natefoo/debian32-wheel:6
+        - natefoo/debian32-wheel:7
+        - natefoo/debian32-wheel:8
+        - natefoo/debian32-wheel:stretch
+        - natefoo/ubuntu-wheel:12.04
+        - natefoo/ubuntu-wheel:14.04
+        - natefoo/ubuntu32-wheel:12.04
+        - natefoo/ubuntu32-wheel:14.04
+        - natefoo/centos-wheel:6
+        - natefoo/centos-wheel:7
+        - natefoo/centos32-wheel:6
+        - natefoo/opensuse-wheel:13
+        - natefoo/fedora-wheel:21
+        - natefoo/fedora-wheel:22
+
+images:
+    natefoo/base-wheel:
+        plat_name: linux_x86_64
+    natefoo/base32-wheel:
+        plat_name: linux_i686
+
+packages:
+    bx-python:
+        version: 0.7.3
+        src: https://pypi.python.org/packages/source/b/bx-python/bx-python-0.7.3.tar.gz
+        prebuild: "git clone -b linux-wheels https://github.com/natefoo/pip && cd pip && for py in cp26m cp26mu cp27m cp27mu; do /python/${py}-`uname -m`/bin/python setup.py install && /python/${py}-`uname -m`/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1; done"
+        apt:
+            - git
+    Cheetah:
+        version: 2.4.4
+        src: https://pypi.python.org/packages/source/C/Cheetah/Cheetah-2.4.4.tar.gz
+    MarkupSafe:
+        version: 0.23
+        src: https://pypi.python.org/packages/source/M/MarkupSafe/MarkupSafe-0.23.tar.gz
+    mercurial:
+        version: 3.5
+        src: https://pypi.python.org/packages/source/M/Mercurial/mercurial-3.5.tar.gz
+        insert_setuptools: true
+    numpy:
+        version: 1.9.2
+        src: https://pypi.python.org/packages/source/n/numpy/numpy-1.9.2.tar.gz
+    psycopg2:
+        version: 2.6.1
+        src: http://initd.org/psycopg/tarballs/PSYCOPG-2-6/psycopg2-2.6.1.tar.gz
+        insert_setuptools: true
+        imageset: full
+        apt:
+            - libpq-dev
+        yum:
+            - postgresql-devel
+        zypper:
+            - postgresql-devel
+    pycrypto:
+        version: 2.6.1
+        src: https://pypi.python.org/packages/source/p/pycrypto/pycrypto-2.6.1.tar.gz
+        insert_setuptools: true
+    pysam:
+        version: 0.8.3-gx1
+        src:  https://github.com/dannon/pysam/archive/flexible_bam_index_naming.tar.gz
+        # https://github.com/pysam-developers/pysam/issues/164
+        prebuild: for py in cp26m cp26mu cp27m cp27mu; do /python/${py}-`uname -m`/bin/easy_install 'cython<0.23' || exit 1; done && sed -i -e 's/0\.8\.3/0.8.3-gx1/' ${SRC_ROOT}/pysam/version.py
+    pysqlite:
+        # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
+        # Python's stdlib, but keeping the rule here in case we have to add it
+        # back (people with non-standard Pythons may be missing sqlite3 if the
+        # sqlite3 headers were not available at Python compile-time).
+        version: 2.7.0
+        src:
+            - https://pypi.python.org/packages/source/p/pysqlite/pysqlite-2.7.0.tar.gz
+            - https://sqlite.org/2015/sqlite-autoconf-3081002.tar.gz
+        prebuild: for f in sqlite3.h sqlite3.c sqlite3ext.h; do cp ${SRC_ROOT_1}/$f $f || return 1; done && echo 'include_dirs=.' >>${SRC_ROOT_0}/setup.cfg
+        build_args: build_static bdist_wheel
+    python_lzo:
+        version: 1.8
+        src:
+            - http://www.oberhumer.com/opensource/lzo/download/LZO-v1/python-lzo-1.08.tar.gz
+            - http://www.oberhumer.com/opensource/lzo/download/lzo-2.09.tar.gz
+        insert_setuptools: true
+        prebuild: cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --prefix=${SRC_ROOT_0}/lzo --disable-shared && make install && sed -i -e 's/\["lzo"\]/\["lzo2"\]/' ${SRC_ROOT_0}/setup.py
+        build_args: build_ext -I lzo/include:lzo/include/lzo -L lzo/lib bdist_wheel
+    PyYAML:
+        version: 3.11
+        src: https://pypi.python.org/packages/source/P/PyYAML/PyYAML-3.11.tar.gz
+        insert_setuptools: true
+        apt:
+            - libyaml-dev
+    SQLAlchemy:
+        version: 1.0.8
+        src: https://pypi.python.org/packages/source/S/SQLAlchemy/SQLAlchemy-1.0.8.tar.gz

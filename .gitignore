@@ -3,10 +3,10 @@
 *.tar.gz
 image/Dockerfile
 
-*/*/Dockerfile
 */*/build.sh
 
 */build.log
 *.gz
 
 wheels/dist/
+wheels/build/cache/

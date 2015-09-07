@@ -1,0 +1,34 @@
+TAG		:= REPLACE_TAG
+DIST		:= REPLACE_DIST
+DOCKERFILE	:= REPLACE_DOCKERFILE
+RELEASE		:= REPLACE_RELEASE
+URL		:= REPLACE_URL
+
+
+image-id: Dockerfile .dockerignore $(DIST).tar
+	docker build -t $(TAG) .
+	docker images -q $(TAG) >$@
+
+.dockerignore:
+	echo '*.dest' >$@
+	echo 'Makefile' >>$@
+
+Dockerfile: ../$(DOCKERFILE)
+	sed -e 's#IMAGE_TAR#$(DIST)#' ../$(DOCKERFILE) >$@
+
+$(DIST).tar: $(DIST).dest
+	sudo tar -C $(DIST).dest -cf $(DIST).tar .
+
+debian.dest:
+	sudo debootstrap --arch=i386 $(RELEASE) $(DIST).dest $(URL)
+
+centos.dest:
+	# Doesn't work with CentOS 7 because there's no setarch, but it doesn't
+	# matter because we only build for 32-bit CentOS 6
+	sudo yumbootstrap --verbose --include=setarch --groups=Core centos-6-32 $@
+
+clean:
+	rm -f Dockerfile .dockerignore
+	sudo rm -f $(DIST).tar $(DIST).dest
+
+.PHONY: clean

@@ -1,0 +1,24 @@
+TAG		:= REPLACE_TAG
+FROM		:= REPLACE_FROM
+DOCKERFILE	:= REPLACE_DOCKERFILE
+PKGS		:= REPLACE_PKGS
+WHEEL_VERSION	:= REPLACE_WHEEL_VERSION
+
+
+image-id: Dockerfile .dockerignore buildpy.sh
+	docker build -t $(TAG) .
+	docker images -q $(TAG) >$@
+
+.dockerignore:
+	echo 'Makefile' >$@
+
+Dockerfile: ../$(DOCKERFILE)
+	sed -e 's#FROM_IMAGE#$(FROM)#' \
+		-e 's#PKGS#$(PKGS)#' ../$(DOCKERFILE) >$@
+
+buildpy.sh: ../buildpy.sh.in
+	sed -e 's#WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		../buildpy.sh.in >$@
+
+clean:
+	rm -f Dockerfile .dockerignore image-id buildpy.sh

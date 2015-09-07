@@ -1,4 +1,0 @@
-
-# source me
-
-sed -i '/from distutils import core/iimport setuptools' setup.py
