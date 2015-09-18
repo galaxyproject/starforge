@@ -10,6 +10,8 @@ from distutils.util import get_platform
 
 import yaml
 
+from pkg_resources import parse_version
+
 from wheel.pep425tags import get_platforms
 from wheel.platform import get_specific_platform
 
@@ -22,6 +24,9 @@ import setuptools
 execfile('setup_wrapped.py')
 '''
 
+PUREPY_IMAGE = 'natefoo/purepy-wheel'
+PUREPY_PYTHON = 'cp27mu'
+
 PYTHONS = 'cp26m cp26mu cp27m cp27mu'.split()
 
 def execute(cmd):
@@ -29,11 +34,12 @@ def execute(cmd):
     subprocess.check_call(cmd)
 
 
-def build(wheel_name, wheel_dict, plat):
-    if plat is not None:
-        print 'Using platform from wheels.yml: %s' % plat
-    else:
-        print 'Using default platform: %s' % get_platforms(major_only=True)[0]
+def build(wheel_name, wheel_dict, plat, purepy=False):
+    if not purepy:
+        if plat is not None:
+            print 'Using platform from wheels.yml: %s' % plat
+        else:
+            print 'Using default platform: %s' % get_platforms(major_only=True)[0]
 
     distro = get_specific_platform()
     if distro is not None:
@@ -61,11 +67,27 @@ def build(wheel_name, wheel_dict, plat):
 
     os.chdir(BUILD)
 
-    src_urls = wheel_dict['src']
+    version = wheel_dict['version']
+    src_cache = join(os.sep, '/host', 'build', 'cache')
+    src_paths = []
+
+    for cfile in os.listdir(src_cache):
+        if cfile.startswith(wheel_name + '-'):
+            cver = cfile[len(wheel_name + '-'):]
+            cver = cver.replace('.tar.gz', '').replace('.tgz', '')
+            if parse_version(cver) == parse_version(version):
+                src_paths.append(join(src_cache, cfile))
+                break
+    else:
+        raise Exception('Could not find primary sdist in %s' % src_cache)
+
+    src_urls = wheel_dict.get('src', [])
     if isinstance(src_urls, basestring):
         src_urls = [src_urls]
-    for i, src_url in enumerate(src_urls):
-        tgz = join(os.sep, '/host', 'build', 'cache', basename(src_url))
+    for src_url in src_urls:
+        src_paths.append(join(src_cache, basename(src_url)))
+
+    for i, tgz in enumerate(src_paths):
         tf = tarfile.open(tgz)
         roots = set()
         for name in tf.getnames():
@@ -92,7 +114,12 @@ def build(wheel_name, wheel_dict, plat):
         with open('setup.py', 'w') as handle:
             handle.write(SETUPTOOLS_WRAPPER)
 
-    for py in PYTHONS:
+    if purepy:
+        pythons = [PUREPY_PYTHON]
+    else:
+        pythons = PYTHONS
+
+    for py in pythons:
         py = '%s-%s' % (py, os.uname()[4])
         build_args = wheel_dict.get('build_args', 'bdist_wheel').split()
         cmd = [join(os.sep, 'python', py, 'bin', 'python'), 'setup.py'] + build_args
@@ -100,6 +127,10 @@ def build(wheel_name, wheel_dict, plat):
             cmd.append('--plat-name=%s' % plat)
         execute(cmd)
         shutil.rmtree('build')
+
+    py = '%s-%s' % (PUREPY_PYTHON, os.uname()[4])
+    cmd = [join(os.sep, 'python', py, 'bin', 'python'), 'setup.py', 'sdist']
+    execute(cmd)
     
     for f in os.listdir('dist'):
         shutil.copy(join('dist', f), dest)
@@ -115,8 +146,9 @@ def main():
     except:
         tag = None
     plat = wheels.get('images', {}).get(tag, {}).get('plat_name', None)
+    wheel_dict = wheels['packages'].get(build_wheel, None) or wheels['purepy_packages'][build_wheel]
 
-    build(build_wheel, wheels['packages'][build_wheel], plat)
+    build(build_wheel, wheel_dict, plat, purepy=build_wheel in wheels['purepy_packages'])
 
 
 if __name__ == '__main__':

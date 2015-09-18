@@ -7,6 +7,8 @@ import argparse
 import subprocess
 from os.path import abspath, dirname, join, basename, exists
 
+from pkg_resources import parse_version
+
 import yaml
 
 
@@ -24,24 +26,45 @@ def main():
     with open(WHEELS_YML, 'r') as handle:
         wheels = yaml.load(handle)
 
-    assert args.package in wheels['packages'], 'Not in %s: %s' % (WHEELS_YML, args.package)
+    try:
+        package = wheels['packages'].get(args.package, None) or wheels['purepy_packages'][args.package]
+    except:
+        raise Exception('Not in %s: %s' % (WHEELS_YML, args.package))
+    purepy = args.package in wheels['purepy_packages']
 
-    version = wheels['packages'][args.package]['version']
+    version = package['version']
 
     if args.image is not None:
+        imageset = None
         images = [args.image]
     else:
-        try:
-            imageset = wheels['packages'][args.package]['imageset']
+        imageset = package.get('imageset', 'default')
+        if purepy and imageset == 'default':
+            images = wheels['imagesets']['purepy']
+        else:
             images = wheels['imagesets'][imageset]
-        except:
-            images = wheels['imagesets']['default']
 
     src_cache = join(WHEELS_BUILD_DIR, 'cache')
     if not exists(src_cache):
         os.makedirs(src_cache)
 
-    src_urls = wheels['packages'][args.package]['src']
+    # fetch primary sdist
+    for cfile in os.listdir(src_cache):
+        if cfile.startswith(args.package + '-'):
+            cver = cfile[len(args.package + '-'):]
+            cver = cver.replace('.tar.gz', '').replace('.tgz', '')
+            if parse_version(cver) == parse_version(version):
+                print 'Using cached sdist: %s' % cfile
+                break
+    else:
+        cmd = ['pip', '--no-cache-dir', 'install', '-d', src_cache,
+                '--no-binary', ':all:', '--no-deps', args.package + '==' +
+                version]
+        print 'Fetching sdist: %s' % ' '.join(cmd)
+        subprocess.check_call(cmd)
+
+    # fetch additional source urls
+    src_urls = package.get('src', [])
     if isinstance(src_urls, basestring):
         src_urls = [src_urls]
     for src_url in src_urls:
@@ -59,24 +82,28 @@ def main():
 
     expected = {}
 
+    norm = lambda x: str(x).replace('-', '_')
     for image in images:
-        plat_name = wheels['images'].get(image, {}).get('plat_name', None)
-        if plat_name is None:
-            if image not in platforms:
-                print 'Caching platform tag for image: %s' % image
-                cmd = [ 'docker', 'run', image, 'python', '-c',
-                        'import wheel.pep425tags; print '
-                        'wheel.pep425tags.get_platforms(major_only=True)[0]' ]
-                platforms[image] = subprocess.check_output(cmd).strip()
-                print 'Platform tag for %s is: %s' % (image, platforms[image])
-                open(plat_cache, 'w').write(yaml.dump(platforms))
-            plat_name = platforms[image]
-        expected[image] = []
-        for py in ('26', '27'):
-            for abi_flags in ('m', 'mu'):
-                norm = lambda x: x.replace('-', '_')
-                whl = '%s-%s-cp%s-cp%s%s-%s.whl' % (norm(args.package), norm(version), py, py, abi_flags, plat_name)
-                expected[image].append(join(WHEELS_DIST_DIR, args.package, whl))
+        if purepy:
+            whl = '%s-%s-py2-none-any.whl' % (norm(args.package), norm(version))
+            expected[image] = [join(WHEELS_DIST_DIR, args.package, whl)]
+        else:
+            plat_name = wheels['images'].get(image, {}).get('plat_name', None)
+            if plat_name is None:
+                if image not in platforms:
+                    print 'Caching platform tag for image: %s' % image
+                    cmd = [ 'docker', 'run', image, 'python', '-c',
+                            'import wheel.pep425tags; print '
+                            'wheel.pep425tags.get_platforms(major_only=True)[0]' ]
+                    platforms[image] = subprocess.check_output(cmd).strip()
+                    print 'Platform tag for %s is: %s' % (image, platforms[image])
+                    open(plat_cache, 'w').write(yaml.dump(platforms))
+                plat_name = platforms[image]
+            expected[image] = []
+            for py in ('26', '27'):
+                for abi_flags in ('m', 'mu'):
+                    whl = '%s-%s-cp%s-cp%s%s-%s.whl' % (norm(args.package), norm(version), py, py, abi_flags, plat_name)
+                    expected[image].append(join(WHEELS_DIST_DIR, args.package, whl))
 
     for image in images:
         for f in expected[image]:
