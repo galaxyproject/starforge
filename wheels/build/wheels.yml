@@ -65,11 +65,11 @@ packages:
         version: 2.6.1
         insert_setuptools: true
     pysam:
-        version: 0.8.3-gx1
+        version: 0.8.3gx1
         src:
             - https://github.com/dannon/pysam/archive/flexible_bam_index_naming.tar.gz
         # https://github.com/pysam-developers/pysam/issues/164
-        prebuild: for py in cp26m cp26mu cp27m cp27mu; do /python/${py}-`uname -m`/bin/easy_install 'cython<0.23' || exit 1; done && sed -i -e 's/0\.8\.3/0.8.3-gx1/' ${SRC_ROOT}/pysam/version.py
+        prebuild: for py in cp26m cp26mu cp27m cp27mu; do /python/${py}-`uname -m`/bin/easy_install 'cython<0.23' || exit 1; done && sed -i -e 's/0\.8\.3/0.8.3gx1/' ${SRC_ROOT}/pysam/version.py
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it
@@ -105,15 +105,30 @@ purepy_packages:
         version: 2.0
     Beaker:
         version: 1.7.0
+    bioblend:
+        version: 0.6.1
+    boto:
+        version: 2.38.0
     decorator:
         version: 4.0.2
     docutils:
         version: 0.12
         insert_setuptools: true
+    ecdsa:
+        version: 0.13
+    Fabric:
+        version: 1.10.2
     kombu:
         version: 3.0.26
     Mako:
         version: 1.0.2
+    nose:
+        version: 1.3.7
+    paramiko:
+        version: 1.15.2
+    Parsley:
+        version: 1.3
+        insert_setuptools: true
     Paste:
         version: 1.7.5.1
     PasteDeploy:
@@ -140,7 +155,12 @@ purepy_packages:
     wchartype:
         version: 0.1
         insert_setuptools: true
+    WebError:
+        version: 0.11
     WebHelpers:
         version: 1.3
     WebOb:
         version: 1.4.1
+    Whoosh:
+        version: 2.4.1
+        prebuild: sed -i -e 's/self\.results\.docterms\[self\.docnum\]/self.results.docterms.get(self.docnum, [])/' ${SRC_ROOT}/src/whoosh/searching.py && sed -i -e 's/versionstring()/"2.4.1gx1"/' ${SRC_ROOT}/setup.py
