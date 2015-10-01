@@ -32,7 +32,7 @@ def main():
         raise Exception('Not in %s: %s' % (WHEELS_YML, args.package))
     purepy = args.package in wheels['purepy_packages']
 
-    version = package['version']
+    version = str(package['version'])
 
     if args.image is not None:
         imageset = None
@@ -48,6 +48,8 @@ def main():
     if not exists(src_cache):
         os.makedirs(src_cache)
 
+    src_urls = package.get('src', [])
+
     # fetch primary sdist
     for cfile in os.listdir(src_cache):
         if cfile.startswith(args.package + '-'):
@@ -57,14 +59,18 @@ def main():
                 print 'Using cached sdist: %s' % cfile
                 break
     else:
-        cmd = ['pip', '--no-cache-dir', 'install', '-d', src_cache,
-                '--no-binary', ':all:', '--no-deps', args.package + '==' +
-                version]
-        print 'Fetching sdist: %s' % ' '.join(cmd)
-        subprocess.check_call(cmd)
+        try:
+            cmd = ['pip', '--no-cache-dir', 'install', '-d', src_cache,
+                    '--no-binary', ':all:', '--no-deps', args.package + '==' +
+                    version]
+            print 'Fetching sdist: %s' % ' '.join(cmd)
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError as exc:
+            if not src_urls:
+                raise
+            print 'Warning: Fetching sdist failed, primary source will be from `src` attribute: %s' % exc
 
     # fetch additional source urls
-    src_urls = package.get('src', [])
     if isinstance(src_urls, basestring):
         src_urls = [src_urls]
     for src_url in src_urls:

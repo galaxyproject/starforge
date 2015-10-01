@@ -67,9 +67,10 @@ def build(wheel_name, wheel_dict, plat, purepy=False):
 
     os.chdir(BUILD)
 
-    version = wheel_dict['version']
+    version = str(wheel_dict['version'])
     src_cache = join(os.sep, '/host', 'build', 'cache')
     src_paths = []
+    src_urls = wheel_dict.get('src', [])
 
     for cfile in os.listdir(src_cache):
         if cfile.startswith(wheel_name + '-'):
@@ -79,9 +80,9 @@ def build(wheel_name, wheel_dict, plat, purepy=False):
                 src_paths.append(join(src_cache, cfile))
                 break
     else:
-        raise Exception('Could not find primary sdist in %s' % src_cache)
+        if not src_urls:
+            raise Exception('Could not find primary sdist in %s' % src_cache)
 
-    src_urls = wheel_dict.get('src', [])
     if isinstance(src_urls, basestring):
         src_urls = [src_urls]
     for src_url in src_urls:
