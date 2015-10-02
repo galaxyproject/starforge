@@ -135,6 +135,8 @@ purepy_packages:
         version: 1.5.2
     pbr:
         version: 1.8.0
+    Pygments:
+        version: 2.0.2
     pytz:
         version: 2015.4
     repoze.lru:
