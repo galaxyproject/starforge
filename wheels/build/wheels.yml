@@ -16,14 +16,23 @@ imagesets:
         - natefoo/debian32-wheel:stretch
         - natefoo/ubuntu-wheel:12.04
         - natefoo/ubuntu-wheel:14.04
+        - natefoo/ubuntu-wheel:15.04
+        - natefoo/ubuntu-wheel:15.10
         - natefoo/ubuntu32-wheel:12.04
         - natefoo/ubuntu32-wheel:14.04
+        - natefoo/ubuntu32-wheel:15.04
+        - natefoo/ubuntu32-wheel:15.10
         - natefoo/centos-wheel:6
         - natefoo/centos-wheel:7
         - natefoo/centos32-wheel:6
         - natefoo/opensuse-wheel:13
         - natefoo/fedora-wheel:21
         - natefoo/fedora-wheel:22
+    default_plus_rhel_6:
+        - natefoo/base-wheel
+        - natefoo/base32-wheel
+        - natefoo/centos-wheel:6
+        - natefoo/centos32-wheel:6
     purepy:
         # tag on debian8-wheel
         - natefoo/purepy-wheel
@@ -33,6 +42,12 @@ images:
         plat_name: linux_x86_64
     natefoo/base32-wheel:
         plat_name: linux_i686
+    natefoo/centos-wheel:6:
+        plat_name: linux_x86_64_rhel_6
+    natefoo/centos-wheel:7:
+        plat_name: linux_x86_64_rhel_7
+    natefoo/centos32-wheel:6:
+        plat_name: linux_i686_rhel_6
 
 packages:
     bx-python:
@@ -70,6 +85,7 @@ packages:
             - https://github.com/dannon/pysam/archive/flexible_bam_index_naming.tar.gz
         # https://github.com/pysam-developers/pysam/issues/164
         prebuild: for py in cp26m cp26mu cp27m cp27mu; do /python/${py}-`uname -m`/bin/easy_install 'cython<0.23' || exit 1; done && sed -i -e 's/0\.8\.3/0.8.3+gx1/' ${SRC_ROOT}/pysam/version.py
+        imageset: default_plus_rhel_6
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it

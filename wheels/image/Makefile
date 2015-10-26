@@ -1,6 +1,6 @@
 IMAGE_TARGETS		= debian32_6 debian32_7 ubuntu32_12.04 centos32_6
-WHEEL_TARGETS		= debian-wheel_6 debian-wheel_7 debian-wheel_8 debian-wheel_stretch ubuntu-wheel_12.04 ubuntu-wheel_14.04 centos-wheel_6 centos-wheel_7 opensuse-wheel_13 fedora-wheel_21 fedora-wheel_22
-WHEEL_TARGETS_32	= debian32-wheel_6 debian32-wheel_7 debian32-wheel_8 debian32-wheel_stretch ubuntu32-wheel_12.04 ubuntu32-wheel_14.04 centos32-wheel_6
+WHEEL_TARGETS		= debian-wheel_6 debian-wheel_7 debian-wheel_8 debian-wheel_stretch ubuntu-wheel_12.04 ubuntu-wheel_14.04 ubuntu-wheel_15.04 ubuntu-wheel_15.10 centos-wheel_6 centos-wheel_7 opensuse-wheel_13 fedora-wheel_21 fedora-wheel_22
+WHEEL_TARGETS_32	= debian32-wheel_6 debian32-wheel_7 debian32-wheel_8 debian32-wheel_stretch ubuntu32-wheel_12.04 ubuntu32-wheel_14.04 ubuntu32-wheel_15.04 ubuntu32-wheel_15.10 centos32-wheel_6
 ALL_TARGETS		= $(IMAGE_TARGETS) $(WHEEL_TARGETS) $(WHEEL_TARGETS_32)
 CLEAN_TARGETS		= $(ALL_TARGETS:=.clean)
 
@@ -156,6 +156,24 @@ ubuntu-wheel_14.04/Makefile: wheel-Makefile
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
 		wheel-Makefile >$@
 
+ubuntu-wheel_15.04/Makefile: wheel-Makefile
+	mkdir -p $(@D)
+	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_FROM#ubuntu:15.04#' \
+		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
+		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
+		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		wheel-Makefile >$@
+
+ubuntu-wheel_15.10/Makefile: wheel-Makefile
+	mkdir -p $(@D)
+	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_FROM#ubuntu:15.10#' \
+		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
+		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
+		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		wheel-Makefile >$@
+
 # Ubuntu 32 bit
 
 ubuntu32-wheel_12.04/Makefile: wheel-Makefile
@@ -173,6 +191,20 @@ ubuntu32-wheel_14.04/Makefile: wheel-Makefile
 	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-linux32.in#' \
 		-e 's#REPLACE_FROM#natefoo/ubuntu-wheel:14.04#' \
+		wheel-Makefile >$@
+
+ubuntu32-wheel_15.04/Makefile: wheel-Makefile
+	mkdir -p $(@D)
+	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_DOCKERFILE#Dockerfile-linux32.in#' \
+		-e 's#REPLACE_FROM#natefoo/ubuntu-wheel:15.04#' \
+		wheel-Makefile >$@
+
+ubuntu32-wheel_15.10/Makefile: wheel-Makefile
+	mkdir -p $(@D)
+	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_DOCKERFILE#Dockerfile-linux32.in#' \
+		-e 's#REPLACE_FROM#natefoo/ubuntu-wheel:15.10#' \
 		wheel-Makefile >$@
 
 # CentOS 64 bit
