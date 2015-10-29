@@ -138,6 +138,9 @@ purepy_packages:
         version: 3.0.26
     Mako:
         version: 1.0.2
+    Markdown:
+        version: 2.6.3
+        insert_setuptools: true
     nose:
         version: 1.3.7
     paramiko:
@@ -164,6 +167,8 @@ purepy_packages:
         version: 0.6
     requests:
         version: 2.8.1
+    requests-toolbelt:
+        version: 0.4.0
     Routes:
         version: 2.2
     six:
