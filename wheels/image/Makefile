@@ -30,7 +30,7 @@ $(CLEAN_TARGETS):
 
 debian32_6/Makefile: image-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_DIST#debian#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-baseimage-32.in#' \
 		-e 's#REPLACE_RELEASE#squeeze#' \
@@ -39,7 +39,7 @@ debian32_6/Makefile: image-Makefile
 
 debian32_7/Makefile: image-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_DIST#debian#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-baseimage-32.in#' \
 		-e 's#REPLACE_RELEASE#wheezy#' \
@@ -48,7 +48,7 @@ debian32_7/Makefile: image-Makefile
 
 ubuntu32_12.04/Makefile: image-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_DIST#debian#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-baseimage-32.in#' \
 		-e 's#REPLACE_RELEASE#precise#' \
@@ -57,7 +57,7 @@ ubuntu32_12.04/Makefile: image-Makefile
 
 centos32_6/Makefile: image-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_DIST#centos#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-baseimage-32.in#' \
 		image-Makefile >$@
@@ -68,7 +68,7 @@ centos32_6/Makefile: image-Makefile
 
 debian-wheel_6/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#debian:6#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-64.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
@@ -77,7 +77,7 @@ debian-wheel_6/Makefile: wheel-Makefile
 
 debian-wheel_7/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#debian:7#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-64.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
@@ -86,7 +86,7 @@ debian-wheel_7/Makefile: wheel-Makefile
 
 debian-wheel_8/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#debian:8#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
@@ -94,7 +94,7 @@ debian-wheel_8/Makefile: wheel-Makefile
 
 debian-wheel_stretch/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#debian:stretch#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
@@ -104,8 +104,8 @@ debian-wheel_stretch/Makefile: wheel-Makefile
 
 debian32-wheel_6/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
-		-e 's#REPLACE_FROM#natefoo/debian32:6#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_FROM#galaxy/debian32:6#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-32.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
@@ -113,8 +113,8 @@ debian32-wheel_6/Makefile: wheel-Makefile
 
 debian32-wheel_7/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
-		-e 's#REPLACE_FROM#natefoo/debian32:7#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_FROM#galaxy/debian32:7#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-32.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
@@ -124,15 +124,15 @@ debian32-wheel_7/Makefile: wheel-Makefile
 # the 64 bit image (sets linux32 as the entrypoint)
 debian32-wheel_8/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
-		-e 's#REPLACE_FROM#natefoo/debian-wheel:8#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_FROM#galaxy/debian-wheel:8#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-linux32.in#' \
 		wheel-Makefile >$@
 
 debian32-wheel_stretch/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
-		-e 's#REPLACE_FROM#natefoo/debian-wheel:stretch#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_FROM#galaxy/debian-wheel:stretch#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-linux32.in#' \
 		wheel-Makefile >$@
 
@@ -140,7 +140,7 @@ debian32-wheel_stretch/Makefile: wheel-Makefile
 
 ubuntu-wheel_12.04/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#ubuntu:12.04#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-64.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
@@ -149,7 +149,7 @@ ubuntu-wheel_12.04/Makefile: wheel-Makefile
 
 ubuntu-wheel_14.04/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#ubuntu:14.04#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
@@ -158,7 +158,7 @@ ubuntu-wheel_14.04/Makefile: wheel-Makefile
 
 ubuntu-wheel_15.04/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#ubuntu:15.04#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
@@ -167,7 +167,7 @@ ubuntu-wheel_15.04/Makefile: wheel-Makefile
 
 ubuntu-wheel_15.10/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#ubuntu:15.10#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
@@ -178,8 +178,8 @@ ubuntu-wheel_15.10/Makefile: wheel-Makefile
 
 ubuntu32-wheel_12.04/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
-		-e 's#REPLACE_FROM#natefoo/ubuntu32:12.04#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_FROM#galaxy/ubuntu32:12.04#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-32.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
@@ -188,30 +188,30 @@ ubuntu32-wheel_12.04/Makefile: wheel-Makefile
 # Ubuntu >= 14.04 is fully multiarch capable
 ubuntu32-wheel_14.04/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-linux32.in#' \
-		-e 's#REPLACE_FROM#natefoo/ubuntu-wheel:14.04#' \
+		-e 's#REPLACE_FROM#galaxy/ubuntu-wheel:14.04#' \
 		wheel-Makefile >$@
 
 ubuntu32-wheel_15.04/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-linux32.in#' \
-		-e 's#REPLACE_FROM#natefoo/ubuntu-wheel:15.04#' \
+		-e 's#REPLACE_FROM#galaxy/ubuntu-wheel:15.04#' \
 		wheel-Makefile >$@
 
 ubuntu32-wheel_15.10/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-linux32.in#' \
-		-e 's#REPLACE_FROM#natefoo/ubuntu-wheel:15.10#' \
+		-e 's#REPLACE_FROM#galaxy/ubuntu-wheel:15.10#' \
 		wheel-Makefile >$@
 
 # CentOS 64 bit
 
 centos-wheel_6/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#centos:6#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-64.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
@@ -220,7 +220,7 @@ centos-wheel_6/Makefile: wheel-Makefile
 
 centos-wheel_7/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#centos:7#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-64.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
@@ -231,8 +231,8 @@ centos-wheel_7/Makefile: wheel-Makefile
 
 centos32-wheel_6/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
-		-e 's#REPLACE_FROM#natefoo/centos32:6#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
+		-e 's#REPLACE_FROM#galaxy/centos32:6#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-32.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
@@ -242,7 +242,7 @@ centos32-wheel_6/Makefile: wheel-Makefile
 
 opensuse-wheel_13/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#opensuse:13.2#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-opensuse.in#' \
 		-e 's#REPLACE_PKGS#$(OPENSUSE_PKGS)#' \
@@ -253,7 +253,7 @@ opensuse-wheel_13/Makefile: wheel-Makefile
 
 fedora-wheel_21/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#fedora:21#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-64.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
@@ -262,7 +262,7 @@ fedora-wheel_21/Makefile: wheel-Makefile
 
 fedora-wheel_22/Makefile: wheel-Makefile
 	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#natefoo/$(subst _,:,$(@D))#' \
+	sed -e 's#REPLACE_TAG#galaxy/$(subst _,:,$(@D))#' \
 		-e 's#REPLACE_FROM#fedora:22#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-64.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \

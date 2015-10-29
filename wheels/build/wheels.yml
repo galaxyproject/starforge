@@ -3,50 +3,50 @@
 imagesets:
     default:
         # note: these are currently just extra tags on debian6-wheel*
-        - natefoo/base-wheel
-        - natefoo/base32-wheel
+        - galaxy/base-wheel
+        - galaxy/base32-wheel
     full:
-        - natefoo/debian-wheel:6
-        - natefoo/debian-wheel:7
-        - natefoo/debian-wheel:8
-        - natefoo/debian-wheel:stretch
-        - natefoo/debian32-wheel:6
-        - natefoo/debian32-wheel:7
-        - natefoo/debian32-wheel:8
-        - natefoo/debian32-wheel:stretch
-        - natefoo/ubuntu-wheel:12.04
-        - natefoo/ubuntu-wheel:14.04
-        - natefoo/ubuntu-wheel:15.04
-        - natefoo/ubuntu-wheel:15.10
-        - natefoo/ubuntu32-wheel:12.04
-        - natefoo/ubuntu32-wheel:14.04
-        - natefoo/ubuntu32-wheel:15.04
-        - natefoo/ubuntu32-wheel:15.10
-        - natefoo/centos-wheel:6
-        - natefoo/centos-wheel:7
-        - natefoo/centos32-wheel:6
-        - natefoo/opensuse-wheel:13
-        - natefoo/fedora-wheel:21
-        - natefoo/fedora-wheel:22
+        - galaxy/debian-wheel:6
+        - galaxy/debian-wheel:7
+        - galaxy/debian-wheel:8
+        - galaxy/debian-wheel:stretch
+        - galaxy/debian32-wheel:6
+        - galaxy/debian32-wheel:7
+        - galaxy/debian32-wheel:8
+        - galaxy/debian32-wheel:stretch
+        - galaxy/ubuntu-wheel:12.04
+        - galaxy/ubuntu-wheel:14.04
+        - galaxy/ubuntu-wheel:15.04
+        - galaxy/ubuntu-wheel:15.10
+        - galaxy/ubuntu32-wheel:12.04
+        - galaxy/ubuntu32-wheel:14.04
+        - galaxy/ubuntu32-wheel:15.04
+        - galaxy/ubuntu32-wheel:15.10
+        - galaxy/centos-wheel:6
+        - galaxy/centos-wheel:7
+        - galaxy/centos32-wheel:6
+        - galaxy/opensuse-wheel:13
+        - galaxy/fedora-wheel:21
+        - galaxy/fedora-wheel:22
     default_plus_rhel_6:
-        - natefoo/base-wheel
-        - natefoo/base32-wheel
-        - natefoo/centos-wheel:6
-        - natefoo/centos32-wheel:6
+        - galaxy/base-wheel
+        - galaxy/base32-wheel
+        - galaxy/centos-wheel:6
+        - galaxy/centos32-wheel:6
     purepy:
         # tag on debian8-wheel
-        - natefoo/purepy-wheel
+        - galaxy/purepy-wheel
 
 images:
-    natefoo/base-wheel:
+    galaxy/base-wheel:
         plat_name: linux_x86_64
-    natefoo/base32-wheel:
+    galaxy/base32-wheel:
         plat_name: linux_i686
-    natefoo/centos-wheel:6:
+    galaxy/centos-wheel:6:
         plat_name: linux_x86_64_rhel_6
-    natefoo/centos-wheel:7:
+    galaxy/centos-wheel:7:
         plat_name: linux_x86_64_rhel_7
-    natefoo/centos32-wheel:6:
+    galaxy/centos32-wheel:6:
         plat_name: linux_i686_rhel_6
 
 packages:
