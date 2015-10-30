@@ -16,6 +16,27 @@ from wheel.pep425tags import get_platforms
 from wheel.platform import get_specific_platform
 
 
+# On CentOS 6, build.py runs under Python 2.6
+try:
+    from argparse import ArgumentParser
+except ImportError:
+    from optparse import OptionParser
+
+    class ArgumentParser(OptionParser):
+
+        def __init__(self, **kwargs):
+            self.delegate = OptionParser(**kwargs)
+
+        def add_argument(self, *args, **kwargs):
+            if "required" in kwargs:
+                del kwargs["required"]
+            return self.delegate.add_option(*args, **kwargs)
+
+        def parse_args(self, args=None):
+            (options, args) = self.delegate.parse_args(args)
+            return options
+
+
 WHEELS_YML = join(os.sep, 'host', 'build', 'wheels.yml')
 BUILD = join(os.sep, 'build')
 
@@ -35,7 +56,10 @@ def execute(cmd, cwd=None):
     subprocess.check_call(cmd, cwd=cwd)
 
 
-def build(wheel_name, wheel_dict, plat, uid, gid, purepy=False):
+def build(args, wheel_dict, plat, purepy=False):
+    wheel_name = args.build_wheel
+    uid = args.uid
+    gid = args.gid
     if not purepy:
         if plat is not None:
             print 'Using platform from wheels.yml: %s' % plat
@@ -156,21 +180,23 @@ def build(wheel_name, wheel_dict, plat, uid, gid, purepy=False):
 
 
 def main():
-    build_wheel = sys.argv[1]
+    parser = ArgumentParser(description='Build wheel')
+    parser.add_argument('-i', '--tag', default=None,
+            help='Tag of the image on which the wheel is building')
+    parser.add_argument('-u', '--uid', type=int, default=-1,
+            help='Change ownership of output wheels to UID')
+    parser.add_argument('-g', '--gid', type=int, default=-1,
+            help='Change group of output wheels to GID')
+    parser.add_argument('build_wheel', help='Package name (in wheels.yml)')
+    args =  parser.parse_args()
+
     with open(WHEELS_YML, 'r') as handle:
         wheels = yaml.load(handle)
 
-    uid = int(sys.argv[2])
-    gid = int(sys.argv[3])
+    plat = wheels.get('images', {}).get(args.tag, {}).get('plat_name', None)
+    wheel_dict = wheels['packages'].get(args.build_wheel, None) or wheels['purepy_packages'][args.build_wheel]
 
-    try:
-        tag = sys.argv[4]
-    except:
-        tag = None
-    plat = wheels.get('images', {}).get(tag, {}).get('plat_name', None)
-    wheel_dict = wheels['packages'].get(build_wheel, None) or wheels['purepy_packages'][build_wheel]
-
-    build(build_wheel, wheel_dict, plat, uid, gid, purepy=build_wheel in wheels['purepy_packages'])
+    build(args, wheel_dict, plat, purepy=args.build_wheel in wheels['purepy_packages'])
 
 
 if __name__ == '__main__':

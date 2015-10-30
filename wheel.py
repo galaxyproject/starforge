@@ -142,8 +142,9 @@ def docker(images, purepy, args, version, wheels):
         cmd = [ 'docker', 'run', '--rm',
                 '--volume=%s/:/host/dist/' % WHEELS_DIST_DIR,
                 '--volume=%s/:/host/build/:ro' % WHEELS_BUILD_DIR,
-                image, buildpy, '-u', '/host/build/build.py', args.package,
-                str(os.getuid()), str(os.getgid()), image ]
+                image, buildpy, '-u', '/host/build/build.py',
+                '-i', image, '-u', str(os.getuid()), '-g', str(os.getgid()),
+                args.package ]
         print 'Running docker:', ' '.join(cmd)
         subprocess.check_call(cmd)
         missing = []
@@ -177,7 +178,7 @@ def osx_qemu(args):
     qemu_config = config['wheel_osx_qemu']
     qemu_sudo = ['sudo'] if qemu_config['qemu_use_sudo'] else []
     btrfs_sudo = ['sudo'] if qemu_config['btrfs_use_sudo'] else []
-    dist = 'wheels/dist-qemu/%s' % args.package
+    dist = 'wheels/dist/%s' % args.package
     if not os.path.exists(dist):
         os.makedirs(dist)
     work_snap = None
@@ -217,19 +218,22 @@ def osx_qemu(args):
     osx_ssh('[ -h /host/build ] || (mkdir -p /host && ln -s /Volumes/Untitled/build /host/build)', qemu_config['ssh'])
     osx_ssh('/python/wheelenv/bin/python /host/build/build.py %s' % args.package, qemu_config['ssh'])
     osx_scp('%s:/host/dist/%s/*.whl %s/' % (qemu_config['ssh']['userhost'], args.package, dist), qemu_config['ssh'])
+    delete_cmd = btrfs_sudo + 'btrfs subvolume delete {snap}'.format(snap=work_snap).split()
     if not args.no_qemu_shutdown:
         try:
             osx_ssh('shutdown -h now', qemu_config['ssh'])
         except subprocess.CalledProcessError as exc:
             assert exc.returncode == 255
         if work_snap is not None:
-            cmd = btrfs_sudo + 'btrfs subvolume delete {snap}'.format(snap=work_snap).split()
-            print 'Deleting snapshot:', ' '.join(cmd)
-            subprocess.check_call(cmd)
+            print 'Deleting snapshot:', ' '.join(delete_cmd)
+            subprocess.check_call(delete_cmd)
         else:
             print 'OS X was not booted under this run, so the snapshot is unknown and cannot be deleted automatically'
     else:
-        print 'QEMU shutdown not requested, skipping shutdown'
+        print 'QEMU shutdown not requested, skipping shutdown.'
+        if work_snap is not None:
+            print 'After shutdown, the snapshot for this image can be deleted with:'
+            print ' '.join(delete_cmd)
 
 
 def main():
