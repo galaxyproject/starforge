@@ -24,14 +24,15 @@ import setuptools
 execfile('setup_wrapped.py')
 '''
 
-PUREPY_IMAGE = 'natefoo/purepy-wheel'
+PUREPY_IMAGE = 'galaxy/purepy-wheel'
 PUREPY_PYTHON = 'cp27mu'
 
-PYTHONS = 'cp26m cp26mu cp27m cp27mu'.split()
+LINUX_PYTHONS = 'cp26m cp26mu cp27m cp27mu'.split()
+OSX_PYTHONS = 'cp26m cp27m'.split()
 
-def execute(cmd):
+def execute(cmd, cwd=None):
     print 'EXECUTING:', ' '.join(cmd)
-    subprocess.check_call(cmd)
+    subprocess.check_call(cmd, cwd=cwd)
 
 
 def build(wheel_name, wheel_dict, plat, purepy=False):
@@ -57,6 +58,11 @@ def build(wheel_name, wheel_dict, plat, purepy=False):
         execute(['yum', 'install', '-y'] + wheel_dict['yum'])
     elif distro in ('opensuse', 'sles') and wheel_dict.get('zypper', []):
         execute(['zypper', '-n', 'in'] + wheel_dict['zypper'])
+    elif get_platform().startswith('macosx-') and wheel_dict.get('brew', []):
+        if '/usr/local/bin' not in os.environ['PATH']:
+            os.environ['PATH'] = '/usr/local/bin:' + os.environ['PATH']
+        execute(['sudo', '-u', 'admin', 'brew', 'install'] + wheel_dict['brew'], cwd='/tmp')
+
 
     dest = join(os.sep, 'host', 'dist', wheel_name)
     if not exists(dest):
@@ -115,23 +121,31 @@ def build(wheel_name, wheel_dict, plat, purepy=False):
         with open('setup.py', 'w') as handle:
             handle.write(SETUPTOOLS_WRAPPER)
 
-    if purepy:
-        pythons = [PUREPY_PYTHON]
+    if get_platform().startswith('macosx-'):
+        pythons = OSX_PYTHONS
     else:
-        pythons = PYTHONS
+        if purepy:
+            pythons = [PUREPY_PYTHON]
+        else:
+            pythons = LINUX_PYTHONS
 
     for py in pythons:
         py = '%s-%s' % (py, os.uname()[4])
-        build_args = wheel_dict.get('build_args', 'bdist_wheel').split()
+        build_args = []
+        if get_platform().startswith('macosx-') and wheel_dict.get('brew', []):
+            build_args.extend(['build_ext', '-I', '/usr/local/include', '-L', '/usr/local/lib', '-R', '/usr/local/lib'])
+        build_args.extend(wheel_dict.get('build_args', 'bdist_wheel').split())
         cmd = [join(os.sep, 'python', py, 'bin', 'python'), 'setup.py'] + build_args
         if plat is not None:
             cmd.append('--plat-name=%s' % plat)
         execute(cmd)
         shutil.rmtree('build')
 
-    py = '%s-%s' % (PUREPY_PYTHON, os.uname()[4])
-    cmd = [join(os.sep, 'python', py, 'bin', 'python'), 'setup.py', 'sdist']
-    execute(cmd)
+    # Sorta lazy, we should explicitly state whether or not an sdist should be built
+    if not get_platform().startswith('macosx-'):
+        py = '%s-%s' % (PUREPY_PYTHON, os.uname()[4])
+        cmd = [join(os.sep, 'python', py, 'bin', 'python'), 'setup.py', 'sdist']
+        execute(cmd)
     
     for f in os.listdir('dist'):
         shutil.copy(join('dist', f), dest)

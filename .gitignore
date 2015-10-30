@@ -9,4 +9,5 @@ image/Dockerfile
 *.gz
 
 wheels/dist/
+wheels/dist-qemu/
 wheels/build/cache/

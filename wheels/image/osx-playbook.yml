@@ -1,0 +1,200 @@
+---
+
+- hosts: osxhost
+  remote_user: root
+  vars:
+    work_dir: /build
+    py26_version: 2.6.9
+    py26_sha256: 7277b1285d8a82f374ef6ebaac85b003266f7939b3f2a24a3af52f9523ac94db
+    py26_configure_args: -C 
+        --enable-framework
+        --enable-universalsdk=/Developer/SDKs/MacOSX10.6.sdk
+        --with-universal-archs=intel
+        CFLAGS='-I/Developer/SDKs/MacOSX10.6.sdk/usr/include'
+        CPPFLAGS='-I/Developer/SDKs/MacOSX10.6.sdk/usr/include'
+        LDFLAGS='-g'
+        OPT='-g -O3'
+        MACOSX_DEPLOYMENT_TARGET=10.6
+    py27_version: 2.7.10
+    py27_sha256: dc08b90ebc21fd3987909144ed95aa36474f69e6f9c8deb224db5c626838d013
+    virtualenv_version: 13.1.2
+    virtualenv_sha256: aabc8ef18cddbd8a2a9c7f92bc43e2fea54b1147330d65db920ef3ce9812e3dc
+    setuptools_version: 18.3.2
+    setuptools_sha256: 8c4ab0c4f227730519dc1e020f875b3ef97e643c8f43a98a4fa0c46fbad12450
+    wheel_version: 3f496bdf2708
+    wheel_sha256: 5e9dde924f91f80484b7b3be44e6e7b7f8fa56eca89d14920d3f1286aed1adc6
+  tasks:
+
+  # TODO: These tasks were performed by hand:
+  # - Install OS X
+  # - Install Xcode
+  # - Copy the 10.6 SDK to /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
+  # - Run gcc once to accept the Xcode license
+  # - Install an SSH public key to allow non-interactive SSH to root@host
+
+  - name: Create /Developer symlink
+    file:
+      src: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer
+      dest: /Developer
+      state: link
+
+  - name: Create work_dir
+    file:
+      path: "{{ work_dir }}"
+      state: directory
+
+  - name: Fetch Python 2.6 source
+    get_url:
+      url: https://www.python.org/ftp/python/{{ py26_version }}/Python-{{ py26_version }}.tgz
+      sha256sum: "{{ py26_sha256 }}"
+      dest: "{{ work_dir }}/Python-{{ py26_version }}.tgz"
+
+  - name: Untar Python 2.6 source
+    unarchive:
+      src: "{{ work_dir }}/Python-{{ py26_version }}.tgz"
+      dest: "{{ work_dir }}"
+      creates: "{{ work_dir }}/Python-{{ py26_version }}"
+      copy: no
+
+  - name: Configure Python 2.6
+    command: ./configure {{ py26_configure_args }}
+    args:
+      chdir: "{{ work_dir }}/Python-{{ py26_version }}"
+      creates: "{{ work_dir }}/Python-{{ py26_version }}/config.status"
+
+  - name: Build Python 2.6
+    command: make
+    args:
+      chdir: "{{ work_dir }}/Python-{{ py26_version }}"
+      creates: "{{ work_dir }}/Python-{{ py26_version }}/build"
+
+  - name: Install Python 2.6
+    command: make install
+    args:
+      chdir: "{{ work_dir }}/Python-{{ py26_version }}"
+      creates: "/Library/Frameworks/Python.framework/Versions/2.6/bin/python2.6"
+
+  - name: Fetch Python 2.7 installer
+    get_url:
+      url: https://www.python.org/ftp/python/{{ py27_version }}/python-{{ py27_version }}-macosx10.6.pkg
+      sha256sum: "{{ py27_sha256 }}"
+      dest: "{{ work_dir }}/python-{{ py27_version }}-macosx10.6.pkg"
+
+  - name: Install Python 2.7
+    command: installer -pkg {{ work_dir }}/python-{{ py27_version }}-macosx10.6.pkg -target /
+    args:
+      creates: "/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7"
+
+  - name: Remove /usr/local symlinks
+    file:
+      path: /usr/local/bin
+      state: absent
+
+  - name: Create /python
+    file:
+      path: /python
+      state: directory
+
+  - name: Create /python symlinks
+    file: 
+      src: /Library/Frameworks/Python.framework/Versions/{{ item }}
+      dest: /python/cp{{ item | replace('.', '') }}m-x86_64
+      state: link
+    with_items:
+      - 2.6
+      - 2.7
+
+  - name: Fix Python 2.6 get_platforms on 10.10+
+    command: cp /Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/{{ item }} /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/{{ item }}
+    with_items:
+      - _osx_support.py
+      - distutils/util.py
+
+  - name: Compile bytecode for fixed get_platforms (.pyc)
+    command: /Library/Frameworks/Python.framework/Versions/2.6/bin/python -m py_compile /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/{{ item }}
+    with_items:
+      - _osx_support.py
+      - distutils/util.py
+
+  - name: Compile bytecode for fixed get_platforms (.pyo)
+    command: /Library/Frameworks/Python.framework/Versions/2.6/bin/python -O -m py_compile /Library/Frameworks/Python.framework/Versions/2.6/lib/python2.6/{{ item }}
+    with_items:
+      - _osx_support.py
+      - distutils/util.py
+
+  - name: Fetch virtualenv
+    get_url:
+      url: https://pypi.python.org/packages/source/v/virtualenv/virtualenv-{{ virtualenv_version }}.tar.gz
+      sha256sum: "{{ virtualenv_sha256 }}"
+      dest: "{{ work_dir }}/virtualenv-{{ virtualenv_version }}.tar.gz"
+
+  - name: Untar virtualenv
+    unarchive:
+      src: "{{ work_dir }}/virtualenv-{{ virtualenv_version }}.tar.gz"
+      dest: "{{ work_dir }}"
+      creates: "{{ work_dir }}/virtualenv-{{ virtualenv_version }}"
+      copy: no
+
+  - name: Create wheelenv and install packages
+    pip:
+      name: PyYAML
+      virtualenv: /python/wheelenv
+      virtualenv_command: /usr/bin/python {{ work_dir }}/virtualenv-{{ virtualenv_version }}/virtualenv.py
+
+  - name: Fetch setuptools
+    get_url:
+      url: https://pypi.python.org/packages/source/s/setuptools/setuptools-{{ setuptools_version }}.tar.gz
+      sha256sum: "{{ setuptools_sha256 }}"
+      dest: "{{ work_dir }}/setuptools-{{ setuptools_version }}.tar.gz"
+
+  - name: Untar setuptools
+    unarchive:
+      src: "{{ work_dir }}/setuptools-{{ setuptools_version }}.tar.gz"
+      dest: "{{ work_dir }}"
+      creates: "{{ work_dir }}/setuptools-{{ setuptools_version }}"
+      copy: no
+
+  - name: Install setuptools
+    shell: /python/cp{{ item | replace('.', '') }}m-x86_64/bin/python setup.py install && rm -rf build
+    args:
+      chdir: "{{ work_dir }}/setuptools-{{ setuptools_version }}"
+      creates: /python/cp{{ item | replace('.', '') }}m-x86_64/lib/python{{ item }}/site-packages/setuptools.pth
+    with_items:
+      - 2.6
+      - 2.7
+
+  - name: Fetch wheel
+    get_url:
+      url: https://bitbucket.org/natefoo/wheel/get/{{ wheel_version }}.tar.gz
+      sha256sum: "{{ wheel_sha256 }}"
+      dest: "{{ work_dir }}/natefoo-wheel-{{ wheel_version }}.tar.gz"
+
+  - name: Unarchive wheel
+    unarchive:
+      src: "{{ work_dir }}/natefoo-wheel-{{ wheel_version }}.tar.gz"
+      dest: "{{ work_dir }}"
+      creates: "{{ work_dir }}/natefoo-wheel-{{ wheel_version }}"
+      copy: no
+
+  - name: Install wheel
+    shell: /python/{{ item }}/bin/python setup.py install && rm -rf build
+    args:
+      chdir: "{{ work_dir }}/natefoo-wheel-{{ wheel_version }}"
+      # Will not overwrite bundled wheel in wheelenv
+      #creates: /python/{{ item }}/bin/wheel
+    with_items:
+      - wheelenv
+      - cp26m-x86_64
+      - cp27m-x86_64
+
+  - name: Allow admin(s) to sudo without a password
+    lineinfile:
+      dest: /etc/sudoers
+      regexp: "^%admin"
+      line: "%admin  ALL=(ALL) NOPASSWD: ALL"
+
+  - name: Install Homebrew
+    remote_user: admin
+    shell: ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" </dev/null
+    args:
+      creates: /usr/local/bin/brew
