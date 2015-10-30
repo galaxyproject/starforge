@@ -35,7 +35,7 @@ def execute(cmd, cwd=None):
     subprocess.check_call(cmd, cwd=cwd)
 
 
-def build(wheel_name, wheel_dict, plat, purepy=False):
+def build(wheel_name, wheel_dict, plat, uid, gid, purepy=False):
     if not purepy:
         if plat is not None:
             print 'Using platform from wheels.yml: %s' % plat
@@ -64,9 +64,12 @@ def build(wheel_name, wheel_dict, plat, purepy=False):
         execute(['sudo', '-u', 'admin', 'brew', 'install'] + wheel_dict['brew'], cwd='/tmp')
 
 
-    dest = join(os.sep, 'host', 'dist', wheel_name)
+    dist = join(os.sep, 'host', 'dist')
+    dest = join(dist, wheel_name)
     if not exists(dest):
         os.makedirs(dest)
+    os.chown(dist, uid, gid)
+    os.chown(dest, uid, gid)
 
     if not exists(BUILD):
         os.makedirs(BUILD)
@@ -149,6 +152,7 @@ def build(wheel_name, wheel_dict, plat, purepy=False):
     
     for f in os.listdir('dist'):
         shutil.copy(join('dist', f), dest)
+        os.chown(join(dest, f), uid, gid)
 
 
 def main():
@@ -156,14 +160,17 @@ def main():
     with open(WHEELS_YML, 'r') as handle:
         wheels = yaml.load(handle)
 
+    uid = int(sys.argv[2])
+    gid = int(sys.argv[3])
+
     try:
-        tag = sys.argv[2]
+        tag = sys.argv[4]
     except:
         tag = None
     plat = wheels.get('images', {}).get(tag, {}).get('plat_name', None)
     wheel_dict = wheels['packages'].get(build_wheel, None) or wheels['purepy_packages'][build_wheel]
 
-    build(build_wheel, wheel_dict, plat, purepy=build_wheel in wheels['purepy_packages'])
+    build(build_wheel, wheel_dict, plat, uid, gid, purepy=build_wheel in wheels['purepy_packages'])
 
 
 if __name__ == '__main__':

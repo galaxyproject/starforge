@@ -142,7 +142,8 @@ def docker(images, purepy, args, version, wheels):
         cmd = [ 'docker', 'run', '--rm',
                 '--volume=%s/:/host/dist/' % WHEELS_DIST_DIR,
                 '--volume=%s/:/host/build/:ro' % WHEELS_BUILD_DIR,
-                image, buildpy, '-u', '/host/build/build.py', args.package, image ]
+                image, buildpy, '-u', '/host/build/build.py', args.package,
+                str(os.getuid()), str(os.getgid()), image ]
         print 'Running docker:', ' '.join(cmd)
         subprocess.check_call(cmd)
         missing = []
