@@ -151,6 +151,8 @@ purepy_packages:
     ordereddict:
         version: 1.1
         insert_setuptools: true
+        force_pythons:
+            -  cp26mu
     paramiko:
         version: 1.15.2
     Parsley:

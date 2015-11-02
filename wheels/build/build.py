@@ -151,7 +151,9 @@ def build(args, wheel_dict, plat, purepy=False):
     if get_platform().startswith('macosx-'):
         pythons = OSX_PYTHONS
     else:
-        if purepy:
+        if wheel_dict.get('force_pythons', None):
+            pythons = wheel_dict['force_pythons']
+        elif purepy:
             pythons = [PUREPY_PYTHON]
         else:
             pythons = LINUX_PYTHONS
