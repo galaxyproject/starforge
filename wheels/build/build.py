@@ -108,7 +108,7 @@ def build(args, wheel_dict, plat, purepy=False):
     for cfile in os.listdir(src_cache):
         if cfile.startswith(wheel_name + '-'):
             cver = cfile[len(wheel_name + '-'):]
-            cver = cver.replace('.tar.gz', '').replace('.tgz', '')
+            cver = cver.replace('.tar.gz', '').replace('.tgz', '').replace('.tar.bz2', '')
             if parse_version(cver) == parse_version(version):
                 src_paths.append(join(src_cache, cfile))
                 break

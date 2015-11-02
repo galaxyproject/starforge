@@ -311,7 +311,7 @@ def main():
     if not args.no_docker:
         docker(images, purepy, args, version, wheels)
 
-    if not args.no_qemu and imageset != 'purepy':
+    if not args.no_qemu and not purepy:
         osx_qemu(args)
 
 
