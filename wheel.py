@@ -5,6 +5,7 @@ import urllib2
 import uuid
 import argparse
 import subprocess
+import errno
 from os.path import abspath, dirname, join, basename, exists, expanduser
 from time import sleep
 
@@ -77,7 +78,7 @@ def read_config():
     try:
         user_config = yaml.safe_load(open(CONFIG_FILE).read())
     except (OSError, IOError) as exc:
-        if exc.errno == ernno.ENOENT:
+        if exc.errno == errno.ENOENT:
             user_config = {}
         else:
             raise
