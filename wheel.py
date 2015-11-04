@@ -59,7 +59,9 @@ CONFIG_DEFAULT = {
             'host': 'localhost',
             'port': '8222'
         },
-        # qemu > 2.4 should have a label= option for fat drives
+        # qemu > 2.4 should have a label= option for fat drives. It mounted as
+        # `Untitled` on my stretch system and `QEMU VVFAT` on jessie, so who
+        # knows what you'll get...
         'wheel_volume': '/Volumes/Untitled'
     }
 }
@@ -216,7 +218,14 @@ def osx_qemu(args):
             sleep(5)
     # fat:ro can't be mounted in the guest, but it's ok because changes made to
     # the volume are not written back, so it's effectively read only
-    osx_ssh('[ -h /host/build ] || (mkdir -p /host && ln -s /Volumes/Untitled/build /host/build)', qemu_config['ssh'])
+    #
+    # this silliness in the event the volume name contains a space (it's run
+    # w/o a shell locally but the remote command is executed in a shell)
+    ln_cmd = '[ -h /host/build ] || (mkdir -p /host && ln -s'.split()
+    ln_cmd.append("'%s/build'" % qemu_config['wheel_volume'])
+    ln_cmd.append('/host/build)')
+    #ln_cmd = '[ -h /host/build ] || (mkdir -p /host && ln -s "${vol}/build" /host/build)'.format(vol=qemu_config['wheel_volume'])
+    osx_ssh(ln_cmd, qemu_config['ssh'])
     osx_ssh('/python/wheelenv/bin/python /host/build/build.py %s' % args.package, qemu_config['ssh'])
     osx_scp('%s:/host/dist/%s/*.whl %s/' % (qemu_config['ssh']['userhost'], args.package, dist), qemu_config['ssh'])
     delete_cmd = btrfs_sudo + 'btrfs subvolume delete {snap}'.format(snap=work_snap).split()
