@@ -1,0 +1,47 @@
+---
+# Default Starforge config
+
+docker:
+    use_sudo: no
+
+wheel_osx_qemu:
+    qemu_use_sudo: no
+    btrfs_use_sudo: no
+    run_cmd: qemu-system-x86_64
+    run_args: >
+        -enable-kvm
+        -m 2048
+        -cpu core2duo
+        -machine q35
+        -usb -device usb-kbd -device usb-mouse
+        -device isa-applesmc,osk={osk}
+        -kernel {bootloader}
+        -vga std
+        -vnc none
+        -daemonize
+        -smbios type=2
+        -device ide-drive,bus=ide.2,drive=MacHDD
+        -drive id=MacHDD,if=none,file={diskimage}
+        -netdev user,id=hub0port0,hostfwd=tcp:127.0.0.1:{sshport}-:22
+        -device e1000-82545em,netdev=hub0port0,id=mac_vnet0
+        -device ide-drive,bus=ide.4,drive=wheels
+        -drive id=wheels,if=none,file=fat:rw:{wheels},format=raw
+    # relative to snap_root/snap_src
+    bootloader: boot
+    diskimage: hd.img
+    ssh:
+        # You should probably change `host` to avoid ssh host key
+        # conflicts. An ~/.ssh/config entry like this should work:
+        # Host osxguest:
+        #   Hostname localhost
+        #   User root
+        #   Port 8222
+        # If you don't do this, be aware that '-p' is not automatically set
+        # for you, so in that case you would need to add it to args.
+        args: []
+        host: localhost
+        port: '8222'
+    # qemu > 2.4 should have a label= option for fat drives. It mounted as
+    # `Untitled` on my stretch system and `QEMU VVFAT` on jessie, so who
+    # knows what you'll get...
+    wheel_volume: /Volumes/Untitled
