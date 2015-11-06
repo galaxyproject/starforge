@@ -16,7 +16,12 @@ DEFAULT_PUREPY_IMAGESET = 'purepy'
 DEFAULT_IMAGE_TYPE = 'docker'
 DEFAULT_IMAGE_PKGTOOL = 'apt'
 DEFAULT_CONFIG_FILE = 'wheels.yml'
-DEFAULT_PYTHONS = '/python/cp26m-{arch} /python/cp26mu-{arch} /python/cp27m-{arch} /python/cp27mu-{arch}'.split()
+DEFAULT_PYTHONS = [
+    '/python/cp26m-{arch}/bin/python',
+    '/python/cp26mu-{arch}/bin/python',
+    '/python/cp27m-{arch}/bin/python',
+    '/python/cp27mu-{arch}/bin/python'
+]
 
 
 class WheelImage(object):

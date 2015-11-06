@@ -27,11 +27,11 @@ from ..execution.local import LocalExecutionContext
               default=getcwd(),
               type=click.Path(file_okay=False),
               help='Copy output wheels to OUTPUT')
-@click.option('--uid',
+@click.option('-u', '--uid',
               default=-1,
               type=click.STRING,
               help='Change ownership of output(s) to UID')
-@click.option('--gid',
+@click.option('-g', '--gid',
               default=-1,
               type=click.STRING,
               help='Change group of output(s) to UID')
@@ -56,8 +56,8 @@ def cli(ctx, wheels_config, image, output, uid, gid, fetch_srcs, wheel):
     cachemgr = CacheManager(ctx.config.cache_path)
     # FIXME: ctx.config.cache_path is wrong when running under virtualization
     wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
-    local = LocalExecutionContext(image, ctx.config['docker_config'])
-    forge = ForgeWheel(wheel_config, cachemgr, local.run_context, image=image)
+    ectx = LocalExecutionContext(image)
+    forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image)
     if fetch_srcs:
         forge.cache_sources()
     forge.bdist_wheel(output=output, uid=uid, gid=gid)

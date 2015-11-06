@@ -30,12 +30,12 @@ class ExecutionContext(object):
         """
 
     @abstractmethod
-    def run(self, cmd):
+    def run(self, cmd, **kwargs):
         """
         """
 
     @abstractmethod
-    def destroy(self):
+    def destroy(self, **kwargs):
         """
         """
 

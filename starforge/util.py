@@ -7,6 +7,7 @@ import os
 import tarfile
 import zipfile
 from os.path import join, abspath, expanduser
+from subprocess import Popen, CalledProcessError, PIPE
 try:
     from configparser import ConfigParser, NoSectionError, NoOptionError
 except ImportError:
@@ -32,6 +33,22 @@ def xdg_config_file():
 def xdg_data_dir():
     data_home = expanduser(os.environ.get('XDG_DATA_HOME', '~/.local/share/'))
     return abspath(join(data_home, 'galaxy-starforge'))
+
+
+def check_output(*popenargs, **kwargs):
+    """ From Python 2.7
+    """
+    if 'stdout' in kwargs:
+        raise ValueError('stdout argument not allowed, it will be overridden.')
+    process = Popen(stdout=PIPE, *popenargs, **kwargs)
+    output, unused_err = process.communicate()
+    retcode = process.poll()
+    if retcode:
+        cmd = kwargs.get("args")
+        if cmd is None:
+            cmd = popenargs[0]
+        raise CalledProcessError(retcode, cmd, output=output)
+    return output
 
 
 # asbool implementation pulled from PasteDeploy

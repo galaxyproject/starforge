@@ -65,20 +65,22 @@ class ForgeWheel(object):
                 # FIXME: invalid for osx, probably shouldn't be hardcoded, you
                 # could just cache it like platform
                 for flags in ('m', 'mu'):
-                    whl = '{name}-{version}-cp{py}-cp{py}{flags}-{platform}'.format(name=self.name.replace('-', '_'),
-                                                                                    version=str(parse_version(self.version)),
-                                                                                    py=py,
-                                                                                    flags=flags,
-                                                                                    platform=platform)
+                    whl = '{name}-{version}-cp{py}-cp{py}{flags}-{platform}.whl'.format(name=self.name.replace('-', '_'),
+                                                                                        version=str(parse_version(self.version)),
+                                                                                        py=py,
+                                                                                        flags=flags,
+                                                                                        platform=platform)
                     wheels.append(whl)
         return wheels
 
-    def get_bdist_wheel_cmd(self):
+    def get_bdist_wheel_cmd(self, output):
         # TODO set PYTHONUNBUFFERED=1
-        return 'starforge bdist_wheel -i {image} -u {uid} -g {gid} {name}'.format(image=self.image,
-                                                                                  uid=getuid(),
-                                                                                  gid=getgid(),
-                                                                                  name=self.name)
+        return ('starforge bdist_wheel -i {image} -o {output} '
+                '-u {uid} -g {gid} {name}'.format(image=self.image,
+                                                  output=output,
+                                                  uid=getuid(),
+                                                  gid=getgid(),
+                                                  name=self.name))
 
         #return '/buildpyvenv/starforge -i <image_name> --uid <uid> --gid <gid> self.name'
 

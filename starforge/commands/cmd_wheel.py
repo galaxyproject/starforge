@@ -2,7 +2,9 @@
 """
 from __future__ import absolute_import
 
-from os.path import exists
+from os import getcwd, getuid, getgid
+from os.path import exists, abspath, join
+from shutil import copy
 
 import click
 
@@ -12,6 +14,12 @@ from ..config.wheels import WheelConfigManager
 from ..forge.wheels import ForgeWheel
 from ..cache import CacheManager
 from ..execution.docker import DockerExecutionContext
+from ..util import xdg_data_dir
+
+
+BDIST_WHEEL_CMD_TEMPLATE = 'starforge bdist_wheel --wheels-config {config} -i {image} -o {output} -u {uid} -g {gid} {name}'
+GUEST_HOST = '/host'
+GUEST_SHARE = '/share'
 
 
 @click.command('wheel')
@@ -44,9 +52,18 @@ def cli(ctx, wheels_config, wheel):
             else:
                 build = True
         if build:
-                cmd = forge.get_bdist_wheel_cmd()
-                with ectx.run_context() as run:
-                    run(cmd)
+            copy(wheels_config, join(xdg_data_dir(), 'wheels.yml'))
+            cmd = BDIST_WHEEL_CMD_TEMPLATE.format(config=join(GUEST_SHARE, 'galaxy-starforge', 'wheels.yml'),
+                                                  image=image_name,
+                                                  output=GUEST_HOST,
+                                                  uid=getuid(),
+                                                  gid=getgid(),
+                                                  name=wheel)
+            share = [(abspath(getcwd()), GUEST_HOST, 'rw'),
+                     (abspath(xdg_data_dir()), join(GUEST_SHARE, 'galaxy-starforge'), 'ro')]
+            env = {'XDG_DATA_HOME': GUEST_SHARE}
+            with ectx.run_context(share=share, env=env) as run:
+                run(cmd)
         else:
             info('All wheels from image %s already built', image_name)
     # TODO: need to call sdist

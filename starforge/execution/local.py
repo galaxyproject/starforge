@@ -2,7 +2,11 @@
 """
 from __future__ import absolute_import
 
-import subprocess
+from subprocess import check_call
+try:
+    from subprocess import check_output
+except ImportError:
+    from ..util import check_output
 
 from ..io import warn, info
 from . import ExecutionContext
@@ -15,10 +19,13 @@ class LocalExecutionContext(ExecutionContext):
     def start(self, **kwargs):
         pass
 
-    def run(self, cmd, cwd=None, **kwargs):
+    def run(self, cmd, cwd=None, capture_output=False, **kwargs):
         cmd = self.normalize_cmd(cmd)
         info('Running local: %s', ' '.join(cmd))
-        return subprocess.check_output(cmd, cwd=cwd)
+        if capture_output:
+            return check_output(cmd, cwd=cwd)
+        else:
+            check_call(cmd, cwd=cwd)
 
     def destroy(self, **kwargs):
         pass
