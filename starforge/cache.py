@@ -83,10 +83,10 @@ class PlatformStringCacher(BaseCacher):
         platforms = yaml.safe_load(open(self.cache_file).read())
         return platforms.get(name, None)
 
-    def cache(self, name, execctx=None, **kwargs):
+    def cache(self, name, execctx=None, buildpy='python', **kwargs):
         platforms = yaml.safe_load(open(self.cache_file).read())
         if name not in platforms:
-            cmd = "python -c 'import wheel.pep425tags; print wheel.pep425tags.get_platforms(major_only=True)[0]'"
+            cmd = "{buildpy} -c 'import wheel.pep425tags; print wheel.pep425tags.get_platforms(major_only=True)[0]'".format(buildpy=buildpy)
             with execctx() as run:
                 platform = run(cmd, capture_output=True)
             platforms[name] = platform
@@ -157,5 +157,5 @@ class CacheManager(object):
     def url_cache(self, name):
         self.cachers['url'].cache(name)
 
-    def platform_cache(self, name, execctx):
-        self.cachers['platform'].cache(name, execctx=execctx)
+    def platform_cache(self, name, execctx, buildpy):
+        self.cachers['platform'].cache(name, execctx=execctx, buildpy=buildpy)

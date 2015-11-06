@@ -30,7 +30,20 @@ class WheelImage(object):
         self.type = image.get('type', DEFAULT_IMAGE_TYPE)
         self.pkgtool = image.get('pkgtool', DEFAULT_IMAGE_PKGTOOL)
         self.plat_name = image.get('plat_name', None)
+        self.buildpy = image.get('buildpy', 'python')
         self.pythons = image.get('pythons', DEFAULT_PYTHONS)
+        self.run_cmd = image.get('run_cmd', None)
+        self.run_args = image.get('run_args', {})
+        self.insert_osk = image.get('insert_osk', False)
+        self.snap_root = image.get('snap_root', None)
+        self.snap_src = image.get('snap_src', None)
+        self.ssh = image.get('ssh', {})
+        self.vvfat_mounts = image.get('vvfat_mounts', [])
+        if 'host' not in self.ssh:
+            self.ssh['host'] = 'localhost'
+        self.ssh['userhost'] = self.ssh['host']
+        if 'user' in self.ssh:
+            self.ssh['userhost'] = self.ssh['user'] + '@' + self.ssh['host']
 
 
 class WheelImageset(object):
@@ -52,6 +65,7 @@ class WheelConfig(object):
         self.insert_setuptools = config.get('insert_setuptools', False)
         self.force_pythons = config.get('force_pythons', None)
         self.build_args = config.get('build_args', 'bdist_wheel')
+        # does this belong here? not using it currently
         self.buildpy = config.get('buildpy', 'python')
         if not purepy:
             default_imageset = DEFAULT_C_IMAGESET

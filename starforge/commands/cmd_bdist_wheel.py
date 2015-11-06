@@ -11,11 +11,12 @@ from ..config.wheels import WheelConfigManager
 from ..forge.wheels import ForgeWheel
 from ..cache import CacheManager
 from ..execution.local import LocalExecutionContext
+from ..util import xdg_config_file
 
 
 @click.command('wheel')
 @click.option('--wheels-config',
-              default='wheels.yml',
+              default=xdg_config_file(name='wheels.yml'),
               type=click.Path(file_okay=True,
                               writable=False,
                               resolve_path=True),

@@ -21,6 +21,7 @@ class ConfigManager(object):
         self.config_file = config_file
         self.cache_path = xdg_data_dir()
         self.docker = {}
+        self.qemu = {}
         self.load_config()
 
     def load_config(self):
@@ -38,15 +39,10 @@ class ConfigManager(object):
         if 'docker' in config:
             self.docker = config['docker']
 
+        if 'qemu' in config:
+            self.qemu = config['qemu']
+
         if 'cache_path' in config:
             self.cache_path = abspath(expanduser(config['cache_path']))
-
-        # set userhost
-        ssh_config = config['wheel_osx_qemu']['ssh']
-        ssh_config['userhost'] = ssh_config['host']
-        if 'user' in ssh_config:
-            ssh_config['userhost'] = ssh_config['user'] + '@' + ssh_config['host']
-        if not type(ssh_config['args']) == list:
-            ssh_config['args'] = ssh_config['args'].split()
 
         self.config = config

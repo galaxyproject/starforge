@@ -25,9 +25,9 @@ def dict_merge(old, new):
             old[k] = v
 
 
-def xdg_config_file():
+def xdg_config_file(name='config.yml'):
     config_home = expanduser(os.environ.get('XDG_CONFIG_HOME', '~/.config'))
-    return abspath(join(config_home, 'galaxy-starforge', 'config.yml'))
+    return abspath(join(config_home, 'galaxy-starforge', name))
 
 
 def xdg_data_dir():

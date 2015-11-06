@@ -57,10 +57,9 @@ class ForgeWheel(object):
             platform = None
             if self.image:
                 # get forced platform name if any
-                image_config = self.wheel_config.get_image(self.image)
-                platform = image_config.plat_name
+                platform = self.image.plat_name
             if platform is None:
-                platform = self.cache_manager.platform_cache(self.image, self.exec_context)
+                platform = self.cache_manager.platform_cache(self.image.name, self.exec_context, self.image.buildpy)
             for py in ('26', '27'):
                 # FIXME: invalid for osx, probably shouldn't be hardcoded, you
                 # could just cache it like platform
@@ -72,18 +71,6 @@ class ForgeWheel(object):
                                                                                         platform=platform)
                     wheels.append(whl)
         return wheels
-
-    def get_bdist_wheel_cmd(self, output):
-        # TODO set PYTHONUNBUFFERED=1
-        return ('starforge bdist_wheel -i {image} -o {output} '
-                '-u {uid} -g {gid} {name}'.format(image=self.image,
-                                                  output=output,
-                                                  uid=getuid(),
-                                                  gid=getgid(),
-                                                  name=self.name))
-
-        #return '/buildpyvenv/starforge -i <image_name> --uid <uid> --gid <gid> self.name'
-
 
 
     def execute(self, cmd, cwd=None):
@@ -100,11 +87,10 @@ class ForgeWheel(object):
         version = self.wheel_config.version
         pythons = []
         if self.image:
-            image_config = self.wheel_config.get_image(self.image)
             # FIXME: force_python here if you're going to keep it
-            pythons = image_config.pythons
-            platform = image_config.plat_name
-            pkgtool = image_config.pkgtool
+            pythons = self.image.pythons
+            platform = self.image.plat_name
+            pkgtool = self.image.pkgtool
         else:
             pythons = ['python']
             platform = None
@@ -112,7 +98,7 @@ class ForgeWheel(object):
         if platform is not None:
             info('Platform name forced to: %s', platform)
 
-        pkgs = self.wheel_config.get_dependencies(self.image)
+        pkgs = self.wheel_config.get_dependencies(self.image.name)
         if pkgs:
             if pkgtool == 'apt':
                 if arch == 'i686' and exists('/usr/lib/x86_64-linux-gnu'):

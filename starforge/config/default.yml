@@ -4,7 +4,7 @@
 docker:
     use_sudo: no
 
-wheel_osx_qemu:
+qemu:
     qemu_use_sudo: no
     btrfs_use_sudo: no
     run_cmd: qemu-system-x86_64
@@ -44,4 +44,4 @@ wheel_osx_qemu:
     # qemu > 2.4 should have a label= option for fat drives. It mounted as
     # `Untitled` on my stretch system and `QEMU VVFAT` on jessie, so who
     # knows what you'll get...
-    wheel_volume: /Volumes/Untitled
+    #wheel_volume: /Volumes/QEMU VVFAT
