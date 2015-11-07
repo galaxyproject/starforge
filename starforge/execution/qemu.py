@@ -201,7 +201,7 @@ class QEMUExecutionContext(ExecutionContext):
         if env is not None:
             with tempfile.NamedTemporaryFile() as envfile:
                 for k, v in env.items():
-                    envfile.write('{k}={v}')
+                    envfile.write('{k}={v}'.format(k=k, v=v))
                 envfile.flush()
                 self._scp('{f} {userhost}:.ssh/environment'.format(f=envfile.name,
                                                                    userhost=self.ssh_config['userhost']))
