@@ -105,9 +105,10 @@ class QEMUExecutionContext(ExecutionContext):
     def _scp(self, cmd):
         cmd = self.normalize_cmd(cmd)
         ssh_args = self.normalize_cmd(self.ssh_config.get('args', ''))
-        ssh_args.extend(['-p', str(self.run_args['sshport'])])
+        ssh_args.extend(['-o', 'Port=%s' % self.run_args['sshport']])
         cmd = ['scp'] + ssh_args + cmd
         info('Executing: %s', ' '.join(cmd))
+        check_call(cmd)
 
     def start(self, share=None, env=None, **kwargs):
         # path to snapshot
@@ -214,9 +215,15 @@ class QEMUExecutionContext(ExecutionContext):
             for host, guest, read in self.share:
                 if read != 'rw':
                     continue
-                self._scp('-r {userhost}:{guest} {host}'.format(userhost=self.ssh_config['userhost'],
-                                                                guest=guest,
-                                                                host=host))
+                # FIXME: this breaks what we are claiming to do, which is
+                # pretend that {guest} and {host} are a single FS. The problem
+                # is that OS X fills {guest} with a bunch of garbage that we
+                # don't want. So for the moment, just copy back *.whl, which is
+                # the only thing we wanted.
+                self._scp('{userhost}:{guest}/*.whl {host}'.format(
+                    userhost=self.ssh_config['userhost'],
+                    guest=guest,
+                    host=host))
         self._ssh('shutdown -h now')
         cmd = 'btrfs subvolume delete {snap}'.format(snap=self.snap)
         self._execute(cmd, sudo=self.btrfs_use_sudo)

@@ -57,6 +57,8 @@ def cli(ctx, wheels_config, image, output, uid, gid, fetch_srcs, wheel):
     cachemgr = CacheManager(ctx.config.cache_path)
     # FIXME: ctx.config.cache_path is wrong when running under virtualization
     wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
+    # `image` is an image_name until here
+    image = wheel_config.get_image(image)
     ectx = LocalExecutionContext(image)
     forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image)
     if fetch_srcs:

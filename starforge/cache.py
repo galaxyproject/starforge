@@ -88,7 +88,7 @@ class PlatformStringCacher(BaseCacher):
         if name not in platforms:
             cmd = "{buildpy} -c 'import wheel.pep425tags; print wheel.pep425tags.get_platforms(major_only=True)[0]'".format(buildpy=buildpy)
             with execctx() as run:
-                platform = run(cmd, capture_output=True)
+                platform = run(cmd, capture_output=True).splitlines()[0].strip()
             platforms[name] = platform
             with open(self.cache_file, 'w') as handle:
                 handle.write(yaml.dump(platforms))
