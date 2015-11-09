@@ -59,17 +59,17 @@ class ForgeWheel(object):
                 # get forced platform name if any
                 platform = self.image.plat_name
             if platform is None:
-                platform = self.cache_manager.platform_cache(self.image.name, self.exec_context, self.image.buildpy)
-            for py in ('26', '27'):
-                # FIXME: invalid for osx, probably shouldn't be hardcoded, you
-                # could just cache it like platform
-                for flags in ('m', 'mu'):
-                    whl = '{name}-{version}-cp{py}-cp{py}{flags}-{platform}.whl'.format(name=self.name.replace('-', '_'),
-                                                                                        version=str(parse_version(self.version)),
-                                                                                        py=py,
-                                                                                        flags=flags,
-                                                                                        platform=platform)
-                    wheels.append(whl)
+                platform = self.cache_manager.platform_cache(self.image.name, self.exec_context, self.image.pythons[0])
+            for python in self.image.pythons:
+                # FIXME: this forces a very specific naming (i.e. '/pythons/cp{py}{flags}-{arch}/')
+                abi = python.split('/')[2].split('-')[0]
+                py = abi[2:4]
+                whl = '{name}-{version}-cp{py}-{abi}-{platform}.whl'.format(name=self.name.replace('-', '_'),
+                                                                            version=str(parse_version(self.version)),
+                                                                            py=py,
+                                                                            abi=abi,
+                                                                            platform=platform)
+                wheels.append(whl)
         return wheels
 
 
@@ -79,6 +79,9 @@ class ForgeWheel(object):
             run(cmd, cwd=cwd)
 
     def bdist_wheel(self, output=None, uid=-1, gid=-1):
+        # TODO: a lot of stuff in this method like installing from the package
+        # manager and changing permissions should be abstracted out for
+        # non-wheel executions
         uid = int(uid)
         gid = int(gid)
         arch = uname()[4]
@@ -87,7 +90,6 @@ class ForgeWheel(object):
         version = self.wheel_config.version
         pythons = []
         if self.image:
-            # FIXME: force_python here if you're going to keep it
             pythons = self.image.pythons
             platform = self.image.plat_name
             pkgtool = self.image.pkgtool

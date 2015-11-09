@@ -38,7 +38,7 @@ class WheelImage(object):
         self.snap_root = image.get('snap_root', None)
         self.snap_src = image.get('snap_src', None)
         self.ssh = image.get('ssh', {})
-        self.vvfat_mounts = image.get('vvfat_mounts', [])
+        self.vvfat_mount_base = image.get('vvfat_mount_base', None)
         if 'host' not in self.ssh:
             self.ssh['host'] = 'localhost'
         self.ssh['userhost'] = self.ssh['host']
