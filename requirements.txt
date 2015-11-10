@@ -3,4 +3,5 @@ beautifulsoup4
 filecache
 click
 requests
-wheel==0.27.0+gx0
+six
+wheel==0.26.0+gx1

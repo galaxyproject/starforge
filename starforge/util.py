@@ -13,12 +13,14 @@ try:
 except ImportError:
     from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
+from six import iteritems, string_types
+
 
 def dict_merge(old, new):
     """Recursive dictionary merge, values in `new` will replace values of
     conflicting keys in `old`.
     """
-    for k, v in new.items():
+    for (k, v) in iteritems(new):
         if type(v) == dict:
             if k in old:
                 dict_merge(old[k], new[k])
@@ -60,7 +62,7 @@ falsy = frozenset(['false', 'no', 'off', 'n', 'f', '0'])
 
 
 def asbool(obj):
-    if isinstance(obj, basestring):
+    if isinstance(obj, string_types):
         obj = obj.strip().lower()
         if obj in truthy:
             return True

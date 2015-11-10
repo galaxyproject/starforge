@@ -10,20 +10,20 @@ try:
 except ImportError:
     from pipes import quote
 
+from six import with_metaclass, string_types
 
-class ExecutionContext(object):
-    __metaclass__ = ABCMeta
 
+class ExecutionContext(with_metaclass(ABCMeta, object)):
     def __init__(self, image, **kwargs):
         self.image = image
 
     def normalize_cmd(self, cmd):
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, string_types):
             cmd = shlex.split(cmd)
         return cmd
 
     def stringify_cmd(self, cmd):
-        if isinstance(cmd, basestring):
+        if isinstance(cmd, string_types):
             return cmd
         r = ''
         for e in cmd:

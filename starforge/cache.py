@@ -15,13 +15,12 @@ except ImportError:
 import requests
 import yaml
 from pkg_resources import parse_version
+from six import with_metaclass
 
 from .io import warn, error, info, debug, fatal
 
 
-class BaseCacher(object):
-    __metaclass__ = ABCMeta
-
+class BaseCacher(with_metaclass(ABCMeta, object)):
     def __init__(self, cache_path):
         if not exists(cache_path):
             makedirs(cache_path)
@@ -100,9 +99,13 @@ class PlatformStringCacher(BaseCacher):
 
 
 class UrlCacher(TarballCacher):
-    def cache(self, name, **kwargs):
+    def check(self, name, **kwargs):
         tgz = basename(urlparse(name).path)
-        cfpath = self.check(tgz)
+        return super(UrlCacher, self).check(tgz)
+
+    def cache(self, name, **kwargs):
+        cfpath = self.check(name)
+        tgz = basename(urlparse(name).path)
         if cfpath is not None:
             info('Using cached file: %s', cfpath)
         else:

@@ -15,6 +15,8 @@ try:
 except ImportError:
     from ..util import check_output
 
+from six import iteritems
+
 from ..io import warn, info, error
 from . import ExecutionContext
 
@@ -96,7 +98,7 @@ class QEMUExecutionContext(ExecutionContext):
             ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], '--'] + cmd
         else:
             args['cmd'] = cmd
-            for k, v in args.items():
+            for (k, v) in iteritems(args):
                 args[k] = repr(v)
             ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], 'mktemp', 'starforge.XXXXXXXX']
             guest_temp = check_output(ssh_cmd).strip()
@@ -239,7 +241,7 @@ class QEMUExecutionContext(ExecutionContext):
         # guest's shell will read anything at startup
         if env is not None:
             with tempfile.NamedTemporaryFile() as envfile:
-                for k, v in env.items():
+                for (k, v) in iteritems(env):
                     envfile.write('{k}={v}'.format(k=k, v=v))
                 envfile.flush()
                 self._scp('{f} {userhost}:.ssh/environment'.format(f=envfile.name,

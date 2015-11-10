@@ -9,6 +9,7 @@ except:
     from ordereddict import OrderedDict
 
 import yaml
+from six import iteritems
 
 from ..util import dict_merge, xdg_data_dir
 
@@ -89,7 +90,10 @@ class ConfigManager(object):
             self.cache_path = abspath(expanduser(config['cache_path']))
 
         if 'imagesets' in config:
-            for name, imageset in config['imagesets'].items():
+            for (name, imageset) in iteritems(config['imagesets']):
                 self.imagesets[name] = Imageset(name, imageset, config.get('images', {}))
 
         self.config = config
+
+    def dump_config(self):
+        return self.config

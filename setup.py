@@ -6,21 +6,24 @@ from os.path import join
 from setuptools import setup, find_packages
 
 
-#with open('README.rst') as file:
-#    long_description = file.read()
-#
-#long_description += '\n\n'
-#with open('HISTORY.rst') as file:
-#    long_description += file.read()
+with open('README.md') as file:
+    long_description = file.read()
 
-execfile(join('starforge', '__init__.py'))
+long_description += '\n\n'
+with open('HISTORY.md') as file:
+    long_description += file.read()
+
+init = join('starforge', '__init__.py')
+with open(init) as f:
+    exec(compile(f.read(), "somefile.py", 'exec'))
+
 
 setup(
     name = 'starforge',
     version = __version__,
     packages = find_packages(),
     description = 'Build Galaxy things in virtualized environments',
-    #long_description = long_description,
+    long_description = long_description,
     url = 'https://github.com/galaxyproject/starforge',
     author = 'The Galaxy Community',
     author_email = 'galaxy-dev@lists.galaxyproject.org',
@@ -30,8 +33,14 @@ setup(
         'config/default.yml',
     ]},
     install_requires = [
+        'pyyaml',
         'click',
-        'requests'
+        'requests',
+        'six',
+        'wheel==0.26.0+gx1'
+    ],
+    dependency_links = [
+        'https://wheels.galaxyproject.org/simple/wheel/',
     ],
     entry_points = {
         'console_scripts': [

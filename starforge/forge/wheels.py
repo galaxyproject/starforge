@@ -13,6 +13,7 @@ from shutil import rmtree, copy
 
 from pkg_resources import parse_version
 from wheel.pep425tags import get_platforms
+from six.moves import map
 
 from ..io import debug, info, warn
 from ..util import Archive
@@ -46,6 +47,12 @@ class ForgeWheel(object):
         if self.wheel_config.purepy:
             # need to check universal
             cached_source = self.cache_manager.pip_check(self.name, self.version)
+            missing = '%s %s' % (self.name, self.version)
+            if cached_source is None:
+                if self.src_urls:
+                    cached_source = self.cache_manager.url_check(self.src_urls[0])
+                    missing = self.src_urls[0]
+            assert cached_source is not None, 'Cache failure on: %s' % missing
             arc = Archive.open(cached_source)
             if arc.universal:
                 py = 'py2.py3'
@@ -72,11 +79,54 @@ class ForgeWheel(object):
                 wheels.append(whl)
         return wheels
 
+    def get_sdist_expected_names(self):
+        tarballs = []
+        extensions = ('zip', 'tar.gz')
+        for ext in extensions:
+            tarballs.append('{name}-{version}.{ext}'.format(name=self.name,
+                                                            version=str(parse_version(self.version)),
+                                                            ext=ext))
+        return tarballs
+
 
     def execute(self, cmd, cwd=None):
         debug('Executing: %s', ' '.join(cmd))
         with self.exec_context() as run:
             run(cmd, cwd=cwd)
+
+    def _prep_build(self, build, output, uid, gid):
+        if output:
+            if not exists(output):
+                makedirs(output)
+            chown(output, uid, gid)
+
+        src_paths = []
+        pip_path = self.cache_manager.pip_check(self.name, self.version)
+        if pip_path is not None:
+            src_paths.append(pip_path)
+        for src_url in self.wheel_config.sources:
+            src_paths.append(self.cache_manager.url_check(src_url))
+
+        for i, arc_path in enumerate(src_paths):
+            arc = Archive.open(arc_path)
+            assert len(arc.roots) == 1, "Could not determine root directory in archive"
+            root = next(iter(arc.roots))
+            root_t = abspath(join(getcwd(), root))
+            os.environ['SRC_ROOT_%d' % i] = root_t
+            # will cd to first root
+            if i == 0:
+                os.environ['SRC_ROOT'] = root_t
+                root = root_t
+            # TODO: don't use extractall (but since we *should* be running
+            # under docker, we shouldn't need to care)
+            arc.extractall(build)
+
+        prebuild = self.wheel_config.prebuild
+        if prebuild is not None:
+            subprocess.check_call(prebuild, shell=True)
+
+        return root
+
 
     def bdist_wheel(self, output=None, uid=-1, gid=-1):
         # TODO: a lot of stuff in this method like installing from the package
@@ -86,8 +136,6 @@ class ForgeWheel(object):
         gid = int(gid)
         arch = uname()[4]
         build = abspath(getcwd())
-        name = self.wheel_config.name
-        version = self.wheel_config.version
         pythons = []
         if self.image:
             pythons = self.image.pythons
@@ -120,32 +168,7 @@ class ForgeWheel(object):
             else:
                 warn('Skipping installation of dependencies: %s', ', '.join(pkgs))
 
-        if output:
-            if not exists(output):
-                makedirs(output)
-            chown(output, uid, gid)
-
-        src_paths = [self.cache_manager.pip_check(name, version)]
-        for src_url in self.wheel_config.sources:
-            src_paths.append(self.cache_manager.url_check(name))
-
-        for i, arc_path in enumerate(src_paths):
-            arc = Archive.open(arc_path)
-            assert len(arc.roots) == 1, "Could not determine root directory in archive"
-            root = next(iter(arc.roots))
-            root_t = abspath(join(getcwd(), root))
-            os.environ['SRC_ROOT_%d' % i] = root_t
-            # will cd to first root
-            if i == 0:
-                os.environ['SRC_ROOT'] = root_t
-                root = root_t
-            # TODO: don't use extractall (but since we *should* be running
-            # under docker, we shouldn't need to care)
-            arc.extractall(build)
-
-        prebuild = self.wheel_config.prebuild
-        if prebuild is not None:
-            subprocess.check_call(prebuild, shell=True)
+        root = self._prep_build(build, output, uid, gid)
 
         chdir(join(build, root))
 
@@ -171,8 +194,21 @@ class ForgeWheel(object):
                 copy(join('dist', f), output)
                 chown(join(output, f), uid, gid)
 
+
     def sdist(self, output=None, uid=-1, gid=-1):
-        # TODO: implement
-        py = pythons[0].format(arch=arch)
-        cmd = [py, 'setup.py', 'sdist']
+        uid = int(uid)
+        gid = int(gid)
+        arch = uname()[4]
+        build = abspath(getcwd())
+        root = self._prep_build(build, output, uid, gid)
+        chdir(join(build, root))
+        if self.image:
+            python = self.image.pythons[0].format(arch=arch)
+        else:
+            python = 'python'
+        cmd = [python, 'setup.py', 'sdist']
         self.execute(cmd)
+        if output:
+            for f in listdir('dist'):
+                copy(join('dist', f), output)
+                chown(join(output, f), uid, gid)

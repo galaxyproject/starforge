@@ -8,6 +8,8 @@ try:
 except ImportError:
     from ..util import check_output
 
+from six import iteritems
+
 from ..io import warn, info
 from . import ExecutionContext
 
@@ -33,7 +35,7 @@ class DockerExecutionContext(ExecutionContext):
         cmd = self.normalize_cmd(cmd)
         run_cmd = 'docker run --rm'.split()
         run_cmd.extend(self.share_args)
-        for k, v in self.env.items():
+        for (k, v) in iteritems(self.env):
             run_cmd.append('--env={k}={v}'.format(k=k, v=v))
         run_cmd.append(self.image.name)
         run_cmd.extend(cmd)
