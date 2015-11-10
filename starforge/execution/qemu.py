@@ -57,6 +57,7 @@ class QEMUExecutionContext(ExecutionContext):
         """
         self.run_args = copy.deepcopy(self.image.run_args)
         self.ssh_config = copy.deepcopy(self.image.ssh)
+        self.ssh_args = []
         self.shares = None
         self.env = None
         self.snap = None
@@ -91,15 +92,13 @@ class QEMUExecutionContext(ExecutionContext):
         if args is None:
             args = {}
         cmd = self.normalize_cmd(cmd)
-        ssh_args = self.normalize_cmd(self.ssh_config.get('args', ''))
-        ssh_args.extend(['-p', str(self.run_args['sshport'])])
         if template is None:
-            ssh_cmd = ['ssh'] + ssh_args + [self.ssh_config['userhost'], '--'] + cmd
+            ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], '--'] + cmd
         else:
             args['cmd'] = cmd
             for k, v in args.items():
                 args[k] = repr(v)
-            ssh_cmd = ['ssh'] + ssh_args + [self.ssh_config['userhost'], 'mktemp', 'starforge.XXXXXXXX']
+            ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], 'mktemp', 'starforge.XXXXXXXX']
             guest_temp = check_output(ssh_cmd).strip()
             with tempfile.NamedTemporaryFile() as local_temp:
                 template = template.format(**args)
@@ -108,7 +107,7 @@ class QEMUExecutionContext(ExecutionContext):
                 self._scp('{local} {userhost}:{guest}'.format(local=local_temp.name,
                                                               guest=guest_temp,
                                                               userhost=self.ssh_config['userhost']))
-            ssh_cmd = ['ssh'] + ssh_args + [self.ssh_config['userhost'], '--', self.image.buildpy, guest_temp]
+            ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], '--', self.image.buildpy, guest_temp]
             if cmd:
                 info('%s %s executes: %s', self.image.buildpy, guest_temp, self.stringify_cmd(cmd))
             else:
@@ -121,7 +120,7 @@ class QEMUExecutionContext(ExecutionContext):
                 check_call(ssh_cmd)
         finally:
             if template is not None:
-                ssh_cmd = ['ssh'] + ssh_args + [self.ssh_config['userhost'], 'rm', '-f', guest_temp]
+                ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], 'rm', '-f', guest_temp]
                 try:
                     check_call(ssh_cmd)
                 except CalledProcessError:
@@ -130,9 +129,7 @@ class QEMUExecutionContext(ExecutionContext):
 
     def _scp(self, cmd):
         cmd = self.normalize_cmd(cmd)
-        ssh_args = self.normalize_cmd(self.ssh_config.get('args', ''))
-        ssh_args.extend(['-o', 'Port=%s' % self.run_args['sshport']])
-        cmd = ['scp'] + ssh_args + cmd
+        cmd = ['scp'] + self.ssh_args + cmd
         info('Executing: %s', self.stringify_cmd(cmd))
         check_call(cmd)
 
@@ -172,12 +169,17 @@ class QEMUExecutionContext(ExecutionContext):
                                                                             f=drive['file'],
                                                                             format=fmt))
 
+        # set up ssh args
         # select a random port if necessary
         if 'sshport' not in self.run_args:
-            if 'port' not in self.ssh_config:
-                self.ssh_config['port'] = self._random_port()
-                info('Assigning random ssh port %s to QEMU guest', self.ssh_config['port'])
-            self.run_args['sshport'] = self.ssh_config['port']
+            port = self.ssh_config.get('port', None)
+            if port is None:
+                port = self._random_port()
+                info('Assigning random ssh port %s to QEMU guest', port)
+            self.ssh_args = self.normalize_cmd(self.ssh_config.get('args', ''))
+            self.ssh_args.extend(['-o', 'Port=%s' % port])
+            if 'keyfile' in self.ssh_config:
+                self.ssh_args.extend(['-o', 'IdentityFile', self.ssh_config['keyfile']])
 
         # perhaps the btrfs stuff should be abstracted
         if 'bootloader' in self.run_args:

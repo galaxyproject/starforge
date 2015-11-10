@@ -20,7 +20,10 @@ def dict_merge(old, new):
     """
     for k, v in new.items():
         if type(v) == dict:
-            dict_merge(old[k], new[k])
+            if k in old:
+                dict_merge(old[k], new[k])
+            else:
+                old[k] = v
         else:
             old[k] = v
 

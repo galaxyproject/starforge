@@ -53,9 +53,8 @@ def cli(ctx, wheels_config, image, output, uid, gid, fetch_srcs, wheel):
     virtualization, this is not normally a concern, but if you are running it
     by hand, you should be aware of the security risk.
     """
-    wheel_cfgmgr = WheelConfigManager.open(wheels_config)
+    wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)
     cachemgr = CacheManager(ctx.config.cache_path)
-    # FIXME: ctx.config.cache_path is wrong when running under virtualization
     wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
     # `image` is an image_name until here
     image = wheel_config.get_image(image)

@@ -47,7 +47,7 @@ GUEST_SHARE = '/share'
 def cli(ctx, wheels_config, osk, docker, qemu, wheel):
     """ Build a wheel.
     """
-    wheel_cfgmgr = WheelConfigManager.open(wheels_config)
+    wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)
     cachemgr = CacheManager(ctx.config.cache_path)
     wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
     for image_name, image in wheel_config.images.items():

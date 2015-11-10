@@ -7,41 +7,107 @@ docker:
 qemu:
     qemu_use_sudo: no
     btrfs_use_sudo: no
-    run_cmd: qemu-system-x86_64
-    run_args: >
-        -enable-kvm
-        -m 2048
-        -cpu core2duo
-        -machine q35
-        -usb -device usb-kbd -device usb-mouse
-        -device isa-applesmc,osk={osk}
-        -kernel {bootloader}
-        -vga std
-        -vnc none
-        -daemonize
-        -smbios type=2
-        -device ide-drive,bus=ide.2,drive=MacHDD
-        -drive id=MacHDD,if=none,file={diskimage}
-        -netdev user,id=hub0port0,hostfwd=tcp:127.0.0.1:{sshport}-:22
-        -device e1000-82545em,netdev=hub0port0,id=mac_vnet0
-        -device ide-drive,bus=ide.4,drive=wheels
-        -drive id=wheels,if=none,file=fat:rw:{wheels},format=raw
-    # relative to snap_root/snap_src
-    bootloader: boot
-    diskimage: hd.img
-    ssh:
-        # You should probably change `host` to avoid ssh host key
-        # conflicts. An ~/.ssh/config entry like this should work:
-        # Host osxguest:
-        #   Hostname localhost
-        #   User root
-        #   Port 8222
-        # If you don't do this, be aware that '-p' is not automatically set
-        # for you, so in that case you would need to add it to args.
-        args: []
-        host: localhost
-        port: '8222'
-    # qemu > 2.4 should have a label= option for fat drives. It mounted as
-    # `Untitled` on my stretch system and `QEMU VVFAT` on jessie, so who
-    # knows what you'll get...
-    #wheel_volume: /Volumes/QEMU VVFAT
+
+imagesets:
+    purepy-wheel:
+        # tag on debian8-wheel
+        - starforge/purepy-wheel
+    default-wheel:
+        # tags on debian6-wheel*
+        - starforge/base-wheel
+        - starforge/base32-wheel
+        - starforge/osx-wheel:10.6
+    full-wheel:
+        - starforge/debian-wheel:6
+        - starforge/debian-wheel:7
+        - starforge/debian-wheel:8
+        - starforge/debian-wheel:stretch
+        - starforge/debian32-wheel:6
+        - starforge/debian32-wheel:7
+        - starforge/debian32-wheel:8
+        - starforge/debian32-wheel:stretch
+        - starforge/ubuntu-wheel:12.04
+        - starforge/ubuntu-wheel:14.04
+        - starforge/ubuntu-wheel:15.04
+        - starforge/ubuntu-wheel:15.10
+        - starforge/ubuntu32-wheel:12.04
+        - starforge/ubuntu32-wheel:14.04
+        - starforge/ubuntu32-wheel:15.04
+        - starforge/ubuntu32-wheel:15.10
+        - starforge/centos-wheel:6
+        - starforge/centos-wheel:7
+        - starforge/centos32-wheel:6
+        - starforge/opensuse-wheel:13
+        - starforge/fedora-wheel:21
+        - starforge/fedora-wheel:22
+        - starforge/osx-wheel:10.6
+    default_plus_rhel_6-wheel:
+        - starforge/base-wheel
+        - starforge/base32-wheel
+        - starforge/osx:10.6
+        - starforge/centos-wheel:6
+        - starforge/centos32-wheel:6
+
+images:
+    # default image type is `docker`
+    # default pkgtool is `apt`
+    # default pythons are `/python/cp*-{os.uname()[4]}`
+    starforge/purepy-wheel:
+        pythons:
+            - /python/cp26mu-{arch}/bin/python
+    starforge/base-wheel:
+        plat_name: linux_x86_64
+    starforge/base32-wheel:
+        plat_name: linux_i686
+    starforge/centos-wheel:6:
+        pkgtool: yum
+        plat_name: linux_x86_64_rhel_6
+    starforge/centos-wheel:7:
+        pkgtool: yum
+        plat_name: linux_x86_64_rhel_7
+    starforge/centos32-wheel:6:
+        pkgtool: yum
+        plat_name: linux_i686_rhel_6
+    starforge/fedora-wheel:21:
+        pkgtool: yum
+    starforge/fedora-wheel:22:
+        pkgtool: yum
+    starforge/opensuse-wheel:13:
+        pkgtool: zypper
+    starforge/osx-wheel:10.6:
+        type: qemu
+        pkgtool: brew
+        buildpy: /python/wheelenv/bin/python
+        pythons:
+            - /python/cp26m-{arch}/bin/python
+            - /python/cp27m-{arch}/bin/python
+        run_cmd: >
+            qemu-system-x86_64
+            -enable-kvm
+            -m {mem}
+            {smp}
+            -smbios type=2
+            -kernel {bootloader}
+            -cpu core2duo
+            -machine q35
+            -usb -device usb-kbd -device usb-mouse
+            -vga std
+            -vnc none
+            -daemonize
+            -netdev user,id=hub0port0,hostfwd=tcp:127.0.0.1:{sshport}-:22
+            -device e1000-82545em,netdev=hub0port0,id=mac_vnet0
+        run_args:
+            mem: 2048
+            smp: -smp 2,cores=2
+            bootloader: boot
+            drives:
+                -file: hd.img
+        ssh:
+            user: root
+            args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -q'
+            keyfile: ~/.ssh/id_rsa_osx_wheel_10_6
+        snap_root: ~/snapshots
+        snap_src: '@starforge-wheel'
+        # place osk in $XDG_CONFIG_DIR/galaxy-starforge/osk.txt
+        insert_osk: yes
+        vvfat_mount_base: /Volumes
