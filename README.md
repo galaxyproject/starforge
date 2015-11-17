@@ -1,3 +1,5 @@
+![Starforge Logo](https://raw.githubusercontent.com/galaxyproject/starforge/master/docs/starforge_logo.png)
+
 # Galaxy Starforge: Build things in Docker
 
 Things you can do with Starforge:
