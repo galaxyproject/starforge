@@ -1,54 +1,5 @@
 ---
 
-imagesets:
-    default:
-        # note: these are currently just extra tags on debian6-wheel*
-        - galaxy/base-wheel
-        - galaxy/base32-wheel
-    full:
-        - galaxy/debian-wheel:6
-        - galaxy/debian-wheel:7
-        - galaxy/debian-wheel:8
-        - galaxy/debian-wheel:stretch
-        - galaxy/debian32-wheel:6
-        - galaxy/debian32-wheel:7
-        - galaxy/debian32-wheel:8
-        - galaxy/debian32-wheel:stretch
-        - galaxy/ubuntu-wheel:12.04
-        - galaxy/ubuntu-wheel:14.04
-        - galaxy/ubuntu-wheel:15.04
-        - galaxy/ubuntu-wheel:15.10
-        - galaxy/ubuntu32-wheel:12.04
-        - galaxy/ubuntu32-wheel:14.04
-        - galaxy/ubuntu32-wheel:15.04
-        - galaxy/ubuntu32-wheel:15.10
-        - galaxy/centos-wheel:6
-        - galaxy/centos-wheel:7
-        - galaxy/centos32-wheel:6
-        - galaxy/opensuse-wheel:13
-        - galaxy/fedora-wheel:21
-        - galaxy/fedora-wheel:22
-    default_plus_rhel_6:
-        - galaxy/base-wheel
-        - galaxy/base32-wheel
-        - galaxy/centos-wheel:6
-        - galaxy/centos32-wheel:6
-    purepy:
-        # tag on debian8-wheel
-        - galaxy/purepy-wheel
-
-images:
-    galaxy/base-wheel:
-        plat_name: linux_x86_64
-    galaxy/base32-wheel:
-        plat_name: linux_i686
-    galaxy/centos-wheel:6:
-        plat_name: linux_x86_64_rhel_6
-    galaxy/centos-wheel:7:
-        plat_name: linux_x86_64_rhel_7
-    galaxy/centos32-wheel:6:
-        plat_name: linux_i686_rhel_6
-
 packages:
     bx-python:
         version: 0.7.3
@@ -69,7 +20,7 @@ packages:
         src:
             - http://initd.org/psycopg/tarballs/PSYCOPG-2-6/psycopg2-2.6.1.tar.gz
         insert_setuptools: true
-        imageset: full
+        imageset: full-wheel
         apt:
             - libpq-dev
         yum:
@@ -87,7 +38,7 @@ packages:
             - https://github.com/dannon/pysam/archive/flexible_bam_index_naming.tar.gz
         # https://github.com/pysam-developers/pysam/issues/164
         prebuild: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython<0.23' || exit 1; done && sed -i -e 's/0\.8\.3/0.8.3+gx1/' ${SRC_ROOT}/pysam/version.py
-        imageset: default_plus_rhel_6
+        imageset: default_plus_rhel_6-wheel
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it
@@ -201,6 +152,11 @@ purepy_packages:
         version: 1.3
     WebOb:
         version: 1.4.1
+    wheel:
+        version: 0.26.0+gx1
+        src:
+            - https://bitbucket.org/natefoo/wheel/get/795314b825f9.tar.gz
+        prebuild: sed -i -e 's/__version__ = "0\.26\.0"/__version__ = "0.26.0+gx1"/' ${SRC_ROOT}/wheel/__init__.py
     Whoosh:
         version: 2.4.1
         prebuild: sed -i -e 's/self\.results\.docterms\[self\.docnum\]/self.results.docterms.get(self.docnum, [])/' ${SRC_ROOT}/src/whoosh/searching.py && sed -i -e 's/versionstring()/"2.4.1+gx1"/' ${SRC_ROOT}/setup.py
