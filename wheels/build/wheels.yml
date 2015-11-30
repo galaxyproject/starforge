@@ -11,7 +11,7 @@ packages:
     MarkupSafe:
         version: 0.23
     mercurial:
-        version: 3.5
+        version: 3.4.2
         insert_setuptools: true
     numpy:
         version: 1.9.2
