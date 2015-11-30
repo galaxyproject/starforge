@@ -75,3 +75,7 @@ cd natefoo-wheel-WHEEL_VERSION && \
         rm -rf build || exit 1
     done ) && \
     cd ..
+
+for abi in $abis; do
+    /python/${abi}-${arch}/bin/easy_install https://wheels.galaxyproject.org/simple/pip/pip-PIP_VERSION.tar.gz
+done

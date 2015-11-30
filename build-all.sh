@@ -1,17 +1,17 @@
-./build debian:squeeze atlas
-./build debian:squeeze bcftools
-./build debian:squeeze bowtie2
-./build debian:squeeze emboos
-./build debian:squeeze jellyfish
-./build debian:squeeze kraken
-./build debian:squeeze ngninx
-./build debian:squeeze openms
-./build debian:squeeze perlgd
-./build debian:squeeze pkiss
-./build debian:squeeze rnashapes
-./build debian:squeeze samtools
-./build debian:squeeze tophat
-./build debian:squeeze tpp
-./build debian:squeeze ucsc
+./build.sh debian:squeeze atlas
+./build.sh debian:squeeze bcftools
+./build.sh debian:squeeze bowtie2
+./build.sh debian:squeeze emboos
+./build.sh debian:squeeze jellyfish
+./build.sh debian:squeeze kraken
+./build.sh debian:squeeze ngninx
+./build.sh debian:squeeze openms
+./build.sh debian:squeeze perlgd
+./build.sh debian:squeeze pkiss
+./build.sh debian:squeeze rnashapes
+./build.sh debian:squeeze samtools
+./build.sh debian:squeeze tophat
+./build.sh debian:squeeze tpp
+./build.sh debian:squeeze ucsc
 
 python build.py --quiet tbl2asn

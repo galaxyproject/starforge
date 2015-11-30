@@ -1,3 +1,7 @@
 pyyaml
 beautifulsoup4
 filecache
+click
+requests
+six
+wheel==0.26.0+gx1

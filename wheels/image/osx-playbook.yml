@@ -137,9 +137,12 @@
 
   - name: Create wheelenv and install packages
     pip:
-      name: PyYAML
+      name: "{{ item }}"
       virtualenv: /python/wheelenv
       virtualenv_command: /usr/bin/python {{ work_dir }}/virtualenv-{{ virtualenv_version }}/virtualenv.py
+    with_items:
+      - PyYAML
+      - starforge
 
   - name: Fetch setuptools
     get_url:
