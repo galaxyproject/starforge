@@ -9,9 +9,9 @@ from setuptools import setup, find_packages
 with open('README.md') as file:
     long_description = file.read()
 
-long_description += '\n\n'
-with open('HISTORY.md') as file:
-    long_description += file.read()
+#long_description += '\n\n'
+#with open('HISTORY.md') as file:
+#    long_description += file.read()
 
 init = join('starforge', '__init__.py')
 with open(init) as f:
