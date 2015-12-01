@@ -32,6 +32,12 @@
   # - Run gcc once to accept the Xcode license
   # - Install an SSH public key to allow non-interactive SSH to root@host
 
+  - name: Enable user environment via ssh
+    lineinfile:
+      dest: "/etc/sshd_config"
+      line: "PermitUserEnvironment yes"
+      regexp: "^PermitUserEnvironment "
+
   - name: Create /Developer symlink
     file:
       src: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer
@@ -138,11 +144,12 @@
   - name: Create wheelenv and install packages
     pip:
       name: "{{ item }}"
+      extra_args: "--index-url https://wheels.galaxyproject.org/simple"
       virtualenv: /python/wheelenv
       virtualenv_command: /usr/bin/python {{ work_dir }}/virtualenv-{{ virtualenv_version }}/virtualenv.py
     with_items:
       - PyYAML
-      - starforge
+      - git+https://github.com/natefoo/starforge.git#egg=starforge
 
   - name: Fetch setuptools
     get_url:

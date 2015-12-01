@@ -178,10 +178,11 @@ class QEMUExecutionContext(ExecutionContext):
             if port is None:
                 port = self._random_port()
                 info('Assigning random ssh port %s to QEMU guest', port)
+            self.run_args['sshport'] = port
             self.ssh_args = self.normalize_cmd(self.ssh_config.get('args', ''))
             self.ssh_args.extend(['-o', 'Port=%s' % port])
             if 'keyfile' in self.ssh_config:
-                self.ssh_args.extend(['-o', 'IdentityFile', self.ssh_config['keyfile']])
+                self.ssh_args.extend(['-o', 'IdentityFile=%s' % self.ssh_config['keyfile']])
 
         # perhaps the btrfs stuff should be abstracted
         if 'bootloader' in self.run_args:
