@@ -45,9 +45,12 @@ GUEST_SHARE = '/share'
 @click.option('--qemu/--no-qemu',
               default=True,
               help='Build under QEMU')
+@click.option('--qemu-port',
+              default=None,
+              help='Connect to running QEMU instance on PORT')
 @click.argument('wheel')
 @pass_context
-def cli(ctx, wheels_config, osk, docker, qemu, wheel):
+def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port):
     """ Build a wheel.
     """
     wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)
@@ -64,7 +67,7 @@ def cli(ctx, wheels_config, osk, docker, qemu, wheel):
         elif image.type == 'qemu':
             if not qemu:
                 continue
-            ectx = QEMUExecutionContext(image, ctx.config.qemu, osk_file=osk)
+            ectx = QEMUExecutionContext(image, ctx.config.qemu, osk_file=osk, qemu_port=qemu_port)
         forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image)
         forge.cache_sources()
         build_wheel = False

@@ -44,11 +44,13 @@ for guest in {guests}:
 
 
 class QEMUExecutionContext(ExecutionContext):
-    def __init__(self, image, qemu_config=None, osk_file=None, **kwargs):
+    def __init__(self, image, qemu_config=None, osk_file=None, qemu_port=None, **kwargs):
         self.image = image
         self.qemu_config = qemu_config
         self.qemu_use_sudo = qemu_config.get('qemu_use_sudo', False)
         self.btrfs_use_sudo = qemu_config.get('btrfs_use_sudo', False)
+        self.qemu_port = qemu_port
+        self.start_stop_image = qemu_port is None
         self.osk = None
         if osk_file is not None and exists(osk_file):
             self.osk = open(osk_file).read().strip()
@@ -67,6 +69,22 @@ class QEMUExecutionContext(ExecutionContext):
         self.drives = []
         if 'drives' in self.image.run_args:
             self.drives = copy.deepcopy(self.image.run_args['drives'])
+        if self.qemu_port is not None:
+            self.run_args['sshport'] = self.qemu_port
+
+        # set up ssh args
+        self.ssh_args = self.normalize_cmd(self.ssh_config.get('args', ''))
+        if self.qemu_port is not None:
+            port = self.qemu_port
+            self.run_args['sshport'] = self.qemu_port
+        elif 'sshport' in self.run_args:
+            port = self.run_args['sshport']
+        else:
+            port = None
+        if port is not None:
+            self.ssh_args.extend(['-o', 'Port=%s' % port])
+        if 'keyfile' in self.ssh_config:
+            self.ssh_args.extend(['-o', 'IdentityFile=%s' % self.ssh_config['keyfile']])
 
     def _random_port(self):
         """Select a random port for ssh forwarding. There's a race condition
@@ -136,6 +154,11 @@ class QEMUExecutionContext(ExecutionContext):
         check_call(cmd)
 
     def start(self, share=None, env=None, **kwargs):
+        # if a port was provided on the command line, we assume the image is
+        # already running
+        if not self.start_stop_image:
+            return
+
         # path to snapshot
         self.snap = join(self.image.snap_root, '@' + str(uuid.uuid1()))
         drives = []
@@ -179,10 +202,7 @@ class QEMUExecutionContext(ExecutionContext):
                 port = self._random_port()
                 info('Assigning random ssh port %s to QEMU guest', port)
             self.run_args['sshport'] = port
-            self.ssh_args = self.normalize_cmd(self.ssh_config.get('args', ''))
-            self.ssh_args.extend(['-o', 'Port=%s' % port])
-            if 'keyfile' in self.ssh_config:
-                self.ssh_args.extend(['-o', 'IdentityFile=%s' % self.ssh_config['keyfile']])
+            self.ssh_args.extend(['-o', 'Port=%s' % self.run_args['sshport']])
 
         # perhaps the btrfs stuff should be abstracted
         if 'bootloader' in self.run_args:
@@ -266,10 +286,11 @@ class QEMUExecutionContext(ExecutionContext):
                     userhost=self.ssh_config['userhost'],
                     guest=guest,
                     host=host))
-        try:
-            self._ssh('shutdown -h now', template=None)
-        except CalledProcessError as exc:
-            assert exc.returncode == 255
-        cmd = 'btrfs subvolume delete {snap}'.format(snap=self.snap)
-        self._execute(cmd, sudo=self.btrfs_use_sudo)
-        self._init()
+        if self.start_stop_image:
+            try:
+                self._ssh('shutdown -h now', template=None)
+            except CalledProcessError as exc:
+                assert exc.returncode == 255
+            cmd = 'btrfs subvolume delete {snap}'.format(snap=self.snap)
+            self._execute(cmd, sudo=self.btrfs_use_sudo)
+            self._init()
