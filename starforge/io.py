@@ -19,10 +19,11 @@ def debug(message, *args):
         click.echo(message)
 
 
-def info(message, *args):
+def info(message, *args, **kwargs):
     if args:
         message = message % args
-    click.echo(click.style(message, bold=True, fg='green'))
+    fg = kwargs.get('fg', 'green')
+    click.echo(click.style(message, bold=True, fg=fg))
 
 
 def error(message, *args):

@@ -79,3 +79,13 @@ class WheelConfigManager(object):
 
     def get_wheel_images(self, name):
         return self.get_wheel_config(name).get_images()
+
+    def __iter__(self):
+        for name, wheel in iteritems(self.wheels):
+            yield name, wheel
+
+    def __getitem__(self, name):
+        return self.wheels[name]
+
+    def __contains__(self, name):
+        return name in self.wheels
