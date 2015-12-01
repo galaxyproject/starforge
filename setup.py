@@ -39,6 +39,9 @@ setup(
         'six',
         'wheel==0.26.0+gx1'
     ],
+    extras_require = {
+        ':python_version=="2.6"': ["ordereddict"]
+    },
     dependency_links = [
         'https://wheels.galaxyproject.org/simple/wheel/',
     ],

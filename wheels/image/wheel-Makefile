@@ -3,6 +3,7 @@ FROM		:= REPLACE_FROM
 DOCKERFILE	:= REPLACE_DOCKERFILE
 PKGS		:= REPLACE_PKGS
 WHEEL_VERSION	:= REPLACE_WHEEL_VERSION
+PIP_VERSION	:= REPLACE_PIP_VERSION
 
 
 image-id: Dockerfile .dockerignore buildpy.sh
@@ -18,6 +19,7 @@ Dockerfile: ../$(DOCKERFILE)
 
 buildpy.sh: ../buildpy.sh.in
 	sed -e 's#WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#PIP_VERSION#$(PIP_VERSION)#' \
 		../buildpy.sh.in >$@
 
 clean:

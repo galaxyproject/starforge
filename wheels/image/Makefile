@@ -12,6 +12,7 @@ CENTOS_PKGS	= findutils python tar make gcc gcc-c++ curl zlib-devel openssl-deve
 OPENSUSE_PKGS	= python tar make gcc gcc-c++ glibc-devel ca-certificates-mozilla curl zlib-devel libopenssl-devel libbz2-devel python-PyYAML
 
 WHEEL_VERSION	= 3f496bdf2708
+PIP_VERSION	= 8.0.0.dev0+gx1
 
 all: $(ALL_TARGETS)
 
@@ -73,6 +74,7 @@ debian-wheel_6/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-64.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 debian-wheel_7/Makefile: wheel-Makefile
@@ -82,6 +84,7 @@ debian-wheel_7/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-64.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 debian-wheel_8/Makefile: wheel-Makefile
@@ -90,6 +93,7 @@ debian-wheel_8/Makefile: wheel-Makefile
 		-e 's#REPLACE_FROM#debian:8#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 debian-wheel_stretch/Makefile: wheel-Makefile
@@ -98,6 +102,7 @@ debian-wheel_stretch/Makefile: wheel-Makefile
 		-e 's#REPLACE_FROM#debian:stretch#' \
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 # Debian 32 bit
@@ -109,6 +114,7 @@ debian32-wheel_6/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-32.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 debian32-wheel_7/Makefile: wheel-Makefile
@@ -118,6 +124,7 @@ debian32-wheel_7/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-32.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 # Debian >= 8 is fully multiarch capable, so the "32 bit" image is built from
@@ -145,6 +152,7 @@ ubuntu-wheel_12.04/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-64.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 ubuntu-wheel_14.04/Makefile: wheel-Makefile
@@ -154,6 +162,7 @@ ubuntu-wheel_14.04/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 ubuntu-wheel_15.04/Makefile: wheel-Makefile
@@ -163,6 +172,7 @@ ubuntu-wheel_15.04/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 ubuntu-wheel_15.10/Makefile: wheel-Makefile
@@ -172,6 +182,7 @@ ubuntu-wheel_15.10/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-multiarch.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 # Ubuntu 32 bit
@@ -183,6 +194,7 @@ ubuntu32-wheel_12.04/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-32.in#' \
 		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 # Ubuntu >= 14.04 is fully multiarch capable
@@ -216,6 +228,7 @@ centos-wheel_6/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-64.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 centos-wheel_7/Makefile: wheel-Makefile
@@ -225,6 +238,7 @@ centos-wheel_7/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-64.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 # CentOS 32 bit
@@ -236,6 +250,7 @@ centos32-wheel_6/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-32.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 # openSUSE
@@ -247,6 +262,7 @@ opensuse-wheel_13/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-opensuse.in#' \
 		-e 's#REPLACE_PKGS#$(OPENSUSE_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 # Fedora
@@ -258,6 +274,7 @@ fedora-wheel_21/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-64.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 fedora-wheel_22/Makefile: wheel-Makefile
@@ -267,6 +284,7 @@ fedora-wheel_22/Makefile: wheel-Makefile
 		-e 's#REPLACE_DOCKERFILE#Dockerfile-centos-64.in#' \
 		-e 's#REPLACE_PKGS#$(CENTOS_PKGS)#' \
 		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
 		wheel-Makefile >$@
 
 .PHONY: $(ALL_TARGETS) $(CLEAN_TARGETS) all clean distclean

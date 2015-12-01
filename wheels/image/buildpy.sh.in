@@ -82,5 +82,5 @@ cd starforge-master && \
     cd .. && \
 
 for abi in $abis; do
-    /python/${abi}-${arch}/bin/easy_install https://wheels.galaxyproject.org/simple/pip/pip-PIP_VERSION.tar.gz
+    /python/${abi}-${arch}/bin/easy_install https://wheels.galaxyproject.org/packages/pip-PIP_VERSION.tar.gz
 done
