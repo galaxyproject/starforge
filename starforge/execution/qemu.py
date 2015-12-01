@@ -8,7 +8,7 @@ import tempfile
 import uuid
 from os import sep
 from os.path import exists, dirname, join
-from subprocess import check_call, CalledProcessError
+from subprocess import check_call, CalledProcessError, Popen
 from time import sleep
 try:
     from subprocess import check_output
@@ -67,6 +67,7 @@ class QEMUExecutionContext(ExecutionContext):
         self.snap = None
         self.share = None
         self.drives = []
+        self.qemu_proc = None
         if 'drives' in self.image.run_args:
             self.drives = copy.deepcopy(self.image.run_args['drives'])
         if self.qemu_port is not None:
@@ -211,19 +212,24 @@ class QEMUExecutionContext(ExecutionContext):
         # assemble start command
         run_cmd = self.image.run_cmd.format(**self.run_args)
         run_cmd = self.normalize_cmd(run_cmd)
+        run_cmd.extend(drive_args)
+        display_cmd = copy.copy(run_cmd)
         if self.image.insert_osk:
             assert self.osk is not None, 'Image requested insertion of OSK but OSK is unknown!'
             run_cmd.append('-device')
             run_cmd.append('isa-applesmc,osk={osk}'.format(osk=self.osk))
-        info('Running qemu-system: %s', self.stringify_cmd(run_cmd))
-        run_cmd.extend(drive_args)
+            display_cmd.extend(['-device', 'isa-applesmc,osk=redacted'])
+        info('Running qemu-system: %s', self.stringify_cmd(display_cmd))
 
         # snapshot the source image for this run
         cmd = 'btrfs subvolume snapshot {src} {dest}'.format(src=join(self.image.snap_root, self.image.snap_src), dest=self.snap)
         self._execute(cmd, sudo=self.btrfs_use_sudo)
 
         # run QEMU
-        self._execute(run_cmd, sudo=self.qemu_use_sudo)
+        if self.qemu_use_sudo:
+            run_cmd = ['sudo'] + run_cmd
+        self.qemu_proc = Popen(run_cmd)
+        info('QEMU started in pid %s', self.qemu_proc.pid)
 
         # wait for the guest to boot. the first call to ssh will hang until the
         # system is mostly booted. after that it may fail until it's fully up,
@@ -291,6 +297,10 @@ class QEMUExecutionContext(ExecutionContext):
                 self._ssh('shutdown -h now', template=None)
             except CalledProcessError as exc:
                 assert exc.returncode == 255
+            if self.qemu_proc is not None:
+                info('Waiting for QEMU guest shutdown...')
+                self.qemu_proc.wait()
+                # TODO: if necessary, use poll() and kill() if it doesn't die
             cmd = 'btrfs subvolume delete {snap}'.format(snap=self.snap)
             self._execute(cmd, sudo=self.btrfs_use_sudo)
             self._init()

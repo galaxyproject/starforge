@@ -93,7 +93,6 @@ images:
             -usb -device usb-kbd -device usb-mouse
             -vga std
             -vnc none
-            -daemonize
             -netdev user,id=hub0port0,hostfwd=tcp:127.0.0.1:{sshport}-:22
             -device e1000-82545em,netdev=hub0port0,id=mac_vnet0
         run_args:
