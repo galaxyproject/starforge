@@ -244,6 +244,8 @@ class QEMUExecutionContext(ExecutionContext):
             except CalledProcessError:
                 warn('SSH connection test failed, retry %s', (i + 1))
                 sleep(5)
+        else:
+            raise Exception('Connection to guest SSH server failed')
 
         # OS X mounts the VVFAT volumes automatically, other OS' may not, but
         # at this point we don't care about other OS'
