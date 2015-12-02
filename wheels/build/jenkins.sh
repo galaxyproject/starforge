@@ -83,5 +83,5 @@ fi
 if [ -d ${output} ]; then
     ssh ${depotuser}@${depothost} "mkdir -p ${depotroot}/build-${BUILD_NUMBER}"
     scp ${output}/* ${depotuser}@${depothost}:${depotroot}/build-${BUILD_NUMBER}
-    ssh ${depotuser}@${depothost} "chmod 0644 ${depotroot}/build-${BUILD_NUMBER}/\*"
+    ssh ${depotuser}@${depothost} "chmod 0644 ${depotroot}/build-${BUILD_NUMBER}/*"
 fi
