@@ -8,11 +8,11 @@ sfbuild='mjolnir0.galaxyproject.org'
 base_branch='remotes/origin/master'
 sfvenv='/home/jenkins/sfvenv'
 
-if [ -z "${BUILD_NUMBER}" ]; then
-    echo '$BUILD_NUMBER is unset, are you running from Jenkins?'
+if [ -z "${JENKINS_DIST_DIR}" ]; then
+    echo '$JENKINS_DIST_DIR is unset, are you running from Jenkins?'
     exit 1
 else
-    output=$(realpath wheels-build-${BUILD_NUMBER})
+    output=$(realpath ${JENKINS_DIST_DIR})
 fi
 
 
