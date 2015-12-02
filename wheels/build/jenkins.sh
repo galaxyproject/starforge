@@ -5,7 +5,7 @@ set -e
 
 sfuser='jenkins'
 sfbuild='mjolnir0.galaxyproject.org'
-base_branch='master'
+base_branch='remotes/origin/master'
 sfvenv='/home/jenkins/sfvenv'
 
 if [ -z "${BUILD_NUMBER}" ]; then
