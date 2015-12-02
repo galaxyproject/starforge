@@ -17,7 +17,7 @@ import yaml
 from pkg_resources import parse_version
 from six import with_metaclass
 
-from .io import warn, error, info, debug, fatal
+from .io import warn, info, debug, fatal
 
 
 class BaseCacher(with_metaclass(ABCMeta, object)):
@@ -71,6 +71,7 @@ class TarballCacher(BaseCacher):
 
 class PlatformStringCacher(BaseCacher):
     cache_file = '__platform_cache.yml'
+
     def __init__(self, cache_path):
         super(PlatformStringCacher, self).__init__(cache_path)
         self.cache_file = join(cache_path, PlatformStringCacher.cache_file)
@@ -89,9 +90,14 @@ class PlatformStringCacher(BaseCacher):
                 # ugly...
                 cmd = "python -c 'import os; print os.uname()[4]'"
                 arch = run(cmd, capture_output=True).splitlines()[0].strip()
-                cmd = "{buildpy} -c 'import wheel.pep425tags; print wheel.pep425tags.get_platforms(major_only=True)[0]'".format(buildpy=buildpy)
+                cmd = ("{buildpy} -c 'import wheel.pep425tags; "
+                       "print wheel.pep425tags.get_platforms"
+                       "(major_only=True)[0]'".format(buildpy=buildpy))
                 cmd = cmd.format(arch=arch)
-                platform = run(cmd, capture_output=True).splitlines()[0].strip()
+                platform = run(
+                    cmd,
+                    capture_output=True
+                ).splitlines()[0].strip()
             platforms[name] = platform
             with open(self.cache_file, 'w') as handle:
                 handle.write(yaml.dump(platforms))
@@ -133,7 +139,7 @@ class PipSourceCacher(TarballCacher):
                 info('Fetching sdist: %s', name)
                 debug('Executing: %s', ' '.join(cmd))
                 subprocess.check_call(cmd)
-            except subprocess.CalledProcessError as exc:
+            except subprocess.CalledProcessError:
                 if not fail_ok:
                     raise
 
@@ -159,10 +165,16 @@ class CacheManager(object):
         return self.cachers['platform'].check(name)
 
     def pip_cache(self, name, version, fail_ok=False):
-        return self.cachers['pip'].cache(name, version=version, fail_ok=fail_ok)
+        return self.cachers['pip'].cache(
+            name,
+            version=version,
+            fail_ok=fail_ok)
 
     def url_cache(self, name):
         return self.cachers['url'].cache(name)
 
     def platform_cache(self, name, execctx, buildpy):
-        return self.cachers['platform'].cache(name, execctx=execctx, buildpy=buildpy)
+        return self.cachers['platform'].cache(
+            name,
+            execctx=execctx,
+            buildpy=buildpy)

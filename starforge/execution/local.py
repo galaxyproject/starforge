@@ -8,7 +8,7 @@ try:
 except ImportError:
     from ..util import check_output
 
-from ..io import warn, info
+from ..io import info
 from . import ExecutionContext
 
 

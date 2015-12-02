@@ -112,7 +112,6 @@ class Archive(object):
         # FIXME: replace with a safe extraction
         return self.arc.extractall(path)
 
-
     @property
     def universal(self):
         """ Return true if this archive contains an sdist for a universal wheel
@@ -127,7 +126,7 @@ class Archive(object):
             try:
                 universal = cp.get('bdist_wheel', 'universal')
             except NoSectionError:
-                # this isn't documented but seems to work, and PasteDeploy uses it
+                # this isn't documented but works, and PasteDeploy uses it
                 universal = cp.get('wheel', 'universal')
             return asbool(universal)
         except (KeyError, NoSectionError, NoOptionError):

@@ -12,3 +12,7 @@ image/Dockerfile
 wheels/dist/
 wheels/dist-qemu/
 wheels/build/cache/
+
+.tox
+
+starforge.egg-info

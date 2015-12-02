@@ -52,4 +52,3 @@ class ExecutionContext(with_metaclass(ABCMeta, object)):
     def destroy(self, **kwargs):
         """
         """
-

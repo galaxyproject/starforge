@@ -4,8 +4,6 @@ from __future__ import absolute_import
 
 import click
 
-from os import getcwd
-
 from ..io import info
 from ..cli import pass_context
 from ..config.wheels import WheelConfigManager
@@ -45,5 +43,3 @@ def cli(ctx, wheels_config, old_wheels_config):
         info('R %s', name, fg='red')
     for name in modified:
         info('M %s', name, fg='blue')
-
-
