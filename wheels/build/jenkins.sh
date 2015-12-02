@@ -1,14 +1,19 @@
 #!/bin/bash
 set -e
-set -xv
-
-wheels_patch=$(mktemp)
-wheels_tmp=$(mktemp)
+# to debug:
+#set -xv
 
 sfuser='jenkins'
 sfbuild='mjolnir0.galaxyproject.org'
 base_branch='master'
 sfvenv='/home/jenkins/sfvenv'
+
+if [ -z "${BUILD_NUMBER}" ]; then
+    echo '$BUILD_NUMBER is unset, are you running from Jenkins?'
+    exit 1
+else
+    output=$(realpath wheels-build-${BUILD_NUMBER})
+fi
 
 
 function build_wheel()
@@ -16,33 +21,58 @@ function build_wheel()
     wheel=$1
     new=$2
 
-    output=$(ssh ${sfuser}@${sfbuild} mktemp -d)
-    ssh ${sfuser}@${sfbuild} "cd $output && PATH="/sbin:\$PATH" && . ${sfvenv}/bin/activate && starforge --debug wheel --wheels-config=$new $wheel"
-    scp ${sfuser}@${sfbuild}:${output}/\*.whl ${sfuser}@${sfbuild}:${output}/\*.tar.gz .
+    outtmp=$(ssh ${sfuser}@${sfbuild} mktemp -d)
+    ssh ${sfuser}@${sfbuild} "cd $outtmp && PATH="/sbin:\$PATH" && . ${sfvenv}/bin/activate && starforge --debug wheel --wheels-config=$new $wheel"
+    [ ! -d ${output} ] && mkdir -p ${output}
+    scp ${sfuser}@${sfbuild}:${outtmp}/\*.whl ${sfuser}@${sfbuild}:${outtmp}/\*.tar.gz ${output}
+    echo "Contents of ${output} after building ${wheel}:"
+    ls -l ${output}
 }
 
-read new old < <(ssh ${sfuser}@${sfbuild} 'mktemp && mktemp' | xargs echo)
 
-cp wheels/build/wheels.yml $wheels_tmp
-git diff --color=never HEAD $base_branch -- wheels/build/wheels.yml >$wheels_patch
+if [ -z "$1" -o "$1" = 'none' ]; then
 
-if [ $(stat -c %s $wheels_patch) -ne 0 ]; then
-    patch -s $wheels_tmp $wheels_patch
+    echo "Detecting changes to wheels.yml..."
+
+    wheels_patch=$(mktemp)
+    wheels_tmp=$(mktemp)
+
+    read new old < <(ssh ${sfuser}@${sfbuild} 'mktemp && mktemp' | xargs echo)
+
+    cp wheels/build/wheels.yml $wheels_tmp
+    git diff --color=never HEAD $base_branch -- wheels/build/wheels.yml >$wheels_patch
+
+    if [ $(stat -c %s $wheels_patch) -ne 0 ]; then
+        patch -s $wheels_tmp $wheels_patch
+        scp -q wheels/build/wheels.yml ${sfuser}@${sfbuild}:${new}
+        scp -q $wheels_tmp ${sfuser}@${sfbuild}:${old}
+        while read op wheel; do
+            case "$op" in
+                A)
+                    echo "Building new wheel $wheel"
+                    build_wheel $wheel $new
+                    ;;
+                M)
+                    echo "Rebuilding modified wheel $wheel"
+                    build_wheel $wheel $new
+                    ;;
+            esac
+        done < <(ssh ${sfuser}@${sfbuild} ${sfvenv}/bin/starforge wheel_diff --wheels-config=$new $old)
+        ssh ${sfuser}@${sfbuild} "rm ${new} ${old}"
+    fi
+
+    rm ${wheels_patch} ${wheels_tmp}
+
+else
+
+    new=$(ssh ${sfuser}@${sfbuild} mktemp)
     scp -q wheels/build/wheels.yml ${sfuser}@${sfbuild}:${new}
-    scp -q $wheels_tmp ${sfuser}@${sfbuild}:${old}
-    while read op wheel; do
-        case "$op" in
-            A)
-                echo "Building new wheel $wheel"
-                build_wheel $wheel $new
-                ;;
-            M)
-                echo "Rebuilding modified wheel $wheel"
-                build_wheel $wheel $new
-                ;;
-        esac
-    done < <(ssh ${sfuser}@${sfbuild} ${sfvenv}/bin/starforge wheel_diff --wheels-config=$new $old)
-    ssh ${sfuser}@${sfbuild} "rm ${new} ${old}"
-fi
 
-rm ${wheels_patch} ${wheels_tmp}
+    for wheel in "$@"; do
+        echo "Building specified wheel: ${wheel}"
+        build_wheel $wheel $new
+    done
+
+    ssh ${sfuser}@${sfbuild} "rm ${new}"
+
+fi
