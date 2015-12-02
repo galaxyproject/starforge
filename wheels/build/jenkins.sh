@@ -5,14 +5,17 @@ set -e
 
 sfuser='jenkins'
 sfbuild='mjolnir0.galaxyproject.org'
+depotuser='depot'
+depothost='orval.galaxyproject.org'
+depotroot='/srv/nginx/depot.galaxyproject.org/root/starforge/wheels'
 base_branch='remotes/origin/master'
 sfvenv='/home/jenkins/sfvenv'
 
-if [ -z "${JENKINS_DIST_DIR}" ]; then
-    echo '$JENKINS_DIST_DIR is unset, are you running from Jenkins?'
+if [ -z "${BUILD_NUMBER}" ]; then
+    echo '$BUILD_NUMBER is unset, are you running from Jenkins?'
     exit 1
 else
-    output=$(realpath ${JENKINS_DIST_DIR})
+    output=$(realpath wheels/dist/build-${BUILD_NUMBER})
 fi
 
 
@@ -75,4 +78,10 @@ else
 
     ssh ${sfuser}@${sfbuild} "rm ${new}"
 
+fi
+
+if [ -d ${output} ]; then
+    ssh ${depotuser}@${depothost} "mkdir -p ${depotroot}/build-${BUILD_NUMBER}"
+    scp ${output}/* ${depotuser}@${depothost}:${depotroot}/build-${BUILD_NUMBER}
+    ssh ${depotuser}@${depothost} "chmod 0644 ${depotroot}/build-${BUILD_NUMBER}/\*"
 fi
