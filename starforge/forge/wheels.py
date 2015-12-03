@@ -121,10 +121,6 @@ class ForgeWheel(object):
             # under docker, we shouldn't need to care)
             arc.extractall(build)
 
-        prebuild = self.wheel_config.prebuild
-        if prebuild is not None:
-            subprocess.check_call(prebuild, shell=True)
-
         return root
 
 
@@ -169,6 +165,10 @@ class ForgeWheel(object):
                 warn('Skipping installation of dependencies: %s', ', '.join(pkgs))
 
         root = self._prep_build(build, output, uid, gid)
+
+        prebuild = self.wheel_config.prebuild
+        if prebuild is not None:
+            subprocess.check_call(prebuild, shell=True)
 
         chdir(join(build, root))
 
