@@ -15,6 +15,14 @@ packages:
         insert_setuptools: true
     numpy:
         version: 1.9.2
+    h5py:
+        version: 2.5.0
+        prebuild: "git clone -b linux-wheels https://github.com/natefoo/pip && cd pip && for py in /python/cp*-`uname -m`; do ${py}/bin/python setup.py install && ${py}/bin/pip install --index-url https://wh$
+        src:
+            - https://pypi.python.org/packages/source/h/h5py/h5py-2.5.0.tar.gz
+        apt:
+            - git
+            - libhdf5-serial-dev
     psycopg2:
         version: 2.6.1
         src:
