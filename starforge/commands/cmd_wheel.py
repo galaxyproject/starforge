@@ -96,14 +96,14 @@ def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port):
         else:
             info('All wheels from image %s already built', image_name)
 
-    build_sdist = False
+    build_sdist = True
     for name in forge.get_sdist_expected_names():
         if exists(name):
             info("sdist %s already built", name)
-            build_sdist = True
-    if not build_sdist:
-        image = filter(lambda x: x.type == 'docker',
-                       itervalues(wheel_config.images))[0]
+            build_sdist = False
+    if build_sdist:
+        image = next(filter(lambda x: x.type == 'docker',
+                            itervalues(wheel_config.images)))
         ectx = DockerExecutionContext(image, ctx.config.docker)
         forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context,
                            image=image)
