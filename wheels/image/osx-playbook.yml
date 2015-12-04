@@ -13,7 +13,7 @@
         CFLAGS='-I/Developer/SDKs/MacOSX10.6.sdk/usr/include'
         CPPFLAGS='-I/Developer/SDKs/MacOSX10.6.sdk/usr/include'
         LDFLAGS='-g'
-        OPT='-g -O3'
+        OPT='-g'
         MACOSX_DEPLOYMENT_TARGET=10.6
     py27_version: 2.7.10
     py27_sha256: dc08b90ebc21fd3987909144ed95aa36474f69e6f9c8deb224db5c626838d013
