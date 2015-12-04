@@ -23,6 +23,7 @@
     setuptools_sha256: 8c4ab0c4f227730519dc1e020f875b3ef97e643c8f43a98a4fa0c46fbad12450
     wheel_version: 3f496bdf2708
     wheel_sha256: 5e9dde924f91f80484b7b3be44e6e7b7f8fa56eca89d14920d3f1286aed1adc6
+    user_public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCruS3Vk9D5u0lHSEwjO5g0WefvGzP/F0O9LhywRepFUxeZ9WKNiay+S/xi0y/1neJV+zEmy0/6SLGpT5L20ZgzpVMR5iFnJV+q0JENrhJ4uq/pedVkWCW1nA9HgAVqyBn94WXwuZGEovIK+XmeNXMdlPO7jerjUTLGCiefiCnCQqseJqjjEpqTRpAkl5YEZulZzfoBryzaHlzudryhkiRlJbmzuvhd75exbM25YHgs9lT+s+tRrS0UqEejNkz9P+W3HD4ICzc2zlu6O1mtdaReUlkass11ECYCOwMJTmRE1cy+j0SAbhhQLlLIgLbP/8DEiOi2vymdoH96R8BU9TKx user@mjolnir0
   tasks:
 
   # TODO: These tasks were performed by hand:
@@ -30,13 +31,20 @@
   # - Install Xcode
   # - Copy the 10.6 SDK to /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
   # - Run gcc once to accept the Xcode license
-  # - Install an SSH public key to allow non-interactive SSH to root@host
 
   - name: Enable user environment via ssh
     lineinfile:
       dest: "/etc/sshd_config"
       line: "PermitUserEnvironment yes"
       regexp: "^PermitUserEnvironment "
+
+  - name: Allow ssh with public key
+    authorized_key:
+      key: "{{ user_public_key }}"
+      user:  "{{ item }}"
+    with_items:
+      - root
+      - admin
 
   - name: Create /Developer symlink
     file:
