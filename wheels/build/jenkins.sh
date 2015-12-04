@@ -25,7 +25,7 @@ function build_wheel()
     new=$2
 
     outtmp=$(ssh ${sfuser}@${sfbuild} mktemp -d)
-    ssh ${sfuser}@${sfbuild} "cd $outtmp && PATH="/sbin:\$PATH" && . ${sfvenv}/bin/activate && starforge --debug wheel --wheels-config=$new $wheel"
+    ssh ${sfuser}@${sfbuild} "cd $outtmp && PATH="/sbin:\$PATH" && . ${sfvenv}/bin/activate && starforge --debug wheel --wheels-config=$new --exit-on-failure $wheel"
     [ ! -d ${output} ] && mkdir -p ${output}
     scp ${sfuser}@${sfbuild}:${outtmp}/\*.whl ${sfuser}@${sfbuild}:${outtmp}/\*.tar.gz ${output}
     echo "Contents of ${output} after building ${wheel}:"

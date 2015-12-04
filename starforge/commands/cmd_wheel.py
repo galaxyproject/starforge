@@ -48,9 +48,15 @@ GUEST_SHARE = '/share'
 @click.option('--qemu-port',
               default=None,
               help='Connect to running QEMU instance on PORT')
+@click.option('--exit-on-failure/--no-exit-on-failure',
+              default=False,
+              help='Immediately exit upon build failure (by default, '
+                   'Starforge will try to build on all configured images '
+                   'even if a previous image fails)')
 @click.argument('wheel')
 @pass_context
-def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port):
+def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port,
+        exit_on_failure):
     """ Build a wheel.
     """
     wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)
@@ -80,9 +86,11 @@ def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port):
             cmd, share, env = _prep_build(ctx.config, wheels_config, BDIST_WHEEL_CMD_TEMPLATE, image, wheel)
             with ectx.run_context(share=share, env=env) as run:
                 run(cmd)
-            for name in forge.get_expected_names():
-                if not exists(name):
-                    warn("%s missing, build failed?", name)
+            missing = [ n for n in forge.get_expected_names() if not exists(n) ]
+            for name in missing:
+                warn("%s missing, build failed?", name)
+            if exit_on_failure and missing:
+                fatal("Exiting due to missing wheels")
         else:
             info('All wheels from image %s already built', image_name)
 
@@ -104,7 +112,11 @@ def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port):
             if exists(name):
                 break
         else:
-            warn("Possible sdists missing, build failed?")
+            msg = "Possible sdists missing, build failed?"
+            if exit_on_failure:
+                fatal(msg)
+            else:
+                warn(msg)
 
 
 def _prep_build(global_config, wheels_config, template, image, wheel_name):
