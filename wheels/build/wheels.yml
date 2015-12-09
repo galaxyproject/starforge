@@ -67,7 +67,7 @@ packages:
 
 purepy_packages:
     amqp:
-        version: 1.4.6
+        version: 1.4.8
     anyjson:
         version: 0.3.3
     Babel:
@@ -91,7 +91,7 @@ purepy_packages:
         version: 1.0.3
         insert_setuptools: true
     kombu:
-        version: 3.0.26
+        version: 3.0.30
     Mako:
         version: 1.0.2
     Markdown:
