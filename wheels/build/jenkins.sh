@@ -21,14 +21,14 @@ fi
 
 function build_wheel()
 {
-    wheel=$1
-    new=$2
+    l_wheel=$1
+    l_new=$2
 
     outtmp=$(ssh ${sfuser}@${sfbuild} mktemp -d)
-    ssh ${sfuser}@${sfbuild} "cd $outtmp && PATH="/sbin:\$PATH" && . ${sfvenv}/bin/activate && starforge --debug wheel --wheels-config=$new --exit-on-failure $wheel"
+    ssh ${sfuser}@${sfbuild} "cd $outtmp && PATH="/sbin:\$PATH" && . ${sfvenv}/bin/activate && starforge --debug wheel --wheels-config=$l_new --exit-on-failure $l_wheel"
     [ ! -d ${output} ] && mkdir -p ${output}
     scp ${sfuser}@${sfbuild}:${outtmp}/\*.whl ${sfuser}@${sfbuild}:${outtmp}/\*.tar.gz ${output}
-    echo "Contents of ${output} after building ${wheel}:"
+    echo "Contents of ${output} after building ${l_wheel}:"
     ls -l ${output}
 }
 
@@ -49,18 +49,18 @@ if [ -z "$1" -o "$1" = 'none' ]; then
         patch -s $wheels_tmp $wheels_patch
         scp -q wheels/build/wheels.yml ${sfuser}@${sfbuild}:${new}
         scp -q $wheels_tmp ${sfuser}@${sfbuild}:${old}
+        build_wheels=()
         while read op wheel; do
             case "$op" in
-                A)
-                    echo "Building new wheel $wheel"
-                    build_wheel $wheel $new
-                    ;;
-                M)
-                    echo "Rebuilding modified wheel $wheel"
-                    build_wheel $wheel $new
+                A|M)
+                    build_wheels+=($wheel)
                     ;;
             esac
         done < <(ssh ${sfuser}@${sfbuild} ${sfvenv}/bin/starforge wheel_diff --wheels-config=$new $old)
+        for wheel in "${build_wheels[@]}"; do
+            echo "Building '$wheel' wheel and sdist"
+            build_wheel $wheel $new
+        done
         ssh ${sfuser}@${sfbuild} "rm ${new} ${old}"
     fi
 
