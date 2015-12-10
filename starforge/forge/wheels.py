@@ -6,13 +6,11 @@ from __future__ import absolute_import
 import os
 import shlex
 import subprocess
-import tarfile
-from os import uname, makedirs, chown, getcwd, chdir, rename, listdir, getuid, getgid
+from os import uname, makedirs, chown, getcwd, chdir, rename, listdir
 from os.path import exists, join, abspath
 from shutil import rmtree, copy
 
 from pkg_resources import parse_version
-from wheel.pep425tags import get_platforms
 from six.moves import map
 
 from ..io import debug, info, warn
@@ -46,19 +44,22 @@ class ForgeWheel(object):
         py = 'py2'
         if self.wheel_config.purepy:
             # need to check universal
-            cached_source = self.cache_manager.pip_check(self.name, self.version)
+            cached_source = self.cache_manager.pip_check(self.name,
+                                                         self.version)
             missing = '%s %s' % (self.name, self.version)
             if cached_source is None:
                 if self.src_urls:
-                    cached_source = self.cache_manager.url_check(self.src_urls[0])
+                    cached_source = self.cache_manager.url_check(
+                        self.src_urls[0])
                     missing = self.src_urls[0]
             assert cached_source is not None, 'Cache failure on: %s' % missing
             arc = Archive.open(cached_source)
             if arc.universal:
                 py = 'py2.py3'
-            whl = '{name}-{version}-{py}-none-any.whl'.format(name=self.name.replace('-', '_'),
-                                                              version=str(parse_version(self.version)),
-                                                              py=py)
+            whl = ('{name}-{version}-{py}-none-any.whl'
+                   .format(name=self.name.replace('-', '_'),
+                           version=str(parse_version(self.version)),
+                           py=py))
             wheels = [whl]
         else:
             platform = None
@@ -66,16 +67,21 @@ class ForgeWheel(object):
                 # get forced platform name if any
                 platform = self.image.plat_name
             if platform is None:
-                platform = self.cache_manager.platform_cache(self.image.name, self.exec_context, self.image.pythons[0])
+                platform = self.cache_manager.platform_cache(
+                    self.image.name,
+                    self.exec_context,
+                    self.image.pythons[0])
             for python in self.image.pythons:
-                # FIXME: this forces a very specific naming (i.e. '/pythons/cp{py}{flags}-{arch}/')
+                # FIXME: this forces a very specific naming (i.e.
+                # '/pythons/cp{py}{flags}-{arch}/')
                 abi = python.split('/')[2].split('-')[0]
                 py = abi[2:4]
-                whl = '{name}-{version}-cp{py}-{abi}-{platform}.whl'.format(name=self.name.replace('-', '_'),
-                                                                            version=str(parse_version(self.version)),
-                                                                            py=py,
-                                                                            abi=abi,
-                                                                            platform=platform)
+                whl = ('{name}-{version}-cp{py}-{abi}-{platform}.whl'
+                       .format(name=self.name.replace('-', '_'),
+                               version=str(parse_version(self.version)),
+                               py=py,
+                               abi=abi,
+                               platform=platform))
                 wheels.append(whl)
         return wheels
 
@@ -83,11 +89,11 @@ class ForgeWheel(object):
         tarballs = []
         extensions = ('zip', 'tar.gz')
         for ext in extensions:
-            tarballs.append('{name}-{version}.{ext}'.format(name=self.name,
-                                                            version=str(parse_version(self.version)),
-                                                            ext=ext))
+            tarballs.append('{name}-{version}.{ext}'
+                            .format(name=self.name,
+                                    version=str(parse_version(self.version)),
+                                    ext=ext))
         return tarballs
-
 
     def execute(self, cmd, cwd=None):
         debug('Executing: %s', ' '.join(cmd))
@@ -109,7 +115,8 @@ class ForgeWheel(object):
 
         for i, arc_path in enumerate(src_paths):
             arc = Archive.open(arc_path)
-            assert len(arc.roots) == 1, "Could not determine root directory in archive"
+            assert len(arc.roots) == 1, \
+                "Could not determine root directory in archive"
             root = next(iter(arc.roots))
             root_t = abspath(join(getcwd(), root))
             os.environ['SRC_ROOT_%d' % i] = root_t
@@ -122,7 +129,6 @@ class ForgeWheel(object):
             arc.extractall(build)
 
         return root
-
 
     def bdist_wheel(self, output=None, uid=-1, gid=-1):
         # TODO: a lot of stuff in this method like installing from the package
@@ -152,7 +158,8 @@ class ForgeWheel(object):
                     pkgs = map(lambda x: '%s:i386' % x, pkgs)
                 os.environ['DEBIAN_FRONTEND'] = 'noninteractive'
                 self.execute(['apt-get', '-qq', 'update'])
-                self.execute(['apt-get', 'install', '--no-install-recommends', '-y'] + pkgs)
+                self.execute(['apt-get', 'install',
+                              '--no-install-recommends', '-y'] + pkgs)
             elif pkgtool == 'yum':
                 self.execute(['yum', 'install', '-y'] + pkgs)
             elif pkgtool == 'zypper':
@@ -160,9 +167,11 @@ class ForgeWheel(object):
             elif pkgtool == 'brew':
                 if '/usr/local/bin' not in os.environ['PATH']:
                     os.environ['PATH'] = '/usr/local/bin:' + os.environ['PATH']
-                self.execute(['sudo', '-u', 'admin', 'brew', 'install'] + pkgs, cwd='/tmp')
+                self.execute(['sudo', '-u', 'admin',
+                              'brew', 'install'] + pkgs, cwd='/tmp')
             else:
-                warn('Skipping installation of dependencies: %s', ', '.join(pkgs))
+                warn('Skipping installation of dependencies: %s',
+                     ', '.join(pkgs))
 
         root = self._prep_build(build, output, uid, gid)
 
@@ -181,7 +190,10 @@ class ForgeWheel(object):
             py = py.format(arch=arch)
             build_args = []
             if pkgs and pkgtool == 'brew':
-                build_args.extend(['build_ext', '-I', '/usr/local/include', '-L', '/usr/local/lib', '-R', '/usr/local/lib'])
+                build_args.extend(['build_ext',
+                                   '-I', '/usr/local/include',
+                                   '-L', '/usr/local/lib',
+                                   '-R', '/usr/local/lib'])
             build_args.extend(shlex.split(self.wheel_config.build_args))
             cmd = [py, 'setup.py'] + build_args
             if platform is not None:
@@ -193,7 +205,6 @@ class ForgeWheel(object):
             for f in listdir('dist'):
                 copy(join('dist', f), output)
                 chown(join(output, f), uid, gid)
-
 
     def sdist(self, output=None, uid=-1, gid=-1):
         uid = int(uid)

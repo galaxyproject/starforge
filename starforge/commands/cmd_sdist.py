@@ -23,7 +23,8 @@ from ..util import xdg_config_file
               help='Path to wheels config file')
 @click.option('-i', '--image',
               default=None,
-              help='Name of image (in wheels config) under which wheel is building')
+              help='Name of image (in wheels config) under which wheel is '
+                   'building')
 @click.option('-o', '--output',
               default=getcwd(),
               type=click.Path(file_okay=False),
@@ -38,7 +39,8 @@ from ..util import xdg_config_file
               help='Change group of output(s) to UID')
 @click.option('--fetch-srcs/--no-fetch-srcs',
               default=False,
-              help='Enable or disable fetching/caching of sources (normally this is done by `starforge wheel`')
+              help='Enable or disable fetching/caching of sources (normally '
+                   'this is done by `starforge wheel`')
 @click.argument('wheel')
 @pass_context
 def cli(ctx, wheels_config, image, output, uid, gid, fetch_srcs, wheel):

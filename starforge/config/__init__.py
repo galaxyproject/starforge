@@ -1,7 +1,6 @@
 from __future__ import absolute_import
 
 import errno
-import os
 from os.path import join, abspath, expanduser, dirname
 try:
     from collections import OrderedDict
@@ -52,7 +51,8 @@ class Imageset(object):
         self.name = name
         self.images = OrderedDict()
         for image_name in imageset:
-            self.images[image_name] = Image(image_name, images.get(image_name, {}))
+            self.images[image_name] = Image(image_name,
+                                            images.get(image_name, {}))
 
 
 class ConfigManager(object):
@@ -91,7 +91,8 @@ class ConfigManager(object):
 
         if 'imagesets' in config:
             for (name, imageset) in iteritems(config['imagesets']):
-                self.imagesets[name] = Imageset(name, imageset, config.get('images', {}))
+                self.imagesets[name] = Imageset(name, imageset,
+                                                config.get('images', {}))
 
         self.config = config
 

@@ -10,7 +10,7 @@ except ImportError:
 
 from six import iteritems
 
-from ..io import warn, info
+from ..io import info
 from . import ExecutionContext
 
 
@@ -25,9 +25,10 @@ class DockerExecutionContext(ExecutionContext):
     def start(self, share=None, env=None, **kwargs):
         if share is not None:
             for host, guest, read in share:
-                self.share_args.append('--volume={host}:{guest}:{read}'.format(host=host,
-                                                                               guest=guest,
-                                                                               read=read))
+                self.share_args.append(
+                    '--volume={host}:{guest}:{read}'.format(host=host,
+                                                            guest=guest,
+                                                            read=read))
         if env is not None:
             self.env = env
 

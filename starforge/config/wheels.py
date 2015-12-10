@@ -70,9 +70,13 @@ class WheelConfigManager(object):
     def load_config(self):
         self.config = yaml.safe_load(open(self.config_file).read())
         for (name, wheel) in iteritems(self.config['packages']):
-            self.wheels[name] = WheelConfig(name, self.global_config, wheel, self.global_config.imagesets, purepy=False)
+            self.wheels[name] = WheelConfig(name, self.global_config, wheel,
+                                            self.global_config.imagesets,
+                                            purepy=False)
         for (name, wheel) in iteritems(self.config['purepy_packages']):
-            self.wheels[name] = WheelConfig(name, self.global_config, wheel, self.global_config.imagesets, purepy=True)
+            self.wheels[name] = WheelConfig(name, self.global_config, wheel,
+                                            self.global_config.imagesets,
+                                            purepy=True)
 
     def get_wheel_config(self, name):
         return self.wheels[name]

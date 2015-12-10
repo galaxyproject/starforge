@@ -77,7 +77,8 @@ class StarforgeCLI(click.MultiCommand):
               default=xdg_config_file(),
               type=click.Path(dir_okay=False,
                               resolve_path=True),
-              help='Path to Starforge config.yml (default: %s).' % xdg_config_file())
+              help='Path to Starforge config.yml '
+                   '(default: %s).' % xdg_config_file())
 @pass_context
 def starforge(ctx, debug, config_file):
     """ Build Galaxy things under virtualization

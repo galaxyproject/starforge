@@ -7,7 +7,7 @@ import socket
 import tempfile
 import uuid
 from os import sep
-from os.path import exists, dirname, join
+from os.path import exists, join
 from subprocess import check_call, CalledProcessError, Popen
 from time import sleep
 try:
@@ -15,7 +15,7 @@ try:
 except ImportError:
     from ..util import check_output
 
-from six import iteritems
+from six import iteritems, b
 
 from ..io import warn, info, error
 from . import ExecutionContext
@@ -34,7 +34,8 @@ for name in listdir(mount_base):
     if exists(sf_mount):
         mapping[open(sf_mount).read().strip()] = join(mount_base, name)
 for guest in {guests}:
-    assert guest in mapping, 'Volume for %s not found in %s!' % (guest, mount_base)
+    assert guest in mapping, 'Volume for %s not found in %s!' % (guest,
+                                                                 mount_base)
     if not exists(dirname(guest)):
         makedirs(dirname(guest))
     if exists(guest):
@@ -44,7 +45,8 @@ for guest in {guests}:
 
 
 class QEMUExecutionContext(ExecutionContext):
-    def __init__(self, image, qemu_config=None, osk_file=None, qemu_port=None, **kwargs):
+    def __init__(self, image, qemu_config=None, osk_file=None, qemu_port=None,
+                 **kwargs):
         self.image = image
         self.qemu_config = qemu_config
         self.qemu_use_sudo = qemu_config.get('qemu_use_sudo', False)
@@ -85,7 +87,9 @@ class QEMUExecutionContext(ExecutionContext):
         if port is not None:
             self.ssh_args.extend(['-o', 'Port=%s' % port])
         if 'keyfile' in self.ssh_config:
-            self.ssh_args.extend(['-o', 'IdentityFile=%s' % self.ssh_config['keyfile']])
+            self.ssh_args.extend(['-o',
+                                  'IdentityFile=%s'
+                                  % self.ssh_config['keyfile']])
 
     def _random_port(self):
         """Select a random port for ssh forwarding. There's a race condition
@@ -105,7 +109,8 @@ class QEMUExecutionContext(ExecutionContext):
             cmd = ['sudo'] + cmd
         check_call(cmd)
 
-    def _ssh(self, cmd, capture_output=False, template=SSH_EXEC_TEMPLATE, args=None):
+    def _ssh(self, cmd, capture_output=False, template=SSH_EXEC_TEMPLATE,
+             args=None):
         """ Processes in the guest would execute in a shell if run with `ssh
         guest cmd`, so instead, we create a stub python script to run the guest
         command without a shell.
@@ -114,25 +119,37 @@ class QEMUExecutionContext(ExecutionContext):
             args = {}
         cmd = self.normalize_cmd(cmd)
         if template is None:
-            ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], '--'] + cmd
+            ssh_cmd = (['ssh']
+                       + self.ssh_args
+                       + [self.ssh_config['userhost'], '--']
+                       + cmd)
         else:
             args['cmd'] = cmd
             for (k, v) in iteritems(args):
                 args[k] = repr(v)
-            ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], 'mktemp', 'starforge.XXXXXXXX']
-            guest_temp = check_output(ssh_cmd).strip()
+            ssh_cmd = (['ssh']
+                       + self.ssh_args
+                       + [self.ssh_config['userhost'],
+                          'mktemp', 'starforge.XXXXXXXX'])
+            guest_temp = check_output(ssh_cmd).decode('ascii').strip()
             with tempfile.NamedTemporaryFile() as local_temp:
                 template = template.format(**args)
-                local_temp.write(template)
+                local_temp.write(b(template))
                 local_temp.flush()
-                self._scp('{local} {userhost}:{guest}'.format(local=local_temp.name,
-                                                              guest=guest_temp,
-                                                              userhost=self.ssh_config['userhost']))
-            ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], '--', self.image.buildpy, guest_temp]
+                self._scp('{local} {userhost}:{guest}'
+                          .format(local=local_temp.name,
+                                  guest=guest_temp,
+                                  userhost=self.ssh_config['userhost']))
+            ssh_cmd = (['ssh']
+                       + self.ssh_args
+                       + [self.ssh_config['userhost'],
+                          '--', self.image.buildpy, guest_temp])
             if cmd:
-                info('%s %s executes: %s', self.image.buildpy, guest_temp, self.stringify_cmd(cmd))
+                info('%s %s executes: %s',
+                     self.image.buildpy, guest_temp, self.stringify_cmd(cmd))
             else:
-                info('%s %s executes with args: %s', self.image.buildpy, guest_temp, str(args))
+                info('%s %s executes with args: %s',
+                     self.image.buildpy, guest_temp, str(args))
         info('Executing: %s', self.stringify_cmd(ssh_cmd))
         try:
             if capture_output:
@@ -141,12 +158,15 @@ class QEMUExecutionContext(ExecutionContext):
                 check_call(ssh_cmd)
         finally:
             if template is not None:
-                ssh_cmd = ['ssh'] + self.ssh_args + [self.ssh_config['userhost'], 'rm', '-f', guest_temp]
+                ssh_cmd = (['ssh']
+                           + self.ssh_args
+                           + [self.ssh_config['userhost'],
+                              'rm', '-f', guest_temp])
                 try:
                     check_call(ssh_cmd)
                 except CalledProcessError:
-                    error('Failed to clean up guest temporary file %s', guest_temp)
-
+                    error('Failed to clean up guest temporary file %s',
+                          guest_temp)
 
     def _scp(self, cmd):
         cmd = self.normalize_cmd(cmd)
@@ -175,8 +195,8 @@ class QEMUExecutionContext(ExecutionContext):
                 # OS X can't mount the VVFAT volume if it's ro, but (at least
                 # on OS X) updates to the VVFAT volume in the guest are not
                 # reflected on the host anyway
-                drives.append({'file' : 'fat:rw:{host}'.format(host=host),
-                               'format' : 'raw'})
+                drives.append({'file': 'fat:rw:{host}'.format(host=host),
+                               'format': 'raw'})
                 # OS X does not mount the volumes in any reliable order, so use
                 # this to determine the "mount" point later.
                 with open(join(host, '.starforge.mount'), 'w') as fh:
@@ -189,11 +209,13 @@ class QEMUExecutionContext(ExecutionContext):
             if 'format' in drive:
                 fmt = ',format=' + drive['format']
             drive_args.append('-device')
-            drive_args.append('ide-drive,bus=ide.{i},drive=drive{i}'.format(i=i))
+            drive_args.append('ide-drive,bus=ide.{i},drive=drive{i}'
+                              .format(i=i))
             drive_args.append('-drive')
-            drive_args.append('id=drive{i},if=none,file={f}{format}'.format(i=i,
-                                                                            f=drive['file'],
-                                                                            format=fmt))
+            drive_args.append('id=drive{i},if=none,file={f}{format}'
+                              .format(i=i,
+                                      f=drive['file'],
+                                      format=fmt))
 
         # set up ssh args
         # select a random port if necessary
@@ -207,7 +229,8 @@ class QEMUExecutionContext(ExecutionContext):
 
         # perhaps the btrfs stuff should be abstracted
         if 'bootloader' in self.run_args:
-            self.run_args['bootloader'] = join(self.snap, self.run_args['bootloader'])
+            self.run_args['bootloader'] = join(self.snap,
+                                               self.run_args['bootloader'])
 
         # assemble start command
         run_cmd = self.image.run_cmd.format(**self.run_args)
@@ -215,14 +238,17 @@ class QEMUExecutionContext(ExecutionContext):
         run_cmd.extend(drive_args)
         display_cmd = copy.copy(run_cmd)
         if self.image.insert_osk:
-            assert self.osk is not None, 'Image requested insertion of OSK but OSK is unknown!'
+            assert self.osk is not None, \
+                'Image requested insertion of OSK but OSK is unknown!'
             run_cmd.append('-device')
             run_cmd.append('isa-applesmc,osk={osk}'.format(osk=self.osk))
             display_cmd.extend(['-device', 'isa-applesmc,osk=redacted'])
         info('Running qemu-system: %s', self.stringify_cmd(display_cmd))
 
         # snapshot the source image for this run
-        cmd = 'btrfs subvolume snapshot {src} {dest}'.format(src=join(self.image.snap_root, self.image.snap_src), dest=self.snap)
+        cmd = ('btrfs subvolume snapshot {src} {dest}'
+               .format(src=join(self.image.snap_root, self.image.snap_src),
+                       dest=self.snap))
         self._execute(cmd, sudo=self.btrfs_use_sudo)
 
         # run QEMU
@@ -259,7 +285,8 @@ class QEMUExecutionContext(ExecutionContext):
             info('Linking guest volumes to expected mount points')
             for i in range(0, 6):
                 try:
-                    self._ssh(None, template=CREATE_SYMLINK_TEMPLATE, args=args)
+                    self._ssh(None, template=CREATE_SYMLINK_TEMPLATE,
+                              args=args)
                     break
                 except CalledProcessError:
                     warn('Linking failed, retry %s', (i + 1))
@@ -271,10 +298,11 @@ class QEMUExecutionContext(ExecutionContext):
         if env is not None:
             with tempfile.NamedTemporaryFile() as envfile:
                 for (k, v) in iteritems(env):
-                    envfile.write('{k}={v}'.format(k=k, v=v))
+                    envfile.write(b('{k}={v}'.format(k=k, v=v)))
                 envfile.flush()
-                self._scp('{f} {userhost}:.ssh/environment'.format(f=envfile.name,
-                                                                   userhost=self.ssh_config['userhost']))
+                self._scp('{f} {userhost}:.ssh/environment'
+                          .format(f=envfile.name,
+                                  userhost=self.ssh_config['userhost']))
 
     def run(self, cmd, capture_output=False, **kwargs):
         cmd = self.normalize_cmd(cmd)
