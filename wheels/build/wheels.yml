@@ -110,7 +110,7 @@ purepy_packages:
         version: 1.3
         insert_setuptools: true
     Paste:
-        version: 1.7.5.1
+        version: 2.0.2
     PasteDeploy:
         version: 1.5.2
     pbr:
