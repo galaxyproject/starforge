@@ -15,3 +15,4 @@
 ./build.sh debian:squeeze ucsc
 
 python build.py --quiet tbl2asn
+python build.py bcftools --version 1.3
