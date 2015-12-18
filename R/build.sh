@@ -47,7 +47,7 @@ apt-get -qq update &&
     sed -i 's#/build/dest#$(R_ROOT_DIR)#g' /build/dest/lib/R/etc/Makeconf &&
     cp /usr/lib/libgfortran* /build/dest/lib/ &&
     cp /usr/lib/libgomp* /build/dest/lib/ &&
-    cp /usr/lib/libblas* /build/dest/lib -R &&
+    cp -R /usr/lib/libblas* /build/dest/lib &&
     cp /usr/lib/libcairo* /build/dest/lib &&
     cp /usr/lib/libreadline* /build/dest/lib &&
     cp /usr/lib/liblapack* /build/dest/lib &&
