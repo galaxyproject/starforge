@@ -1,0 +1,23 @@
+build:
+  commands:
+  - mkdir -p $HOME/bin/${arch}/ /build/dest/
+  - tar xfz v${version}.tar.gz
+  - tar xfj seqan-library-1.4.2.tar.bz2
+  - mv seqan-library-1.4.2/include flexbar-${version}
+  - cd flexbar-${version}
+  - cmake .
+  - make
+  - ls -l
+  - cp ./flexbar /build/dest/
+  - cp /usr/lib/libtbb.so.2 /build/dest/
+  - tar zcf /host/${pkg}-${version}-Linux-${arch}.tar.gz -C /build/dest .
+  urls:
+    - https://github.com/seqan/flexbar/archive/v2.5.0.tar.gz
+    - https://github.com/seqan/seqan/releases/download/seqan-v1.4.2/seqan-library-1.4.2.tar.bz2
+env:
+  arch: x86_64
+meta:
+  image: debian:squeeze
+  version: 2.5.0
+prebuild:
+  packages: 'libc6-dev git-core cmake zlib1g-dev libtbb-dev cmake'
