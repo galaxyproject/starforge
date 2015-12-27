@@ -80,6 +80,8 @@ purepy_packages:
         version: 2.38.0
     decorator:
         version: 4.0.2
+    dictobj:
+        version: 0.3.1
     docutils:
         version: 0.12
         insert_setuptools: true
@@ -90,6 +92,8 @@ purepy_packages:
     importlib:
         version: 1.0.3
         insert_setuptools: true
+    jstree:
+        version: 0.4
     kombu:
         version: 3.0.30
     Mako:
