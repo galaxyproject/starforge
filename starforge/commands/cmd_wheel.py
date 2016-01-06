@@ -96,7 +96,7 @@ def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port,
                                           wheel)
             with ectx.run_context(share=share, env=env) as run:
                 run(cmd)
-            missing = [ n for n in forge.get_expected_names() if not exists(n) ]
+            missing = [n for n in forge.get_expected_names() if not exists(n)]
             for name in missing:
                 warn("%s missing, build failed?", name)
             if exit_on_failure and missing:
@@ -104,17 +104,16 @@ def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port,
         else:
             info('All wheels from image %s already built', image_name)
 
-    build_sdist = True
+    image = filter(lambda x: x.type == 'docker',
+                   itervalues(wheel_config.images))[0]
+    ectx = DockerExecutionContext(image, ctx.config.docker)
+    forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context,
+                       image=image)
     for name in forge.get_sdist_expected_names():
         if exists(name):
             info("sdist %s already built", name)
-            build_sdist = False
-    if build_sdist:
-        image = next(filter(lambda x: x.type == 'docker',
-                            itervalues(wheel_config.images)))
-        ectx = DockerExecutionContext(image, ctx.config.docker)
-        forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context,
-                           image=image)
+            break
+    else:
         forge.cache_sources()
         cmd, share, env = _prep_build(ctx.config, wheels_config,
                                       SDIST_CMD_TEMPLATE, image, wheel)
