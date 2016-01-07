@@ -68,8 +68,11 @@ def cli(ctx, wheels_config, wheel):
     for wheel, wheel_config in wheel_configs:
         if wheel_config.pinned:
             continue
+        req = wheel
+        if wheel_config.version_spec:
+            req += wheel_config.version_spec
         inst_req = InstallRequirement.from_line(
-            wheel, None, isolated=False, wheel_cache=None)
+            req, None, isolated=False, wheel_cache=None)
         inst_req.satisfied_by = Distribution(
             wheels_config, None, wheel, wheel_config.version, None, None, None)
         try:
