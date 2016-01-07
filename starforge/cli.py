@@ -85,3 +85,4 @@ def starforge(ctx, debug, config_file):
     """
     set_debug(debug)
     ctx.config_file = config_file
+    ctx.debug = debug
