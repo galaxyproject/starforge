@@ -15,6 +15,9 @@ Things you can do with Starforge:
 These things will be built in Docker. Additionally, wheels can be built in
 QEMU/KVM virtualized systems.
 
+Documentation can be found at `starforge.readthedocs.org
+<http://starforge.readthedocs.org/>`_
+
 Quick Start
 -----------
 
