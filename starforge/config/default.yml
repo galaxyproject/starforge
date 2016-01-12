@@ -44,7 +44,7 @@ imagesets:
     default_plus_rhel_6-wheel:
         - starforge/base-wheel
         - starforge/base32-wheel
-        - starforge/osx:10.6
+        - starforge/osx-wheel:10.6
         - starforge/centos-wheel:6
         - starforge/centos32-wheel:6
 
