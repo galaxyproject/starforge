@@ -16,3 +16,5 @@ wheels/build/cache/
 .tox
 
 starforge.egg-info
+
+docs/_build
