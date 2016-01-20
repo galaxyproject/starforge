@@ -116,10 +116,10 @@ purepy_packages:
     pbr:
         version: 1.8.0
     pip:
-        version: 8.0.0.dev0+gx1
+        version: 8.0.0+gx1
         src:
-            - https://github.com/natefoo/pip/archive/linux-wheels.tar.gz
-        prebuild: sed -i -e 's/__version__ = "8\.0\.0\.dev0"/__version__ = "8.0.0.dev0+gx1"/' ${SRC_ROOT}/pip/__init__.py
+            - https://github.com/natefoo/pip/archive/ac76f866c181dc75fb9f5ac3cd5575b6bc32a3c2.tar.gz
+        prebuild: sed -i -e 's/__version__ = "8\.0\.0"/__version__ = "8.0.0+gx1"/' ${SRC_ROOT}/pip/__init__.py
     Pygments:
         version: 2.0.2
     pytz:
