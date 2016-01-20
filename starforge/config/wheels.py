@@ -29,6 +29,8 @@ class WheelConfig(object):
         self.force_pythons = config.get('force_pythons', None)
         self.build_args = config.get('build_args', 'bdist_wheel')
         self.buildpy = config.get('buildpy', 'python')
+        self.pinned = config.get('pinned', False)
+        self.version_spec = config.get('version_specifier', None)
         if not purepy:
             default_imageset = DEFAULT_C_IMAGESET
         else:
