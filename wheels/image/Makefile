@@ -12,7 +12,7 @@ CENTOS_PKGS	= findutils python tar make gcc gcc-c++ curl zlib-devel openssl-deve
 OPENSUSE_PKGS	= python tar make gcc gcc-c++ glibc-devel ca-certificates-mozilla curl zlib-devel libopenssl-devel libbz2-devel python-PyYAML
 
 WHEEL_VERSION	= 3f496bdf2708
-PIP_VERSION	= 8.0.0.dev0+gx1
+PIP_VERSION	= ac76f866c181dc75fb9f5ac3cd5575b6bc32a3c2
 
 all: $(ALL_TARGETS)
 
