@@ -100,6 +100,18 @@ class ForgeWheel(object):
         with self.exec_context() as run:
             run(cmd, cwd=cwd)
 
+    def _get_prebuild_command(self, step):
+        prebuild = self.wheel_config.prebuild
+        # if prebuild is just a string then it's the `all` prebuild
+        # command, but a dict with an explicit `all` key is also allowed
+        # (and allows for `all` in combination with other prebuild commands)
+        if step != 'all' and not isinstance(prebuild, dict):
+            prebuild = None
+        elif step != 'all' or isinstance(prebuild, dict):
+            prebuild = prebuild.get(step, None)
+        debug("Prebuild command for '%s' step is: %s", step, prebuild)
+        return prebuild
+
     def _prep_build(self, build, output, uid, gid):
         if output:
             if not exists(output):
@@ -127,6 +139,10 @@ class ForgeWheel(object):
             # TODO: don't use extractall (but since we *should* be running
             # under docker, we shouldn't need to care)
             arc.extractall(build)
+
+        prebuild = self._get_prebuild_command('all')
+        if prebuild is not None:
+            subprocess.check_call(prebuild, shell=True)
 
         return root
 
@@ -175,7 +191,7 @@ class ForgeWheel(object):
 
         root = self._prep_build(build, output, uid, gid)
 
-        prebuild = self.wheel_config.prebuild
+        prebuild = self._get_prebuild_command('wheel')
         if prebuild is not None:
             subprocess.check_call(prebuild, shell=True)
 
@@ -212,6 +228,9 @@ class ForgeWheel(object):
         arch = uname()[4]
         build = abspath(getcwd())
         root = self._prep_build(build, output, uid, gid)
+        prebuild = self._get_prebuild_command('sdist')
+        if prebuild is not None:
+            subprocess.check_call(prebuild, shell=True)
         chdir(join(build, root))
         if self.image:
             python = self.image.pythons[0].format(arch=arch)

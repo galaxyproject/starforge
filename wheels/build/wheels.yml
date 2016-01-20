@@ -3,7 +3,8 @@
 packages:
     bx-python:
         version: 0.7.3
-        prebuild: "git clone -b linux-wheels https://github.com/natefoo/pip && cd pip && for py in /python/cp*-`uname -m`; do ${py}/bin/python setup.py install && ${py}/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1; done"
+        prebuild:
+            wheel: "git clone -b linux-wheels https://github.com/natefoo/pip && cd pip && for py in /python/cp*-`uname -m`; do ${py}/bin/python setup.py install && ${py}/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1; done"
         apt:
             - git
     Cheetah:
@@ -37,7 +38,9 @@ packages:
         src:
             - https://github.com/dannon/pysam/archive/flexible_bam_index_naming.tar.gz
         # https://github.com/pysam-developers/pysam/issues/164
-        prebuild: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython<0.23' || exit 1; done && sed -i -e 's/0\.8\.3/0.8.3+gx1/' ${SRC_ROOT}/pysam/version.py
+        prebuild:
+            wheel: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython<0.23' || exit 1; done
+            all: sed -i -e 's/0\.8\.3/0.8.3+gx1/' ${SRC_ROOT}/pysam/version.py
         imageset: default_plus_rhel_6-wheel
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
@@ -47,7 +50,8 @@ packages:
         version: 2.7.0
         src:
             - https://sqlite.org/2015/sqlite-autoconf-3081002.tar.gz
-        prebuild: for f in sqlite3.h sqlite3.c sqlite3ext.h; do cp ${SRC_ROOT_1}/$f $f || return 1; done && echo 'include_dirs=.' >>${SRC_ROOT_0}/setup.cfg
+        prebuild:
+            wheel: for f in sqlite3.h sqlite3.c sqlite3ext.h; do cp ${SRC_ROOT_1}/$f $f || return 1; done && echo 'include_dirs=.' >>${SRC_ROOT_0}/setup.cfg
         build_args: build_static bdist_wheel
     python_lzo:
         version: 1.8
@@ -55,7 +59,8 @@ packages:
             - http://www.oberhumer.com/opensource/lzo/download/LZO-v1/python-lzo-1.08.tar.gz
             - http://www.oberhumer.com/opensource/lzo/download/lzo-2.09.tar.gz
         insert_setuptools: true
-        prebuild: cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --prefix=${SRC_ROOT_0}/lzo --disable-shared && make install && sed -i -e 's/\["lzo"\]/\["lzo2"\]/' ${SRC_ROOT_0}/setup.py
+        prebuild:
+            wheel: cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --prefix=${SRC_ROOT_0}/lzo --disable-shared && make install && sed -i -e 's/\["lzo"\]/\["lzo2"\]/' ${SRC_ROOT_0}/setup.py
         build_args: build_ext -I lzo/include:lzo/include/lzo -L lzo/lib bdist_wheel
     PyYAML:
         version: 3.11
