@@ -80,7 +80,7 @@ purepy_packages:
     Beaker:
         version: 1.7.0
     bioblend:
-        version: 0.6.1
+        version: 0.7.0
     boto:
         version: 2.38.0
     decorator:
