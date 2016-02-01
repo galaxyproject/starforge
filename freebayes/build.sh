@@ -7,7 +7,7 @@ build_deps="libc6-dev git-core cmake zlib1g-dev"
 url="
 https://github.com/ekg/freebayes.git
 "
-revision="bfd9832"
+revision="b040236"
 
 binaries="
 freebayes
