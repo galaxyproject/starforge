@@ -34,13 +34,13 @@ packages:
         version: 2.6.1
         insert_setuptools: true
     pysam:
-        version: 0.8.3+gx2
+        version: 0.8.4+gx1
         src:
-            - https://github.com/dannon/pysam/archive/f9c1078136bed2ef01e777cf62d750ebd10b6e43.tar.gz
+            - https://github.com/dannon/pysam/archive/v0.8.4_gxy1.tar.gz
         # https://github.com/pysam-developers/pysam/issues/164
         prebuild:
             wheel: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython<0.23' || exit 1; done
-            all: sed -i -e 's/0\.8\.3/0.8.3+gx2/' ${SRC_ROOT}/pysam/version.py
+            all: sed -i -e 's/0\.8\.4/0.8.4+gx1/' ${SRC_ROOT}/pysam/version.py
         imageset: default_plus_rhel_6-wheel
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
