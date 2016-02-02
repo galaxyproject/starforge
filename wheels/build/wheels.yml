@@ -121,10 +121,10 @@ purepy_packages:
     pbr:
         version: 1.8.0
     pip:
-        version: 8.0.2+gx1
+        version: 8.0.2+gx2
         src:
-            - https://github.com/natefoo/pip/archive/1eaeb5e4478d60768ce5c9e69d19b0d94d430ec2.tar.gz
-        prebuild: sed -i -e 's/__version__ = "8\.0\.2"/__version__ = "8.0.2+gx1"/' ${SRC_ROOT}/pip/__init__.py
+            - https://github.com/natefoo/pip/archive/03c981a2d4659d3087397dc9fd6500437998be5c.tar.gz
+        prebuild: sed -i -e 's/__version__ = "8\.0\.2"/__version__ = "8.0.2+gx2"/' ${SRC_ROOT}/pip/__init__.py
     Pygments:
         version: 2.0.2
     pytz:
