@@ -147,9 +147,6 @@ purepy_packages:
         version: 0.1.1
         src:
             - https://github.com/galaxyproject/starforge/archive/0.1.1.tar.gz
-    SVGFig:
-        version: 1.1.6
-        insert_setuptools: true
     svgwrite:
         version: 1.1.6
     Tempita:
