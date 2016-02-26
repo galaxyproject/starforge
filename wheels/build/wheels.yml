@@ -125,6 +125,10 @@ purepy_packages:
         src:
             - https://github.com/natefoo/pip/archive/03c981a2d4659d3087397dc9fd6500437998be5c.tar.gz
         prebuild: sed -i -e 's/__version__ = "8\.0\.2"/__version__ = "8.0.2+gx2"/' ${SRC_ROOT}/pip/__init__.py
+    psutil:
+        version: 4.0.0
+    pulsar-galaxy-lib:
+        version: 0.7.0.dev0
     Pygments:
         version: 2.0.2
     pytz:
