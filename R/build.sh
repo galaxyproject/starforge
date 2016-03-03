@@ -47,9 +47,10 @@ apt-get -qq update &&
     sed -i 's#/build/dest#${R_ROOT_DIR}#g' /build/dest/bin/R &&
     sed -i 's#/build/dest#${R_ROOT_DIR}#g' /build/dest/lib/R/bin/R &&
     sed -i 's#/build/dest#$(R_ROOT_DIR)#g' /build/dest/lib/R/etc/Makeconf &&
+    sed -i 's#^LDFLAGS = #LDFLAGS = -L$(R_ROOT_DIR)/lib #' /build/dest/lib/R/etc/Makeconf &&
     cp /usr/lib/libgfortran* /build/dest/lib/ &&
     cp /usr/lib/libgomp* /build/dest/lib/ &&
-    cp /usr/lib/libblas.so.3gf /build/dest/lib &&
+    cp /usr/lib/libblas* /build/dest/lib/ &&
     cd /build/dest/lib &&
     ln -s libgfortran.so.3 libgfortran.so &&
     ln -s libgomp.so.1.0.0 libgomp.so &&
