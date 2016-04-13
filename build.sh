@@ -1,4 +1,6 @@
 #!/bin/bash
+set -e
+set -xv
 
 usage="usage: $(basename $0) <galaxy|ubuntu[:tag]|debian[:tag]> <PACKAGE>"
 
@@ -32,6 +34,10 @@ case "$repo" in
         build_image_repository="natefoo/${repo}_build"
         buildpkgs='devscripts debhelper socat quilt fakeroot ca-certificates'
         ;;
+    starforge/*)
+        docker_args='--cap-add=SYS_ADMIN'
+        build_image_repository="$repo"
+        ;;
     *)
         echo "$usage"
         exit 2
@@ -51,12 +57,19 @@ done
 [ "$tag" != "latest" ] && build_image_repository="$build_image_repository:$tag"
 
 if [ -z "$build_image_id" ]; then
-    sed -e "s/BASE_NAME_AND_TAG/$baseimg/" -e "s/ADDITIONAL_BUILD_PACKAGES/$buildpkgs/" ./image/Dockerfile.in >./image/Dockerfile &&
-    docker build -t "$build_image_repository" ./image
+    case "$build_image_repository" in
+        starforge/*)
+            docker build -t "$build_image_repository" ./image/$1
+            ;;
+        *)
+            sed -e "s/BASE_NAME_AND_TAG/$baseimg/" -e "s/ADDITIONAL_BUILD_PACKAGES/$buildpkgs/" ./image/Dockerfile.in >./image/Dockerfile &&
+            docker build -t "$build_image_repository" ./image
+            ;;
+    esac
 fi
 
 base=$(readlink -f $2)
 
-runcmd="docker run --volume=$base/:/host/ --volume=`pwd`/util/:/util/ $build_image_repository"
+runcmd="docker run $docker_args --rm --volume=$base/:/host/ --volume=`pwd`/util/:/util/ $build_image_repository"
 echo "$runcmd $@"
 $runcmd $@

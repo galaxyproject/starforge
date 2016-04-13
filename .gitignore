@@ -14,7 +14,7 @@ wheels/dist-qemu/
 wheels/build/cache/
 
 .tox
-Dockerfile
+#Dockerfile
 starforge.egg-info
 
 docs/_build
