@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -xv
 
 usage="usage: $(basename $0) <galaxy|ubuntu[:tag]|debian[:tag]> <PACKAGE>"
 
