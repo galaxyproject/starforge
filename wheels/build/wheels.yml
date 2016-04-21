@@ -35,6 +35,9 @@ packages:
     pycrypto:
         version: 2.6.1
         insert_setuptools: true
+    pyparsing:
+        # required by svgwrite
+        version: 2.1.1
     pysam:
         version: 0.8.4+gx1
         src:
