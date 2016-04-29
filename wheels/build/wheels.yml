@@ -180,5 +180,7 @@ purepy_packages:
             - https://bitbucket.org/natefoo/wheel/get/795314b825f9.tar.gz
         prebuild: sed -i -e 's/__version__ = "0\.26\.0"/__version__ = "0.26.0+gx1"/' ${SRC_ROOT}/wheel/__init__.py
     Whoosh:
-        version: 2.4.1
-        prebuild: sed -i -e 's/self\.results\.docterms\[self\.docnum\]/self.results.docterms.get(self.docnum, [])/' ${SRC_ROOT}/src/whoosh/searching.py && sed -i -e 's/versionstring()/"2.4.1+gx1"/' ${SRC_ROOT}/setup.py
+        version: 2.7.4
+#    Whoosh:
+#        version: 2.4.1
+#        prebuild: sed -i -e 's/self\.results\.docterms\[self\.docnum\]/self.results.docterms.get(self.docnum, [])/' ${SRC_ROOT}/src/whoosh/searching.py && sed -i -e 's/versionstring()/"2.4.1+gx1"/' ${SRC_ROOT}/setup.py
