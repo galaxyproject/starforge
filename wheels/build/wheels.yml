@@ -137,6 +137,9 @@ purepy_packages:
         prebuild: sed -i -e 's/DEFAULT_PULSAR_GALAXY_LIB = 0/DEFAULT_PULSAR_GALAXY_LIB = 1/' ${SRC_ROOT}/setup.py
     Pygments:
         version: 2.0.2
+    pyparsing:
+        # required by svgwrite
+        version: 2.1.1
     pytz:
         version: 2015.4
     repoze.lru:
@@ -157,6 +160,8 @@ purepy_packages:
         version: 0.1.1
         src:
             - https://github.com/galaxyproject/starforge/archive/0.1.1.tar.gz
+    statsd:
+        version: 3.2.1
     svgwrite:
         version: 1.1.6
     Tempita:
@@ -176,5 +181,7 @@ purepy_packages:
             - https://bitbucket.org/natefoo/wheel/get/795314b825f9.tar.gz
         prebuild: sed -i -e 's/__version__ = "0\.26\.0"/__version__ = "0.26.0+gx1"/' ${SRC_ROOT}/wheel/__init__.py
     Whoosh:
-        version: 2.4.1
-        prebuild: sed -i -e 's/self\.results\.docterms\[self\.docnum\]/self.results.docterms.get(self.docnum, [])/' ${SRC_ROOT}/src/whoosh/searching.py && sed -i -e 's/versionstring()/"2.4.1+gx1"/' ${SRC_ROOT}/setup.py
+        version: 2.7.4
+#    Whoosh:
+#        version: 2.4.1
+#        prebuild: sed -i -e 's/self\.results\.docterms\[self\.docnum\]/self.results.docterms.get(self.docnum, [])/' ${SRC_ROOT}/src/whoosh/searching.py && sed -i -e 's/versionstring()/"2.4.1+gx1"/' ${SRC_ROOT}/setup.py
