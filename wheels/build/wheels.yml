@@ -80,6 +80,8 @@ packages:
             - libyaml-devel
     SQLAlchemy:
         version: 1.0.8
+    uwsgi:
+        version: 2.0.13.1
 
 purepy_packages:
     amqp:
