@@ -13,9 +13,8 @@ imagesets:
         # tag on debian8-wheel
         - starforge/purepy-wheel
     default-wheel:
-        # tags on debian6-wheel*
-        - starforge/base-wheel
-        - starforge/base32-wheel
+        - starforge/manylinux1:latest
+        - starforge/manylinux1-32:latest
         - starforge/osx-wheel:10.6
     full-wheel:
         - starforge/debian-wheel:6
@@ -52,6 +51,25 @@ images:
     # default image type is `docker`
     # default pkgtool is `apt`
     # default pythons are `/python/cp*-{os.uname()[4]}`
+    starforge/manylinux1:latest:
+        pkgtool: yum
+        buildpy: /opt/wheelenv/bin/python
+        pythons:
+            - /python/cp27m-x86_64/bin/python
+            - /python/cp27mu-x86_64/bin/python
+        plat_name: manylinux1_x86_64
+        force_plat: false
+        postbuild: for whl in dist/*.whl; do auditwheel repair $whl -w dist; rm $whl; done
+    starforge/manylinux1-32:latest:
+        pkgtool: yum
+        buildpy: /opt/wheelenv/bin/python
+        pythons:
+            - /python/cp27m-i686/bin/python
+            - /python/cp27mu-i686/bin/python
+        plat_name: manylinux1_i686
+        force_plat: false
+        # until https://github.com/pypa/auditwheel/pull/27 is released in the manylinux image
+        postbuild: for whl in dist/*.whl; do auditwheel repair $whl -w dist; rm $whl; done; for whl in dist/*-linux_i686.manylinux1__i686.whl; do nwhl=$(echo $whl | sed -e 's/linux_i686.manylinux1__i686/manylinux1_i686/'); echo mv $whl $nwhl; mv $whl $nwhl; done
     starforge/purepy-wheel:
         pythons:
             - /python/cp26mu-{arch}/bin/python

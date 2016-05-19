@@ -7,6 +7,10 @@ packages:
             wheel: "git clone -b linux-wheels https://github.com/natefoo/pip && cd pip && for py in /python/cp*-`uname -m`; do ${py}/bin/python setup.py install && ${py}/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1; done"
         apt:
             - git
+        yum:
+            # manylinux1 images don't preinstall these, which is probably the
+            # way they should all work
+            - zlib-devel
     Cheetah:
         version: 2.4.4
     MarkupSafe:
@@ -16,6 +20,8 @@ packages:
         insert_setuptools: true
     numpy:
         version: 1.9.2
+        yum:
+            - atlas-devel
     psutil:
         version: 4.1.0
     psycopg2:
@@ -23,15 +29,15 @@ packages:
         src:
             - http://initd.org/psycopg/tarballs/PSYCOPG-2-6/psycopg2-2.6.1.tar.gz
         insert_setuptools: true
-        imageset: full-wheel
-        apt:
-            - libpq-dev
-        yum:
-            - postgresql-devel
-        zypper:
-            - postgresql-devel
-        brew:
-            - postgresql
+        prebuild: curl -LO http://yum.postgresql.org/9.5/redhat/rhel-5-x86_64/pgdg-centos95-9.5-2.noarch.rpm && rpm -i pgdg-centos95-9.5-2.noarch.rpm && yum install -y postgresql95-devel && sed -i -e 's%^#pg_config=.*%pg_config=/usr/pgsql-9.5/bin/pg_config%' ${SRC_ROOT}/setup.cfg
+        #apt:
+        #    - libpq-dev
+        #yum:
+        #    - postgresql-devel
+        #zypper:
+        #    - postgresql-devel
+        #brew:
+        #    - postgresql
     pycrypto:
         version: 2.6.1
         insert_setuptools: true
@@ -43,7 +49,8 @@ packages:
         prebuild:
             wheel: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython<0.23' || exit 1; done
             all: sed -i -e 's/0\.8\.4/0.8.4+gx1/' ${SRC_ROOT}/pysam/version.py
-        imageset: default_plus_rhel_6-wheel
+        yum:
+            - zlib-devel
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it
@@ -69,6 +76,8 @@ packages:
         insert_setuptools: true
         apt:
             - libyaml-dev
+        yum:
+            - libyaml-devel
     SQLAlchemy:
         version: 1.0.8
 
@@ -96,9 +105,6 @@ purepy_packages:
         version: 0.13
     Fabric:
         version: 1.10.2
-    importlib:
-        version: 1.0.3
-        insert_setuptools: true
     jstree:
         version: 0.4
     kombu:
@@ -110,11 +116,6 @@ purepy_packages:
         insert_setuptools: true
     nose:
         version: 1.3.7
-    ordereddict:
-        version: 1.1
-        insert_setuptools: true
-        force_pythons:
-            -  cp26mu
     paramiko:
         version: 1.15.2
     Parsley:

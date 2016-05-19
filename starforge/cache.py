@@ -60,6 +60,8 @@ class TarballCacher(BaseCacher):
                         ext = len('.tgz')
                     elif cver.endswith('.tar.bz2'):
                         ext = len('.tar.bz2')
+                    elif cver.endswith('.zip'):
+                        ext = len('.zip')
                     else:
                         warn('Unknown extension on cached file: %s', cfile)
                         continue

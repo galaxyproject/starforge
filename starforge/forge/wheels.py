@@ -125,6 +125,8 @@ class ForgeWheel(object):
         for src_url in self.wheel_config.sources:
             src_paths.append(self.cache_manager.url_check(src_url))
 
+        root = None
+
         for i, arc_path in enumerate(src_paths):
             arc = Archive.open(arc_path)
             assert len(arc.roots) == 1, \
@@ -139,6 +141,8 @@ class ForgeWheel(object):
             # TODO: don't use extractall (but since we *should* be running
             # under docker, we shouldn't need to care)
             arc.extractall(build)
+
+        assert root is not None, "Unable to determine root directory"
 
         prebuild = self._get_prebuild_command('all')
         if prebuild is not None:
@@ -163,7 +167,7 @@ class ForgeWheel(object):
             pythons = ['python']
             platform = None
             pkgtool = None
-        if platform is not None:
+        if platform is not None and self.image.force_plat:
             info('Platform name forced to: %s', platform)
 
         pkgs = self.wheel_config.get_dependencies(self.image.name)
@@ -212,10 +216,14 @@ class ForgeWheel(object):
                                    '-R', '/usr/local/lib'])
             build_args.extend(shlex.split(self.wheel_config.build_args))
             cmd = [py, 'setup.py'] + build_args
-            if platform is not None:
+            if platform is not None and self.image.force_plat:
                 cmd.append('--plat-name=%s' % platform)
             self.execute(cmd)
             rmtree('build')
+
+        if self.image.postbuild is not None:
+            info('Running image postbuild command: %s', self.image.postbuild)
+            subprocess.check_call(self.image.postbuild, shell=True)
 
         if output:
             for f in listdir('dist'):
