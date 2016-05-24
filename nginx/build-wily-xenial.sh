@@ -1,18 +1,29 @@
 #!/bin/bash
 
-# for ubuntu:wily
+# for ubuntu:wily or xenial
+
+dch_dist=$(lsb_release -cs)
+
+if [ "$dch_dist" == 'xenial' ]; then
+    nginx_version=1.10.0
+    ubuntu_version=${nginx_version}-0ubuntu0.16.04.1
+    ppa_version=${ubuntu_version}ppa1
+elif [ "$dch_dist" == 'wily' ]; then
+    nginx_version=1.9.3
+    ubuntu_version=${nginx_version}-3ubuntu3.3
+    ppa_version=${ubuntu_version}ppa1
+else
+    echo "Use build-trusty.sh to build for trusty, or adapt script for newer distribution"
+    exit 1
+fi
 
 pkg=nginx
-nginx_version=1.9.3
-ubuntu_version=${nginx_version}-3ubuntu3.3
-ppa_version=${ubuntu_version}ppa1
 dch_message="Restore the nginx-upload module from 2.2 branch in Github, compatible with nginx 1.9.x."
 build_deps="git"
 
 DEBFULLNAME="Nathan Coraor"
 DEBEMAIL="nate@bx.psu.edu"
 export DEBFULLNAME DEBEMAIL
-dch_dist=$(lsb_release -cs)
 
 build=/host/build.$(hostname)
 
