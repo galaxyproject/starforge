@@ -80,6 +80,9 @@ packages:
             - libyaml-devel
     SQLAlchemy:
         version: 1.0.8
+    uwsgi:
+        version: 2.0.13.1
+        prebuild: sed -i -e 's/if \'UWSGI_PYTHON_NOLIB\' not in os.environ:/if False:/' plugins/python/uwsgiplugin.py
 
 purepy_packages:
     amqp:
