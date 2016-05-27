@@ -13,6 +13,9 @@ long_description += '\n\n'
 with open('HISTORY.rst') as file:
     long_description += file.read()
 
+# Strip RTD :doc: links for PyPI
+long_description = long_description.replace(':doc:', '')
+
 init = join('starforge', '__init__.py')
 with open(init) as f:
     exec(compile(f.read(), "somefile.py", 'exec'))

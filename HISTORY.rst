@@ -5,6 +5,12 @@ Starforge is maintained by the `Galaxy`_ Project and community. A `list of
 contributors <https://github.com/galaxyproject/starforge/graphs/contributors>`_
 to the project can be found on GitHub.
 
+0.2.1 (2016-05-27)
+~~~~~~~~~~~~~~~~~~
+
+- Do a case-insensitive comparison for cached tarball names (uWSGI's project
+  name is ``uWSGI`` but its source tarballs are named ``uwsgi-*``). 7672547_
+
 0.2 (2016-05-19)
 ~~~~~~~~~~~~~~~~
 
@@ -43,5 +49,6 @@ Vagrant and Ansible called vadebuildsible).
 .. _9008c57: https://github.com/galaxyproject/starforge/commit/9008c57b09521298b919fac1de00fb62a448bcab
 .. _97b4ba4: https://github.com/galaxyproject/starforge/commit/97b4ba4a591e359b01dc69161925c301c9a7d1b7
 .. _0dbecb7: https://github.com/galaxyproject/starforge/commit/0dbecb79e28baecb62546b629cae9dbebf46df19
+.. _7672547: https://github.com/galaxyproject/starforge/commit/7672547adf3fe05d19f29d62a6a766ef114fd459
 
 .. _Issue 64: https://github.com/galaxyproject/starforge/issues/64
