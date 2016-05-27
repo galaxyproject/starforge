@@ -51,8 +51,9 @@ class TarballCacher(BaseCacher):
             if exists(cfpath):
                 return cfpath
         else:
+            name = name.lower()
             for cfile in listdir(self.cache_path):
-                if cfile.startswith(name + '-'):
+                if cfile.lower().startswith(name + '-'):
                     cver = cfile[len(name + '-'):]
                     if cver.endswith('.tar.gz'):
                         ext = len('.tar.gz')
