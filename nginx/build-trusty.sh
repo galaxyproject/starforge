@@ -4,7 +4,7 @@
 
 pkg=nginx
 nginx_version=1.4.6
-ubuntu_version=${nginx_version}-1ubuntu3.4
+ubuntu_version=${nginx_version}-1ubuntu3.5
 ppa_version=${ubuntu_version}ppa1
 dch_message="Restore the nginx-upload module from 2.2 branch in Github, now compatible with nginx 1.4.x."
 build_deps="git"
