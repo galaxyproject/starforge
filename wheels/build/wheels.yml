@@ -100,8 +100,7 @@ packages:
         version: 1.0.15
     uWSGI:
         version: 2.0.13.1
-        prebuild: sed -i -e 's/default.ini/pyuwsgi.ini/' ${SRC_ROOT}/setup.py
-        ## imageset: default_plus_libpython-wheel
+        prebuild: sed -i -e 's/default.ini/pyuwsgi.ini/' -e 's/cmd.install_scripts/cmd.install_platlib/' ${SRC_ROOT}/setup.py
 
 purepy_packages:
     amqp:
