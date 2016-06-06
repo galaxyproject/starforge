@@ -219,7 +219,6 @@ class ForgeWheel(object):
             cmd = [py, 'setup.py'] + build_args
             if platform is not None and self.image.force_plat:
                 cmd.append('--plat-name=%s' % platform)
-            print >> sys.stderr, "!!", cmd
             self.execute(cmd)
             rmtree('build')
 
