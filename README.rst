@@ -132,7 +132,7 @@ controlled in `wheels/build/wheels.yml`_, see ``psycopg2`` for an example.
 
 **Mac OS X**
 
-Mac OS X mages are not provided due to legal reasons. Consult the :doc:`osx`
+Mac OS X images are not provided due to legal reasons. Consult the :doc:`osx`
 documentation for details.
 
 .. _Galaxy: http://galaxyproject.org/
