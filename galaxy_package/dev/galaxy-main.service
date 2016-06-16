@@ -1,0 +1,14 @@
+[Unit]
+Description=Galaxy job handler
+After=network.target
+ConditionPathExists=/etc/galaxy/galaxy.ini
+
+[Service]
+Type=simple
+Environment=PATH=/usr/lib/galaxy/virtualenv/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+Environment=VIRTUAL_ENV=/usr/lib/galaxy/virtualenv/
+ExecStart=/usr/bin/galaxy-main -c /etc/galaxy/galaxy.ini --log-file /var/log/galaxy/galaxy-handler.log
+User=galaxy
+
+[Install]
+WantedBy=multi-user.target
