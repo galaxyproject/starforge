@@ -16,15 +16,21 @@ build:
   - cp ./lib/galaxy/config/sample/* /usr/share/doc/galaxy/sample
   - cd /host
   - cp galaxy-*.service /lib/systemd/system
-  - "[ ! -d ${image} ] && mkdir ${image}"
   - stamp=$(date -u +%Y%m%dT%H%M%SZ)
-  - fpm -s dir -t deb -n galaxy -v "${version}+${stamp}-${short_sha}" --license 'AFL 3.0' --vendor 'The Galaxy Project' -m 'The Galaxy Committers and Community' --url http://galaxyproject.org/ --description 'Galaxy server for data intensive science' -d python --pre-install /host/preinstall.sh --post-install /host/postinstall.sh -p ${image}/galaxy_${version}+${stamp}-${short_sha}_${arch}.deb /usr/lib/galaxy /usr/bin/galaxy-* /etc/galaxy /usr/share/doc/galaxy /lib/systemd/system/galaxy-*.service /var/log/galaxy
+  - changelog="changelog.${dist}"
+  - changelog_tmp=$(mktemp)
+  - sed -e "s/FULL_VERSION/${version}+${stamp}-${short_sha}/" -e "s/SHORT_VERSION/${version}/" -e "s/DIST/${dist}/" -e "s/SHA/${short_sha}/" -e "s/DATE/$(date -uR)/" changelog.head >$changelog_tmp
+  - cat $changelog >>$changelog_tmp
+  - fpm -s dir -t deb -n galaxy -v "${version}+${stamp}-${short_sha}" --license 'AFL 3.0' --vendor 'The Galaxy Project' -m 'The Galaxy Committers and Community' --url http://galaxyproject.org/ --description 'Galaxy server for data intensive science' -d python -d python-dev --deb-changelog $changelog_tmp --pre-install /host/preinstall.sh --post-install /host/postinstall.sh -p galaxy_${version}+${stamp}-${short_sha}~${dist}_${arch}.deb /usr/lib/galaxy /usr/bin/galaxy-* /etc/galaxy /usr/share/doc/galaxy /lib/systemd/system/galaxy-*.service /var/log/galaxy
+  - cp $changelog_tmp $changelog
+  - rm $changelog_tmp
   urls:
   - https://github.com/${repo}/archive/${ref}.tar.gz
 env:
   repo: natefoo/galaxy
   ref: installable
   arch: amd64
+  dist: jessie
 meta:
   image: debian:jessie
   version: 16.07.dev0
