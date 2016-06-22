@@ -16,9 +16,8 @@ build:
   - cp ./lib/galaxy/config/sample/* /usr/share/doc/galaxy-${version}/sample
   - cd /host
   - cp galaxy-*.service /usr/lib/systemd/system
-  - "[ ! -d ${image} ] && mkdir ${image}"
   - stamp=$(date -u +%Y%m%dT%H%M%SZ)
-  - fpm -s dir -t rpm -n galaxy -v "${version}+${stamp}_${short_sha}" --license 'AFL 3.0' --vendor 'The Galaxy Project' -m 'The Galaxy Committers and Community' --url http://galaxyproject.org/ --description 'Galaxy server for data intensive science' -d python --pre-install /host/preinstall.sh --post-install /host/postinstall.sh -p ${image}/galaxy-${version}+${stamp}_${short_sha}-1.${dist}.${arch}.rpm --rpm-dist ${dist} /usr/lib/galaxy /usr/bin/galaxy-* /etc/galaxy /usr/share/doc/galaxy-${version} /lib/systemd/system/galaxy-*.service /var/log/galaxy
+  - fpm -s dir -t rpm -n galaxy -v "${version}+${stamp}_${short_sha}" --license 'AFL 3.0' --vendor 'The Galaxy Project' -m 'The Galaxy Committers and Community' --url http://galaxyproject.org/ --description 'Galaxy server for data intensive science' -d python --pre-install /host/preinstall.sh --post-install /host/postinstall.sh -p galaxy-${version}+${stamp}_${short_sha}-1.${dist}.${arch}.rpm --rpm-dist ${dist} /usr/lib/galaxy /usr/bin/galaxy-* /etc/galaxy /usr/share/doc/galaxy-${version} /lib/systemd/system/galaxy-*.service /var/log/galaxy
   urls:
   - https://github.com/${repo}/archive/${ref}.tar.gz
 env:
