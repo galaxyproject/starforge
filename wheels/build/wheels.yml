@@ -62,6 +62,8 @@ packages:
         prebuild:
             wheel: for f in sqlite3.h sqlite3.c sqlite3ext.h; do cp ${SRC_ROOT_1}/$f $f || return 1; done && echo 'include_dirs=.' >>${SRC_ROOT_0}/setup.cfg
         build_args: build_static bdist_wheel
+    python-ldap:
+        version: 2.4.25
     python_lzo:
         version: 1.8
         src:
