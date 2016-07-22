@@ -64,6 +64,10 @@ packages:
         build_args: build_static bdist_wheel
     python-ldap:
         version: 2.4.25
+        apt:
+            - libldap2-dev
+        yum:
+            - openldap-devel
     python_lzo:
         version: 1.8
         src:
