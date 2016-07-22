@@ -1,0 +1,42 @@
+build:
+  commands:
+  - short_sha=$(wget -qO- https://api.github.com/repos/${repo}/git/refs/heads/${ref} | json object.sha | cut -c-7)
+  - tar xfz ${ref}.tar.gz
+  - cd galaxy-${ref}
+  - make client
+  - virtualenv -p /usr/bin/python2.7 /usr/lib/galaxy/virtualenv
+  - /usr/lib/galaxy/virtualenv/bin/pip install -U pip setuptools wheel uwsgi
+  - /usr/lib/galaxy/virtualenv/bin/pip install -r requirements.txt
+  - /usr/lib/galaxy/virtualenv/bin/pip install -i https://wheels.galaxyproject.org '.[postgresql]'
+  - echo '/var/lib/galaxy/virtualenv/lib/python2.7/site-packages' >/usr/lib/galaxy/virtualenv/lib/python2.7/site-packages/galaxy-var.pth
+  - for gx in /usr/lib/galaxy/virtualenv/bin/galaxy-*; do ln -s $gx /usr/bin; done
+  - ln -s /usr/lib/galaxy/virtualenv/bin/uwsgi /usr/bin/galaxy-uwsgi
+  - mkdir /etc/galaxy /var/log/galaxy
+  - mkdir -p /usr/share/doc/galaxy/sample
+  - cp ./lib/galaxy/config/sample/* /usr/share/doc/galaxy/sample
+  - cd /host
+  - cp galaxy-*.service /lib/systemd/system
+  - stamp=$(date -u +%Y%m%dT%H%M%SZ)
+  - changelog="changelog.${dist}"
+  - changelog_tmp=$(mktemp)
+  - sed -e "s/FULL_VERSION/${version}+${stamp}-${short_sha}/" -e "s/SHORT_VERSION/${version}/" -e "s/DIST/${dist}/" -e "s/SHA/${short_sha}/" -e "s/DATE/$(date -uR)/" changelog.head >$changelog_tmp
+  - cat $changelog >>$changelog_tmp
+  - fpm -s dir -t deb -n galaxy -v "${version}+${stamp}-${short_sha}" --license 'AFL 3.0' --vendor 'The Galaxy Project' -m 'The Galaxy Committers and Community' --url http://galaxyproject.org/ --description 'Galaxy server for data intensive science' -d python -d python-dev --deb-changelog $changelog_tmp --pre-install /host/preinstall.sh --post-install /host/postinstall.sh -p galaxy_${version}+${stamp}-${short_sha}~${dist}_${arch}.deb /usr/lib/galaxy /usr/bin/galaxy-* /etc/galaxy /usr/share/doc/galaxy /lib/systemd/system/galaxy-*.service /var/log/galaxy
+  - cp $changelog_tmp $changelog
+  - rm $changelog_tmp
+  urls:
+  - https://github.com/${repo}/archive/${ref}.tar.gz
+env:
+  repo: natefoo/galaxy
+  ref: installable
+  arch: amd64
+  dist: jessie
+meta:
+  image: debian:jessie
+  version: 16.07.dev0
+prebuild:
+    # for stretch
+    packages: 'ruby ruby-dev gcc make virtualenv python-dev npm nodejs-legacy'
+    commands:
+    - gem install fpm
+    - npm install -g json

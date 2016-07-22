@@ -1,0 +1,14 @@
+[Unit]
+Description=Galaxy web services
+After=network.target
+ConditionPathExists=/etc/galaxy/galaxy.ini
+
+[Service]
+Type=simple
+Environment=PATH=/usr/lib/galaxy/virtualenv/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+Environment=VIRTUAL_ENV=/usr/lib/galaxy/virtualenv/
+ExecStart=/usr/bin/galaxy-uwsgi --ini-paste /etc/galaxy/galaxy.ini --logto2 /var/log/galaxy/galaxy-uwsgi.log --uid galaxy --gid galaxy
+ExecStop=/bin/kill -INT $MAINPID
+
+[Install]
+WantedBy=multi-user.target

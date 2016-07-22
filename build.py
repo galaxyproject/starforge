@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import glob
 import subprocess
 import shutil
 import re
@@ -34,18 +35,28 @@ def main(package, version='default', image=None, dryrun=False, clone=False, quie
         # Update other variables.
         build_dir = target
 
-    tentative_yaml_path = os.path.join(build_dir, 'build.yml')
-
-    if not os.path.exists(tentative_yaml_path) and not os.path.isdir(tentative_yaml_path):
-        print "No yaml file found at %s" % tentative_yaml_path
+    tentative_yaml_paths = glob.glob(os.path.join(build_dir, 'build*.yml'))
+    if not tentative_yaml_paths:
+        print "No build yaml files found at %s/build*.yml" % build_dir
         sys.exit(3)
 
-    with open(tentative_yaml_path, 'r') as handle:
+    if not dryrun:
+        # Empty the log
+        with open(log_file, 'w') as handle:
+            pass
+
+    for tentative_yaml_path in tentative_yaml_paths:
+        print "Building for %s" % tentative_yaml_path
+        build_and_run(build_dir, tentative_yaml_path, log_file, package, version, image, dryrun, clone, quiet)
+
+
+def build_and_run(build_dir, yaml_path, log_file, package, version, image, dryrun, clone, quiet):
+    with open(yaml_path, 'r') as handle:
         image_data = yaml.load(handle)
 
     DOCKER_TEMPLATE = """
 FROM %(image)s
-MAINTAINER Nare Coraor <nate@bx.psu.edu>
+MAINTAINER The Galaxy Community http://galaxyproject.org/
 
 ENV DEBIAN_FRONTEND noninteractive
 %(meta_env_string)s
@@ -61,7 +72,7 @@ VOLUME ["/host"]
 ENTRYPOINT ["/bin/bash", "/host/build.sh"]
     """
 
-    SCRIPT_TEMPLATE = """#!/bin/sh
+    SCRIPT_TEMPLATE = """#!/bin/bash
 urls="
 {url_list}
 "
@@ -107,18 +118,25 @@ done)
     if version == 'default':
         version = image_data['meta'].get('version', 'default')
 
-    prebuild_packages = ['wget', 'openssl', 'ca-certificates', 'build-essential']
+    # Separate prebuild_packages into separate RUNs to take advantage of caching
+    if docker_env['image'].startswith('centos:'):
+        prebuild_packages = ['wget', 'openssl', 'ca-certificates', '"@development tools"', 'epel-release']
+    else:
+        prebuild_packages = ['wget', 'openssl', 'ca-certificates', 'build-essential']
+
+    install_cmd = install_cmd_for_image(docker_env['image'])
+    template_values['prebuild_packages'] = "RUN %s" % (install_cmd % ' '.join(prebuild_packages))
+
     if 'prebuild' in image_data and 'packages' in image_data['prebuild']:
         pkgs = image_data['prebuild']['packages']
         if isinstance(pkgs, str):
-            prebuild_packages.extend(pkgs.strip().split())
+            prebuild_packages = pkgs.strip().split()
         elif isinstance(pkgs, list):
-            prebuild_packages.extend(pkgs)
+            prebuild_packages = pkgs
         else:
             print "Unknown data type for /prebuild/packages, please use a space delimited string of package names, or a list of strings"
             sys.exit(5)
-
-    template_values['prebuild_packages'] = "RUN apt-get -qq update && apt-get install --no-install-recommends -y %s" % ' '.join(prebuild_packages)
+        template_values['prebuild_packages'] += '\nRUN %s' % (install_cmd % ' '.join(prebuild_packages))
 
     if 'prebuild' in image_data and 'commands' in image_data['prebuild']:
         template_values['prebuild_commands'] = '\n'.join([
@@ -141,7 +159,8 @@ done)
     runcmd = ['docker', 'run', '--volume=%s/:/host/' % build_dir, '--env=pkg=%s' % package,
               '--env=version=%s' % version, image_name]
     if not dryrun:
-        with open(log_file, 'w') as handle:
+        with open(log_file, 'a') as handle:
+            handle.write('Building for %s\n' % yaml_path)
             execute(command, cwd=build_dir, log=handle, quiet=quiet)
             if not quiet:
                 print ' '.join(runcmd)
@@ -168,6 +187,13 @@ def execute(command, cwd=None, log=None, quiet=False):
                 print line,
         except KeyboardInterrupt:
             sys.exit()
+
+
+def install_cmd_for_image(image):
+    # Assume APT as before
+    if image.startswith('centos:'):
+        return "yum install -y %s"
+    return "apt-get -qq update && apt-get install --no-install-recommends -y %s"
 
 
 if __name__ == '__main__':
