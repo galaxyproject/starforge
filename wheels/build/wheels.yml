@@ -101,8 +101,8 @@ purepy_packages:
         version: 1.4.8
     anyjson:
         version: 0.3.3
-    azure:
-        version: 1.0.3
+    azure-storage:
+        version: 0.32.0
     Babel:
         version: 2.0
     Beaker:
