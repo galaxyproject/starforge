@@ -12,15 +12,15 @@ prebuild:
         - echo 'deb http://http.debian.net/debian-backports squeeze-backports main' >> /etc/apt/sources.list
 build:
     urls:
-        - https://github.com/OpenMS/OpenMS/archive/Release2.0.1.tar.gz
+        - https://github.com/OpenMS/OpenMS/archive/Release2.0.0.tar.gz
         - https://github.com/OpenMS/contrib/archive/master.tar.gz
     commands:
         # Since a newer version of cmake is required...we update it now.
         - apt-get -qq update && apt-get dist-upgrade -y
         - mkdir -p /build/dest/bin /build/dest/lib /usr/lib/x86_64-linux-gnu/libgthread-2.0.so
-        - tar xfz Release2.0.1.tar.gz
+        - tar xfz Release2.0.0.tar.gz
         - tar xfz master.tar.gz
-        - mv contrib-master OpenMS-Release2.0.1/contrib
+        - mv contrib-master OpenMS-Release2.0.0/contrib
         - cd OpenMS-Release2.0.0/contrib
         - cmake . -DBUILD_TYPE=SEQAN
         - cmake . -DBUILD_TYPE=LIBSVM
