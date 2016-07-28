@@ -137,6 +137,8 @@ purepy_packages:
         insert_setuptools: true
     nose:
         version: 1.3.7
+    numpy-stl:
+        version: 1.9.1
     paramiko:
         version: 1.15.2
     Parsley:
