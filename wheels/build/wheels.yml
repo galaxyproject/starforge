@@ -69,6 +69,10 @@ packages:
         prebuild:
             wheel: cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --disable-shared --enable-backends=no --enable-slapd=no && make install
         build_args: build_static bdist_wheel
+        apt:
+            - groff
+        yum:
+            - groff
     python_lzo:
         version: 1.8
         src:
