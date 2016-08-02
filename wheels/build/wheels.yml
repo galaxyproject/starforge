@@ -63,11 +63,11 @@ packages:
             wheel: for f in sqlite3.h sqlite3.c sqlite3ext.h; do cp ${SRC_ROOT_1}/$f $f || return 1; done && echo 'include_dirs=.' >>${SRC_ROOT_0}/setup.cfg
         build_args: build_static bdist_wheel
     python-ldap:
-        version: 2.4.25
-        apt:
-            - libldap2-dev
-        yum:
-            - openldap-devel
+        version: 2.4.26
+        src:
+            - ftp://ftp.openldap.org/pub/OpenLDAP/openldap-release/openldap-2.4.44.tgz
+        prebuild:
+            wheel: cd $SRC_ROOT_0 && CFLAGS=-fpic ./configure --disable-shared --enable-backends=no --enable-slapd=no && make install
     python_lzo:
         version: 1.8
         src:
