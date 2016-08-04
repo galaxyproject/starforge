@@ -17,8 +17,6 @@ DEFAULT_CONFIG_FILE = abspath(join(dirname(__file__), 'default.yml'))
 DEFAULT_IMAGE_TYPE = 'docker'
 DEFAULT_IMAGE_PKGTOOL = 'apt'
 DEFAULT_IMAGE_PYTHONS = [
-    '/python/cp26m-{arch}/bin/python',
-    '/python/cp26mu-{arch}/bin/python',
     '/python/cp27m-{arch}/bin/python',
     '/python/cp27mu-{arch}/bin/python'
 ]
