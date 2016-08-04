@@ -15,7 +15,7 @@ if [ -z "${BUILD_NUMBER}" ]; then
     echo '$BUILD_NUMBER is unset, are you running from Jenkins?'
     exit 1
 else
-    output=$(realpath wheels/dist/build-${BUILD_NUMBER})
+    output=$(realpath -m wheels/dist/build-${BUILD_NUMBER})
 fi
 
 
