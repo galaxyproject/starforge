@@ -1,6 +1,11 @@
 ---
 
 packages:
+    biopython:
+        version: 1.66
+        prebuild:
+            wheel: "for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install pip; ${py}/bin/pip install --upgrade pip ; ${py}/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1; done"
+        insert_setuptools: true
     bx-python:
         version: 0.7.3
         prebuild:
