@@ -72,8 +72,10 @@ packages:
         build_args: build bdist_wheel
         apt:
             - groff
+            - libsasl2-dev
         yum:
             - groff
+            - cyrus-sasl-devel
     python_lzo:
         version: 1.8
         src:
