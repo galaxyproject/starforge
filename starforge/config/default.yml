@@ -94,7 +94,7 @@ images:
         postbuild: for whl in dist/*.whl; do auditwheel repair $whl -w dist; rm $whl; done
     starforge/purepy-wheel:
         pythons:
-            - /python/cp26mu-{arch}/bin/python
+            - /python/cp27mu-{arch}/bin/python
     starforge/base-wheel:
         plat_name: linux_x86_64
     starforge/base32-wheel:
@@ -119,7 +119,6 @@ images:
         pkgtool: brew
         buildpy: /python/wheelenv/bin/python
         pythons:
-            - /python/cp26m-{arch}/bin/python
             - /python/cp27m-{arch}/bin/python
         run_cmd: >
             qemu-system-x86_64

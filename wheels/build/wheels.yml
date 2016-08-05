@@ -122,6 +122,8 @@ purepy_packages:
         insert_setuptools: true
     nose:
         version: 1.3.7
+    numpy-stl:
+        version: 1.9.1
     paramiko:
         version: 1.15.2
     Parsley:
@@ -139,7 +141,7 @@ purepy_packages:
             - https://github.com/natefoo/pip/archive/03c981a2d4659d3087397dc9fd6500437998be5c.tar.gz
         prebuild: sed -i -e 's/__version__ = "8\.0\.2"/__version__ = "8.0.2+gx2"/' ${SRC_ROOT}/pip/__init__.py
     pulsar-galaxy-lib:
-        version: 0.7.0.dev3
+        version: 0.7.0.dev4
         prebuild: sed -i -e 's/DEFAULT_PULSAR_GALAXY_LIB = 0/DEFAULT_PULSAR_GALAXY_LIB = 1/' ${SRC_ROOT}/setup.py
     Pygments:
         version: 2.0.2
@@ -172,6 +174,8 @@ purepy_packages:
         version: 1.1.6
     Tempita:
         version: 0.5.3.dev0
+    testfixtures:
+        version: 4.10.0
     wchartype:
         version: 0.1
         insert_setuptools: true

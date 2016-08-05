@@ -67,15 +67,15 @@ centos32_6/Makefile: image-Makefile
 
 # Debian 64 bit
 
-debian-wheel_6/Makefile: wheel-Makefile
-	mkdir -p $(@D)
-	sed -e 's#REPLACE_TAG#starforge/$(subst _,:,$(@D))#' \
-		-e 's#REPLACE_FROM#debian:6#' \
-		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-64.in#' \
-		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
-		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
-		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
-		wheel-Makefile >$@
+#debian-wheel_6/Makefile:
+#	mkdir -p $(@D)
+#	sed -e 's#REPLACE_TAG#starforge/$(subst _,:,$(@D))#' \
+#		-e 's#REPLACE_FROM#debian:6#' \
+#		-e 's#REPLACE_DOCKERFILE#Dockerfile-debian-64.in#' \
+#		-e 's#REPLACE_PKGS#$(DEBIAN_PKGS)#' \
+#		-e 's#REPLACE_WHEEL_VERSION#$(WHEEL_VERSION)#' \
+#		-e 's#REPLACE_PIP_VERSION#$(PIP_VERSION)#' \
+#		wheel-Makefile >$@
 
 debian-wheel_7/Makefile: wheel-Makefile
 	mkdir -p $(@D)
