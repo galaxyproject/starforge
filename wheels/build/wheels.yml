@@ -73,8 +73,7 @@ packages:
             - http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.44.tgz
             - https://pypi.python.org/packages/fc/99/9eed836fe4d916792994838df125da9c25c5f7c31abfbf6f0ab076e5f419/python-ldap-2.4.27.tar.gz
         prebuild:
-            wheel: cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --disable-shared --enable-backends=no --enable-slapd=no && make install && sed -i -e 's/extra_compile_args = /extra_compile_args = -static/' ${SRC_ROOT_0}/setup.cfg
-        build_args: build bdist_wheel
+            wheel: if [ `uname -s` == 'Darwin' ] ; then sed -e 's/^library_dirs.*//' -e 's#^include_dirs.*#include_dirs = /Developer/SDKs/MacOSX10.6.sdk/usr/include /Developer/SDKs/MacOSX10.6.sdk/usr/include/sasl#' -i .orig ${SRC_ROOT_0}/setup.cfg ; sed -e $'$i\\\n#define LDAP_VLV_ERROR 0x4C\n' -i .orig ${SRC_ROOT_0}/Modules/errors.h ; else cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --disable-shared --enable-backends=no --enable-slapd=no && make install && sed -i -e 's/extra_compile_args = /extra_compile_args = -static/' ${SRC_ROOT_0}/setup.cfg ; fi
         apt:
             - groff
             - libsasl2-dev
