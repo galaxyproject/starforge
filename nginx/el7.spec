@@ -34,10 +34,11 @@ Source0:           http://nginx.org/download/nginx-%{version}.tar.gz
 Source1:           http://nginx.org/download/nginx-%{version}.tar.gz.asc
 Source2:           https://github.com/vkholodkov/nginx-upload-module/archive/2.2.tar.gz
 Source3:           http://web.iti.upv.es/~sto/nginx/ngx_http_auth_pam_module-1.4.tar.gz
-Source10:          nginx.init
-Source1017:        nginx.sysconfig
+Source10:          nginx.service
 Source11:          nginx.logrotate
 Source12:          nginx.conf
+Source13:          nginx-upgrade
+Source14:          nginx-upgrade.8
 Source100:         index.html
 Source101:         poweredby.png
 Source102:         nginx-logo.png
@@ -69,11 +70,12 @@ Requires:          openssl
 Requires:          pcre
 Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires(pre):     nginx-galaxy-filesystem
-Requires(post):    chkconfig
-Requires(preun):   chkconfig, initscripts
-Requires(postun):  initscripts
 Provides:          webserver
 
+BuildRequires:     systemd
+Requires(post):    systemd
+Requires(preun):   systemd
+Requires(postun):  systemd
 
 %description
 Nginx is a web server and a reverse proxy server for HTTP, SMTP, POP3 and
@@ -164,13 +166,10 @@ find %{buildroot} -type f -name perllocal.pod -exec rm -f '{}' \;
 find %{buildroot} -type f -empty -exec rm -f '{}' \;
 find %{buildroot} -type f -iname '*.so' -exec chmod 0755 '{}' \;
 install -p -D -m 0644 %{SOURCE10} \
-    %{buildroot}%{_initrddir}/nginx
+    %{buildroot}%{_unitdir}/nginx.service
 
 install -p -D -m 0644 %{SOURCE11} \
     %{buildroot}%{_sysconfdir}/logrotate.d/nginx
-
-install -p -D -m 0644 %{SOURCE1017} \
-    %{buildroot}%{_sysconfdir}/sysconfig/nginx
 
 install -p -d -m 0755 %{buildroot}%{nginx_confdir}/conf.d
 install -p -d -m 0755 %{buildroot}%{nginx_confdir}/default.d
@@ -191,6 +190,9 @@ install -p -m 0644 %{SOURCE103} %{SOURCE104} \
 install -p -D -m 0644 %{_builddir}/nginx-%{version}/man/nginx.8 \
     %{buildroot}%{_mandir}/man8/nginx.8
 
+install -p -D -m 0755 %{SOURCE13} %{buildroot}%{_bindir}/nginx-upgrade
+install -p -D -m 0644 %{SOURCE14} %{buildroot}%{_mandir}/man8/nginx-upgrade.8
+
 for i in ftdetect indent syntax; do
     install -p -D -m644 contrib/vim/${i}/nginx.vim \
         %{buildroot}%{_datadir}/vim/vimfiles/${i}/nginx.vim
@@ -205,37 +207,30 @@ getent passwd %{nginx_user} > /dev/null || \
 exit 0
 
 %post
-if [ $1 -eq 1 ]; then
-    /sbin/chkconfig --add %{name}
-fi
-if [ $1 -eq 2 ]; then
-    # Make sure these directories are not world readable.
-    chmod 700 %{nginx_home}
-    chmod 700 %{nginx_home_tmp}
-    chmod 700 %{nginx_logdir}
-fi
+%systemd_post nginx.service
 
 %preun
-if [ $1 -eq 0 ]; then
-    /sbin/service %{name} stop >/dev/null 2>&1
-    /sbin/chkconfig --del %{name}
-fi
+%systemd_preun nginx.service
 
 %postun
-if [ $1 -eq 2 ]; then
-    /sbin/service %{name} upgrade || :
+%systemd_postun nginx.service
+if [ $1 -ge 1 ]; then
+    /usr/bin/nginx-upgrade >/dev/null 2>&1 || :
 fi
+
 
 %files
 %doc LICENSE CHANGES README
 %{nginx_datadir}/html/*
+%{_bindir}/nginx-upgrade
 %{_sbindir}/nginx
 %{_datadir}/vim/vimfiles/ftdetect/nginx.vim
 %{_datadir}/vim/vimfiles/syntax/nginx.vim
 %{_datadir}/vim/vimfiles/indent/nginx.vim
 %{_mandir}/man3/nginx.3pm*
 %{_mandir}/man8/nginx.8*
-%{_initrddir}/nginx
+%{_mandir}/man8/nginx-upgrade.8*
+%{_unitdir}/nginx.service
 %config(noreplace) %{nginx_confdir}/fastcgi.conf
 %config(noreplace) %{nginx_confdir}/fastcgi.conf.default
 %config(noreplace) %{nginx_confdir}/fastcgi_params
@@ -252,7 +247,6 @@ fi
 %config(noreplace) %{nginx_confdir}/uwsgi_params.default
 %config(noreplace) %{nginx_confdir}/win-utf
 %config(noreplace) %{_sysconfdir}/logrotate.d/nginx
-%config(noreplace) %{_sysconfdir}/sysconfig/nginx
 %dir %{perl_vendorarch}/auto/nginx
 %{perl_vendorarch}/nginx.pm
 %{perl_vendorarch}/auto/nginx/nginx.so
@@ -270,7 +264,4 @@ fi
 
 %changelog
 * Tue Aug 30 2016 Nate Coraor <nate@bx.psu.edu> - 1:1.10.1-1
-- Update to version 1.10.1
-
-* Wed Apr 13 2016 Nate Coraor <nate@bx.psu.edu> - 1:1.8.1-1
-- Initial release of nginx-galaxy
+- Initial release of nginx-galaxy for EL7
