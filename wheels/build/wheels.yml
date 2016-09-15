@@ -122,6 +122,8 @@ purepy_packages:
         version: 4.0.2
     dictobj:
         version: 0.3.1
+    docopt:
+        version: 0.6.2
     docutils:
         version: 0.12
         insert_setuptools: true
@@ -163,9 +165,13 @@ purepy_packages:
         prebuild: sed -i -e 's/DEFAULT_PULSAR_GALAXY_LIB = 0/DEFAULT_PULSAR_GALAXY_LIB = 1/' ${SRC_ROOT}/setup.py
     Pygments:
         version: 2.0.2
+    pykwalify:
+        version: 1.5.1
     pyparsing:
         # required by svgwrite
         version: 2.1.1
+    python-dateutil:
+        version: 2.5.3
     pytz:
         version: 2015.4
     repoze.lru:
