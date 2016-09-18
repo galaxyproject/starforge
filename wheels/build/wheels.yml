@@ -89,6 +89,15 @@ packages:
         prebuild:
             wheel: cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --prefix=${SRC_ROOT_0}/lzo --disable-shared && make install && sed -i -e 's/\["lzo"\]/\["lzo2"\]/' ${SRC_ROOT_0}/setup.py
         build_args: build_ext -I lzo/include:lzo/include/lzo -L lzo/lib bdist_wheel
+    pyuwsgi:
+        pip_name: uWSGI
+        version: 2.1.dev0+gx1.c6ee1f6
+        src:
+            - https://github.com/unbit/uwsgi/archive/c6ee1f6be2e567f6aa873879a0f1a380d0b5775a.tar.gz
+        prebuild: cp ${SRC_ROOT}/setup.cpyext.py ${SRC_ROOT}/setup.py
+            && sed -i -e "s/name='uWSGI'/name='pyuwsgi'/" ${SRC_ROOT}/setup.py
+            && sed -i -e "s/version=uwsgiconfig.uwsgi_version/version='2.1.dev0+gx1.c6ee1f6'/" ${SRC_ROOT}/setup.py
+            && sed -i -e "s/n = scandir(dir, &tasklist, NULL, uwsgi_versionsort);/n = scandir(dir, \&tasklist, NULL, (void *)uwsgi_versionsort);/" ${SRC_ROOT}/core/spooler.c
     PyYAML:
         version: 3.11
         insert_setuptools: true

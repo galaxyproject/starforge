@@ -27,6 +27,7 @@ class ForgeWheel(object):
     def __init__(self, wheel_config, cache_manager, exec_context, image=None):
         self.wheel_config = wheel_config
         self.name = wheel_config.name
+        self.pip_name = wheel_config.pip_name
         self.version = wheel_config.version
         self.src_urls = wheel_config.sources
         self.cache_manager = cache_manager
@@ -35,7 +36,7 @@ class ForgeWheel(object):
 
     def cache_sources(self):
         fail_ok = self.src_urls != []
-        self.cache_manager.pip_cache(self.name, self.version, fail_ok=fail_ok)
+        self.cache_manager.pip_cache(self.pip_name, self.version, fail_ok=fail_ok)
         for src_url in self.src_urls:
             self.cache_manager.url_cache(src_url)
 
@@ -119,7 +120,7 @@ class ForgeWheel(object):
             chown(output, uid, gid)
 
         src_paths = []
-        pip_path = self.cache_manager.pip_check(self.name, self.version)
+        pip_path = self.cache_manager.pip_check(self.pip_name, self.version)
         if pip_path is not None:
             src_paths.append(pip_path)
         for src_url in self.wheel_config.sources:

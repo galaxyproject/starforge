@@ -22,6 +22,7 @@ class WheelConfig(object):
         self.name = name
         self.config = config
         self.purepy = purepy
+        self.pip_name = config.get('pip_name', name)
         self.version = str(config['version'])
         self.sources = config.get('src', [])
         self.prebuild = config.get('prebuild', None)
