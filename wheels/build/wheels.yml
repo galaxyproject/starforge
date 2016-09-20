@@ -49,7 +49,7 @@ packages:
     pysam:
         version: 0.8.4+gx1
         src:
-            - https://github.com/dannon/pysam/archive/v0.8.4_gxy1.tar.gz
+            - https://github.com/dannon/pysam/archive/v0.8.4_gxy2.tar.gz
         # https://github.com/pysam-developers/pysam/issues/164
         prebuild:
             wheel: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython<0.23' || exit 1; done
