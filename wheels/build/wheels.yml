@@ -47,13 +47,13 @@ packages:
         version: 2.6.1
         insert_setuptools: true
     pysam:
-        version: 0.8.4+gx4
+        version: 0.8.4+gx5
         src:
-            - https://github.com/dannon/pysam/archive/v0.8.4_gx4.tar.gz
+            - https://github.com/dannon/pysam/archive/v0.8.4_gx5.tar.gz
         # https://github.com/pysam-developers/pysam/issues/164
         prebuild:
             wheel: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython<0.23' || exit 1; done
-            all: sed -i -e 's/0\.8\.4/0.8.4+gx4/' ${SRC_ROOT}/pysam/version.py
+            all: sed -i -e 's/0\.8\.4/0.8.4+gx5/' ${SRC_ROOT}/pysam/version.py
         yum:
             - zlib-devel
     pysqlite:
