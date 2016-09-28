@@ -106,7 +106,7 @@ packages:
         yum:
             - libyaml-devel
     SQLAlchemy:
-        version: 1.0.14
+        version: 1.0.15
 
 purepy_packages:
     amqp:
