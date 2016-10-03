@@ -22,7 +22,7 @@ packages:
         version: 1.9.2
         yum:
             - atlas-devel
-    pillow:
+    Pillow:
         version: 3.4.0
         yum:
             - zlib-devel
