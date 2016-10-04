@@ -24,13 +24,7 @@ packages:
             - atlas-devel
     Pillow:
         version: 3.4.0
-        yum:
-            - zlib-devel
-            - libjpeg-devel
-            # - libtiff-devel
-            # - libzip-devel
-            # - lcms2-devel
-            # - libwebp-devel
+        build_args: --disable-zlib --disable-jpeg
     psutil:
         version: 4.1.0
     psycopg2:
