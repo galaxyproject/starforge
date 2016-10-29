@@ -91,7 +91,7 @@ packages:
         build_args: build_ext -I lzo/include:lzo/include/lzo -L lzo/lib bdist_wheel
     pyuwsgi:
         pip_name: uWSGI
-        version: 2.0.13.1
+        version: 2.0.14
         prebuild: sed -i -e 's/default.ini/pyuwsgi.ini/' -e 's/cmd.install_scripts/cmd.install_platlib/' -e "s/name='uWSGI'/name='pyuwsgi'/" ${SRC_ROOT}/setup.py
     PyYAML:
         version: 3.11
