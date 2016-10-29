@@ -101,7 +101,7 @@ packages:
     uWSGI:
         version: 2.0.14
         prebuild: 
-            wheel: sed -i.bak -e 's/default.ini/pyuwsgi.ini/' -e 's/cmd.install_scripts/cmd.install_platlib/' ${SRC_ROOT}/setup.py
+            wheel: cd ${SRC_ROOT} && sed -i.bak -e 's/default.ini/pyuwsgi.ini/' -e 's/cmd.install_scripts/cmd.install_platlib/' setup.py
 
 purepy_packages:
     amqp:
