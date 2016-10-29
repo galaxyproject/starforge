@@ -89,6 +89,10 @@ packages:
         prebuild:
             wheel: cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --prefix=${SRC_ROOT_0}/lzo --disable-shared && make install && sed -i -e 's/\["lzo"\]/\["lzo2"\]/' ${SRC_ROOT_0}/setup.py
         build_args: build_ext -I lzo/include:lzo/include/lzo -L lzo/lib bdist_wheel
+    pyuwsgi:
+        pip_name: uWSGI
+        version: 2.0.13.1
+        prebuild: sed -i -e 's/default.ini/pyuwsgi.ini/' -e 's/cmd.install_scripts/cmd.install_platlib/' -e "s/name='uWSGI'/name='pyuwsgi'/" ${SRC_ROOT}/setup.py
     PyYAML:
         version: 3.11
         insert_setuptools: true
@@ -98,6 +102,9 @@ packages:
             - libyaml-devel
     SQLAlchemy:
         version: 1.0.15
+    uWSGI:
+        version: 2.0.13.1
+        prebuild: sed -i -e 's/default.ini/pyuwsgi.ini/' -e 's/cmd.install_scripts/cmd.install_platlib/' ${SRC_ROOT}/setup.py
 
 purepy_packages:
     amqp:
