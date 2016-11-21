@@ -127,6 +127,8 @@ purepy_packages:
     docutils:
         version: 0.12
         insert_setuptools: true
+    EasyProcess:
+        version: 0.2.3
     ecdsa:
         version: 0.13
     Fabric:
@@ -174,6 +176,8 @@ purepy_packages:
         version: 2.5.3
     pytz:
         version: 2015.4
+    pyvirtualdisplay:
+        version: 0.2.1
     repoze.lru:
         version: 0.6
     requests:
