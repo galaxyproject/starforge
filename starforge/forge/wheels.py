@@ -17,8 +17,9 @@ from ..io import debug, info, warn
 from ..util import Archive
 
 
-SETUPTOOLS_WRAPPER = '''#!/usr/bin/env python
-import setuptools
+SETUP_PY_WRAPPER = '''#!/usr/bin/env python
+{import_interface_wheel}
+{import_setuptools}
 execfile('setup_wrapped.py')
 '''
 
@@ -70,7 +71,8 @@ class ForgeWheel(object):
                 platform = self.cache_manager.platform_cache(
                     self.image.name,
                     self.exec_context,
-                    self.image.pythons[0])
+                    self.image.pythons[0],
+                    self.image.plat_specific)
             for python in self.image.pythons:
                 # FIXME: this forces a very specific naming (i.e.
                 # '/pythons/cp{py}{flags}-{arch}/')
@@ -201,10 +203,12 @@ class ForgeWheel(object):
 
         chdir(join(build, root))
 
-        if self.wheel_config.insert_setuptools:
+        if self.wheel_config.insert_setuptools or self.image.plat_specific:
             rename('setup.py', 'setup_wrapped.py')
             with open('setup.py', 'w') as handle:
-                handle.write(SETUPTOOLS_WRAPPER)
+                handle.write(SETUP_PY_WRAPPER.format(
+                    import_interface_wheel='import starforge.interface.wheel' if self.image.plat_specific else '',
+                    import_setuptools='import setuptools' if self.wheel_config.insert_setuptools else ''))
 
         for py in pythons:
             py = py.format(arch=arch)

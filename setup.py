@@ -40,14 +40,12 @@ setup(
         'click',
         'requests',
         'six',
-        'wheel==0.26.0+gx1'
+        'wheel'
     ],
     extras_require = {
-        ':python_version=="2.6"': ["ordereddict"]
+        ':python_version=="2.6"': ["ordereddict"],
+        'platform_specific': ["lionshead"],
     },
-    dependency_links = [
-        'https://wheels.galaxyproject.org/simple/wheel/',
-    ],
     entry_points = {
         'console_scripts': [
             'starforge = starforge.cli:starforge'

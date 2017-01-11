@@ -1,12 +1,33 @@
 FROM FROM_IMAGE
 MAINTAINER Nate Coraor <nate@bx.psu.edu>
-ENV DEBIAN_FRONTEND noninteractive
+
 VOLUME ["/host"]
-COPY buildpy.sh /build/buildpy.sh
+
 RUN zypper --non-interactive --gpg-auto-import-keys ref && \
-    zypper --non-interactive in PKGS && \
-    cd /build && \
-    bash buildpy.sh && \
-    cd / && \
-    rm -rf /build && \
+    zypper --non-interactive in python tar make gcc gcc-c++ glibc-devel ca-certificates-mozilla curl zlib-devel libopenssl-devel libbz2-devel python-PyYAML
+
+WORKDIR /build
+
+ARG python_version=2.7.13
+RUN curl -LO https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz
+COPY buildpy.sh /build/buildpy.sh
+RUN tar zxf Python-${python_version}.tgz
+RUN cd Python-${python_version} && \
+    bash ../buildpy.sh cp27m 2.7 ucs2 && \
+    bash ../buildpy.sh cp27mu 2.7 ucs4
+
+RUN curl -LO https://bootstrap.pypa.io/get-pip.py
+RUN python get-pip.py
+
+COPY starforge.tar.gz /build/starforge.tar.gz
+RUN pip install /build/starforge.tar.gz[platform_specific]
+
+RUN for abi in cp27m cp27mu; do \
+    /python/${abi}-x86_64/bin/python get-pip.py && \
+    /python/${abi}-x86_64/bin/pip install /build/starforge.tar.gz[platform_specific]; \
+    done
+
+WORKDIR /
+
+RUN rm -rf /build /root/.cache && \
     zypper clean

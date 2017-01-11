@@ -1,12 +1,35 @@
 FROM FROM_IMAGE
 MAINTAINER Nate Coraor <nate@bx.psu.edu>
-ENV DEBIAN_FRONTEND noninteractive
+
 VOLUME ["/host"]
-COPY buildpy.sh /build/buildpy.sh
+
+ENV DEBIAN_FRONTEND noninteractive
+
 RUN linux32 apt-get -qq update && \
-    linux32 apt-get install --no-install-recommends -y make gcc g++ ca-certificates curl zlib1g-dev libssl-dev libbz2-dev python-yaml && \
-    cd /build && \
-    linux32 bash buildpy.sh && \
-    cd / && \
-    rm -rf /build && \
-    apt-get clean 
+    linux32 apt-get install --no-install-recommends -y make gcc g++ ca-certificates curl zlib1g-dev libssl-dev libbz2-dev python-yaml
+
+WORKDIR /build
+
+ARG python_version=2.7.13
+RUN curl -LO https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz
+COPY buildpy.sh /build/buildpy.sh
+RUN tar zxf Python-${python_version}.tgz
+RUN cd Python-${python_version} && \
+    linux32 bash ../buildpy.sh cp27m 2.7 ucs2 && \
+    linux32 bash ../buildpy.sh cp27mu 2.7 ucs4
+
+RUN curl -LO https://bootstrap.pypa.io/get-pip.py
+RUN linux32 python get-pip.py
+
+COPY starforge.tar.gz /build/starforge.tar.gz
+RUN linux32 pip install /build/starforge.tar.gz[platform_specific]
+
+RUN for abi in cp27m cp27mu; do \
+    linux32 /python/${abi}-i686/bin/python get-pip.py && \
+    linux32 /python/${abi}-i686/bin/pip install /build/starforge.tar.gz[platform_specific]; \
+    done
+
+WORKDIR /
+
+RUN rm -rf /build /root/.cache && \
+    linux32 apt-get clean 

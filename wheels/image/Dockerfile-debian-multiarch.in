@@ -1,14 +1,44 @@
 FROM FROM_IMAGE
 MAINTAINER Nate Coraor <nate@bx.psu.edu>
-ENV DEBIAN_FRONTEND noninteractive
+
 VOLUME ["/host"]
-COPY buildpy.sh /build/buildpy.sh
+
+ENV DEBIAN_FRONTEND noninteractive
+
 RUN dpkg --add-architecture i386 && \
     apt-get -qq update && \
-    apt-get install --no-install-recommends -y make gcc-multilib g++-multilib gfortran-multilib ca-certificates curl zlib1g-dev:amd64 libssl-dev:amd64 libbz2-dev:amd64 zlib1g-dev:i386 libssl-dev:i386 libbz2-dev:i386 python-yaml && \
-    cd /build && \
-    bash buildpy.sh && \
-    linux32 bash buildpy.sh rerun && \
-    cd / && \
-    rm -rf /build && \
+    apt-get install --no-install-recommends -y make gcc-multilib g++-multilib gfortran-multilib ca-certificates curl zlib1g-dev:amd64 libssl-dev:amd64 libbz2-dev:amd64 zlib1g-dev:i386 libssl-dev:i386 libbz2-dev:i386 python-yaml
+
+WORKDIR /build
+
+ARG python_version=2.7.13
+RUN curl -LO https://www.python.org/ftp/python/${python_version}/Python-${python_version}.tgz
+COPY buildpy.sh /build/buildpy.sh
+RUN tar zxf Python-${python_version}.tgz
+RUN cd Python-${python_version} && \
+    bash ../buildpy.sh cp27m 2.7 ucs2 && \
+    bash ../buildpy.sh cp27mu 2.7 ucs4
+RUN cd Python-${python_version} && \
+    linux32 bash ../buildpy.sh cp27m 2.7 ucs2 && \
+    linux32 bash ../buildpy.sh cp27mu 2.7 ucs4
+
+RUN curl -LO https://bootstrap.pypa.io/get-pip.py
+RUN python get-pip.py
+
+COPY starforge.tar.gz /build/starforge.tar.gz
+RUN pip install /build/starforge.tar.gz[platform_specific]
+
+RUN for abi in cp27m cp27mu; do \
+    /python/${abi}-x86_64/bin/python get-pip.py && \
+    /python/${abi}-x86_64/bin/pip install /build/starforge.tar.gz[platform_specific]; \
+    done
+
+RUN for abi in cp27m cp27mu; do \
+    linux32 /python/${abi}-i686/bin/python get-pip.py && \
+    linux32 /python/${abi}-i686/bin/pip install /build/starforge.tar.gz[platform_specific]; \
+    done
+
+WORKDIR /
+
+RUN rm -rf /build /root/.cache && \
     apt-get clean 

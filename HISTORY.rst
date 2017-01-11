@@ -5,6 +5,14 @@ Starforge is maintained by the `Galaxy`_ Project and community. A `list of
 contributors <https://github.com/galaxyproject/starforge/graphs/contributors>`_
 to the project can be found on GitHub.
 
+0.3 (2017-01-10)
+~~~~~~~~~~~~~~~~
+
+- Drop the dependency on the "Galaxy" wheel fork, which makes installation much
+  easier. "Platform-specific" wheels can still be built.
+- When building Docker images, install Starforge from the local source instead
+  of installing from PyPI or Github.
+
 0.2.1 (2016-05-27)
 ~~~~~~~~~~~~~~~~~~
 
