@@ -29,6 +29,7 @@ class Image(object):
         self.pkgtool = image.get('pkgtool', DEFAULT_IMAGE_PKGTOOL)
         self.plat_name = image.get('plat_name', None)
         self.force_plat = image.get('force_plat', True)
+        self.plat_specific = image.get('plat_specific', False)
         self.buildpy = image.get('buildpy', 'python')
         self.pythons = image.get('pythons', DEFAULT_IMAGE_PYTHONS)
         self.run_cmd = image.get('run_cmd', None)

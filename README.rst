@@ -118,17 +118,17 @@ Notes on images
 
 **Linux**
 
-Images used to build wheels on a variety of platforms are uploaded to the
-`Starforge Docker Hub`_ repo and will be pulled as necessary. Typically you
-will only use the `base-wheel
-<https://hub.docker.com/r/starforge/base-wheel/>`_ and `base32-wheel
-<https://hub.docker.com/r/starforge/base32-wheel/>`_ images, which are Debian
-Squeeze-based images that will usually produce wheels usable on all
-Galaxy-supported platforms. The exception is the case when you need to install
-non-standard system libraries whose versions or location will differ by Linux
-distribution. In this case, a "full" set of images consisting of all
-distributions with official images in Docker Hub can be built. This is
-controlled in `wheels/build/wheels.yml`_, see ``psycopg2`` for an example.
+Images used to build wheels are uploaded to the `Starforge Docker Hub`_ repo
+and will be pulled as necessary. Typically you will only use the
+`manylinux1-wheel <https://hub.docker.com/r/starforge/manylinux1-wheel/>`_ and
+`manylinux1-32-wheel
+<https://hub.docker.com/r/starforge/manylinux1-32-wheel/>`_ images, which are
+`manylinux <https://github.com/pypa/manylinux>`_ CentOS 5-based images that
+will usually produce wheels usable on all Galaxy-supported platforms.
+
+You can also produce "platform-specific" wheels by using the ``full-wheel``
+imageset. This is useful if you want to link to distribution-specific system
+versions of non-standard libraries without bundling them in to the wheel.
 
 **Mac OS X**
 

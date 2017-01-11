@@ -1,12 +1,9 @@
 TAG		:= REPLACE_TAG
 FROM		:= REPLACE_FROM
 DOCKERFILE	:= REPLACE_DOCKERFILE
-PKGS		:= REPLACE_PKGS
-WHEEL_VERSION	:= REPLACE_WHEEL_VERSION
-PIP_VERSION	:= REPLACE_PIP_VERSION
 
 
-image-id: Dockerfile .dockerignore buildpy.sh
+image-id: Dockerfile .dockerignore buildpy.sh starforge.tar.gz
 	docker build -t $(TAG) .
 	docker images -q $(TAG) >$@
 
@@ -17,10 +14,12 @@ Dockerfile: ../$(DOCKERFILE)
 	sed -e 's#FROM_IMAGE#$(FROM)#' \
 		-e 's#PKGS#$(PKGS)#' ../$(DOCKERFILE) >$@
 
-buildpy.sh: ../buildpy.sh.in
-	sed -e 's#WHEEL_VERSION#$(WHEEL_VERSION)#' \
-		-e 's#PIP_VERSION#$(PIP_VERSION)#' \
-		../buildpy.sh.in >$@
+buildpy.sh: ../buildpy.sh
+	cp -p ../buildpy.sh buildpy.sh
 
+starforge.tar.gz:
+	rm -rf ../../../build ../../../dist
+	cd ../../../ && python setup.py sdist
+	cp ../../../dist/starforge-*.tar.gz starforge.tar.gz
 clean:
-	rm -f Dockerfile .dockerignore image-id buildpy.sh
+	rm -f Dockerfile .dockerignore image-id buildpy.sh starforge.tar.gz

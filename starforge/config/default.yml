@@ -17,38 +17,26 @@ imagesets:
         - starforge/manylinux1-32:latest
         - starforge/osx-wheel:10.6
     full-wheel:
-        - starforge/debian-wheel:6
         - starforge/debian-wheel:7
         - starforge/debian-wheel:8
         - starforge/debian-wheel:stretch
-        - starforge/debian32-wheel:6
         - starforge/debian32-wheel:7
         - starforge/debian32-wheel:8
         - starforge/debian32-wheel:stretch
-        - starforge/ubuntu-wheel:12.04
         - starforge/ubuntu-wheel:14.04
-        - starforge/ubuntu-wheel:15.04
-        - starforge/ubuntu-wheel:15.10
-        - starforge/ubuntu32-wheel:12.04
+        - starforge/ubuntu-wheel:16.04
+        - starforge/ubuntu-wheel:16.10
         - starforge/ubuntu32-wheel:14.04
-        - starforge/ubuntu32-wheel:15.04
-        - starforge/ubuntu32-wheel:15.10
+        - starforge/ubuntu32-wheel:16.04
+        - starforge/ubuntu32-wheel:16.10
         - starforge/centos-wheel:6
         - starforge/centos-wheel:7
         - starforge/centos32-wheel:6
+        - starforge/fedora-wheel:23
+        - starforge/fedora-wheel:24
+        - starforge/fedora-wheel:25
         - starforge/opensuse-wheel:13
-        - starforge/fedora-wheel:21
-        - starforge/fedora-wheel:22
-        - starforge/osx-wheel:10.6
-    default_plus_rhel_6-wheel:
-        - starforge/base-wheel
-        - starforge/base32-wheel
-        - starforge/osx-wheel:10.6
-        - starforge/centos-wheel:6
-        - starforge/centos32-wheel:6
-    default_plus_libpython-wheel:
-        - starforge/manylinux1-libpython:latest
-        - starforge/manylinux1-32-libpython:latest
+        - starforge/opensuse-wheel:42
         - starforge/osx-wheel:10.6
 
 images:
@@ -72,48 +60,62 @@ images:
             - /python/cp27mu-i686/bin/python
         plat_name: manylinux1_i686
         force_plat: false
-        # until https://github.com/pypa/auditwheel/pull/27 is released in the manylinux image
-        postbuild: for whl in dist/*.whl; do auditwheel repair $whl -w dist; rm $whl; done; for whl in dist/*-linux_i686.manylinux1__i686.whl; do nwhl=$(echo $whl | sed -e 's/linux_i686.manylinux1__i686/manylinux1_i686/'); echo mv $whl $nwhl; mv $whl $nwhl; done
-    starforge/manylinux1-libpython:latest:
-        pkgtool: yum
-        buildpy: /opt/wheelenv/bin/python
-        pythons:
-            - /python/cp27m-x86_64/bin/python
-            - /python/cp27mu-x86_64/bin/python
-        plat_name: manylinux1_x86_64
-        force_plat: false
-        postbuild: for whl in dist/*.whl; do auditwheel repair $whl -w dist; rm $whl; done
-    starforge/manylinux1-32-libpython:latest:
-        pkgtool: yum
-        buildpy: /opt/wheelenv/bin/python
-        pythons:
-            - /python/cp27m-i686/bin/python
-            - /python/cp27mu-i686/bin/python
-        plat_name: manylinux1_i686
-        force_plat: false
         postbuild: for whl in dist/*.whl; do auditwheel repair $whl -w dist; rm $whl; done
     starforge/purepy-wheel:
         pythons:
             - /python/cp27mu-{arch}/bin/python
-    starforge/base-wheel:
-        plat_name: linux_x86_64
-    starforge/base32-wheel:
-        plat_name: linux_i686
+    starforge/debian-wheel:7:
+        plat_specific: true
+    starforge/debian-wheel:8:
+        plat_specific: true
+    starforge/debian-wheel:stretch:
+        plat_specific: true
+    starforge/debian32-wheel:7:
+        plat_specific: true
+    starforge/debian32-wheel:8:
+        plat_specific: true
+    starforge/debian32-wheel:stretch:
+        plat_specific: true
+    starforge/ubuntu-wheel:14.04:
+        plat_specific: true
+    starforge/ubuntu-wheel:16.04:
+        plat_specific: true
+    starforge/ubuntu-wheel:16.10:
+        plat_specific: true
+    starforge/ubuntu32-wheel:14.04:
+        plat_specific: true
+    starforge/ubuntu32-wheel:16.04:
+        plat_specific: true
+    starforge/ubuntu32-wheel:16.10:
+        plat_specific: true
     starforge/centos-wheel:6:
         pkgtool: yum
         plat_name: linux_x86_64_rhel_6
+        plat_specific: true
     starforge/centos-wheel:7:
         pkgtool: yum
         plat_name: linux_x86_64_rhel_7
+        plat_specific: true
     starforge/centos32-wheel:6:
         pkgtool: yum
         plat_name: linux_i686_rhel_6
-    starforge/fedora-wheel:21:
+        plat_specific: true
+        plat_specific: true
+    starforge/fedora-wheel:23:
         pkgtool: yum
-    starforge/fedora-wheel:22:
+        plat_specific: true
+    starforge/fedora-wheel:24:
         pkgtool: yum
+        plat_specific: true
+    starforge/fedora-wheel:25:
+        pkgtool: yum
+        plat_specific: true
     starforge/opensuse-wheel:13:
         pkgtool: zypper
+        plat_specific: true
+    starforge/opensuse-wheel:42:
+        pkgtool: zypper
+        plat_specific: true
     starforge/osx-wheel:10.6:
         type: qemu
         pkgtool: brew

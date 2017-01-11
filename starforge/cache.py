@@ -86,16 +86,21 @@ class PlatformStringCacher(BaseCacher):
         platforms = yaml.safe_load(open(self.cache_file).read())
         return platforms.get(name, None)
 
-    def cache(self, name, execctx=None, buildpy='python', **kwargs):
+    def cache(self, name, execctx=None, buildpy='python', plat_specific=False, **kwargs):
         platforms = yaml.safe_load(open(self.cache_file).read())
         if name not in platforms:
             with execctx() as run:
                 # ugly...
                 cmd = "python -c 'import os; print os.uname()[4]'"
                 arch = run(cmd, capture_output=True).splitlines()[0].strip()
-                cmd = ("{buildpy} -c 'import wheel.pep425tags; "
-                       "print wheel.pep425tags.get_platforms"
-                       "(major_only=True)[0]'".format(buildpy=buildpy))
+                if plat_specific:
+                    cmd = ("{buildpy} -c 'import starforge.interface.wheel; "
+                           "print starforge.interface.wheel.get_platforms"
+                           "(major_only=True)[0]'".format(buildpy=buildpy))
+                else:
+                    cmd = ("{buildpy} -c 'import wheel.pep425tags; "
+                           "print wheel.pep425tags.get_platforms"
+                           "(major_only=True)[0]'".format(buildpy=buildpy))
                 cmd = cmd.format(arch=arch)
                 platform = run(
                     cmd,
@@ -176,8 +181,9 @@ class CacheManager(object):
     def url_cache(self, name):
         return self.cachers['url'].cache(name)
 
-    def platform_cache(self, name, execctx, buildpy):
+    def platform_cache(self, name, execctx, buildpy, plat_specific=False):
         return self.cachers['platform'].cache(
             name,
             execctx=execctx,
-            buildpy=buildpy)
+            buildpy=buildpy,
+            plat_specific=plat_specific)
