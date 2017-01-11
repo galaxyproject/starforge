@@ -98,6 +98,12 @@ packages:
             - libyaml-devel
     SQLAlchemy:
         version: 1.0.15
+    uWSGI:
+        version: 2.0.15dev0+1007f44
+        src:
+            - https://github.com/unbit/uwsgi/archive/1007f44.tar.gz
+        prebuild:
+            wheel: cp ${SRC_ROOT_0}/setup.cpyext.py ${SRC_ROOT_0}/setup.py && sed -i -e "s/version=uwsgiconfig.uwsgi_version/version='2.0.15dev0+1007f44'/" ${SRC_ROOT}/setup.py
 
 purepy_packages:
     amqp:
