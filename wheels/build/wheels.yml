@@ -202,6 +202,8 @@ purepy_packages:
         version: 0.5.3.dev0
     testfixtures:
         version: 4.10.0
+    twill:
+        version: 0.9.1
     wchartype:
         version: 0.1
         insert_setuptools: true
