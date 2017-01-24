@@ -185,7 +185,7 @@ purepy_packages:
     selenium:
         version: 3.0.1
     six:
-        version: 1.9.0
+        version: 1.10.0
     sqlalchemy-migrate:
         version: 0.10.0
     sqlparse:
