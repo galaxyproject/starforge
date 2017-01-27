@@ -2,7 +2,9 @@
 
 # for ubuntu:wily or xenial
 
-dch_dist=$(lsb_release -cs)
+. /etc/os-release
+
+dch_dist="$UBUNTU_CODENAME"
 
 if [ "$dch_dist" == 'xenial' ]; then
     nginx_version=1.10.0
