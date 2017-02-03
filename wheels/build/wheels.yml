@@ -131,6 +131,8 @@ purepy_packages:
         version: 0.13
     Fabric:
         version: 1.10.2
+    galaxy_sequence_utils:
+        version: 1.0.2
     jstree:
         version: 0.4
     kombu:
