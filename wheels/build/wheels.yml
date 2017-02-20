@@ -135,6 +135,8 @@ purepy_packages:
         version: 1.0.2
     jstree:
         version: 0.4
+    kamaki:
+        version: 0.15
     kombu:
         version: 3.0.30
     Mako:
