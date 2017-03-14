@@ -187,7 +187,7 @@ purepy_packages:
     requests-toolbelt:
         version: 0.4.0
     Routes:
-        version: 2.2
+        version: 2.4.1
     selenium:
         version: 3.0.1
     six:
