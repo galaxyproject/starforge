@@ -1,0 +1,31 @@
+sudo: required
+services:
+- docker
+os:
+- linux
+language: python
+env:
+  matrix:
+  - CODENAME="trusty"
+  - CODENAME="wily"
+  - CODENAME="xenial"
+  - CODENAME="yakkety"
+  global:
+  - DEBFULLNAME="Marius van den Beek"
+  - DEBEMAIL="m.vandenbeek@gmail.com"
+  - PPA="ppa:m-vandenbeek/nginx-upload-store"
+install:
+- docker pull ubuntu:trusty
+script:
+- mkdir build
+- docker run -v $PWD/build:/host -v $PWD/nginx:/nginx -e DEBFULLNAME="$DEBFULLNAME"
+  -e DEBEMAIL="$DEBEMAIL" -e PPA="$PPA" ubuntu:$CODENAME /nginx/build-ubuntu.sh
+deploy:
+- provider: script
+  skip_cleanup: true
+  script: docker run -v $PWD/build:/host -v $PWD/nginx:/nginx -v $PWD/launchpad_gpg_key.asc:/gpg_key.asc
+    -e DEBFULLNAME="$DEBFULLNAME" -e DEBEMAIL="$DEBEMAIL" -e PPA="$PPA" ubuntu:$CODENAME
+    bash /nginx/build-ubuntu.sh
+before_install:
+- openssl aes-256-cbc -K $encrypted_58e9086bca66_key -iv $encrypted_58e9086bca66_iv
+  -in launchpad_gpg_key.asc.enc -out launchpad_gpg_key.asc -d
