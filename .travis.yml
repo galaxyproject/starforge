@@ -11,7 +11,7 @@ env:
   - CODENAME="xenial"
   - CODENAME="yakkety"
   global:
-  - DEBFULLNAME="Marius van den Beek"
+  - DEBFULLNAME="Marius van den Beek (travis-ci)"
   - DEBEMAIL="m.vandenbeek@gmail.com"
   - PPA="ppa:m-vandenbeek/nginx-upload-store"
 install:

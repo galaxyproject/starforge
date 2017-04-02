@@ -1,6 +1,6 @@
 #!/bin/bash
-
 # tested for ubuntu trusty, wily and xenial
+set -e
 
 . /etc/os-release
 
@@ -58,7 +58,7 @@ debuild -S -sd -us -uc &&
 if [ -f "$GPG_KEY" ]; then
     echo "Signing source.changes and uploading to ppa" &&
     gpg2 --import --batch "$GPG_KEY" &&
-    debsign -p "gpg2 --batch" -S ${build}/${pkg}_${ppa_version}_source.changes
+    debsign -p "gpg2 --batch" -S ${build}/${pkg}_${ppa_version}_source.changes &&
     dput -u "$PPA" $build/${pkg}_${ppa_version}_source.changes
 else
     echo "To sign: debsign -S ${pkg}_${ppa_version}_source.changes" &&
