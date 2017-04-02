@@ -15,7 +15,7 @@ env:
   - DEBEMAIL="m.vandenbeek@gmail.com"
   - PPA="ppa:m-vandenbeek/nginx-upload-store"
 install:
-- docker pull ubuntu:trusty
+- docker pull ubuntu:$CODENAME
 script:
 - mkdir build
 - docker run -v $PWD/build:/host -v $PWD/nginx:/nginx -e DEBFULLNAME="$DEBFULLNAME"
