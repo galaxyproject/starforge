@@ -31,7 +31,7 @@ case "$repo" in
     ubuntu|debian)
         baseimg="$1"
         build_image_repository="natefoo/${repo}_build"
-        buildpkgs='devscripts debhelper socat quilt fakeroot ca-certificates'
+        buildpkgs='devscripts debhelper socat quilt fakeroot ca-certificates dh-systemd'
         ;;
     starforge/*)
         docker_args='--cap-add=SYS_ADMIN'
