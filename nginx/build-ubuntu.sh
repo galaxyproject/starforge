@@ -5,7 +5,7 @@ set -e
 . /etc/os-release
 
 
-apt-get -qq update && apt-get install -y lsb-release
+apt-get -qq update && apt-get install -y lsb-release tzdata
 
 pkg=nginx
 dch_message="Restore the nginx-upload module from 2.2 branch in Github, compatible with nginx 1.x."
