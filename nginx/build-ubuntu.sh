@@ -28,7 +28,7 @@ cd $build &&
 if [ "$dch_dist" != 'trusty' ]; then
     apt-get install -y dh-systemd
 fi &&
-if [ "$dch_dist" == 'yakkety' ]; then
+if [ "$dch_dist" == 'yakkety' -o "$dch_dist" == 'xenial' ]; then
     sed -i s'/# deb-src/deb-src/' /etc/apt/sources.list &&
     apt-get update
 fi &&
