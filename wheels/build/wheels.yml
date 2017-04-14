@@ -98,6 +98,9 @@ packages:
             - libyaml-devel
     SQLAlchemy:
         version: 1.0.15
+    uWSGI:
+        version: 2.0.15
+        prebuild: cp ${SRC_ROOT_0}/setup.cpyext.py ${SRC_ROOT_0}/setup.py
 
 purepy_packages:
     amqp:
