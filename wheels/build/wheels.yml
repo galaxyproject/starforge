@@ -121,6 +121,8 @@ purepy_packages:
         version: 0.7.0
     boto:
         version: 2.38.0
+    chronos-python:
+        version: 0.38.0
     cloudbridge:
         version: 0.1.1
     decorator:
