@@ -104,7 +104,7 @@ packages:
 
 purepy_packages:
     amqp:
-        version: 1.4.8
+        version: 1.4.9
     anyjson:
         version: 0.3.3
     azure-common:
