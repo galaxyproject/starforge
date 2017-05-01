@@ -155,6 +155,10 @@ purepy_packages:
         version: 1.3.7
     numpy-stl:
         version: 1.9.1
+    oauthclient:
+        version: 1.0.3
+    oauthlib:
+        version: 2.0.2
     paramiko:
         version: 1.15.2
     Parsley:
@@ -174,6 +178,8 @@ purepy_packages:
     pulsar-galaxy-lib:
         version: 0.7.0.dev4
         prebuild: sed -i -e 's/DEFAULT_PULSAR_GALAXY_LIB = 0/DEFAULT_PULSAR_GALAXY_LIB = 1/' ${SRC_ROOT}/setup.py
+    pykube:
+        version: 0.15.0
     Pygments:
         version: 2.0.2
     pykwalify:
@@ -188,7 +194,9 @@ purepy_packages:
     repoze.lru:
         version: 0.6
     requests:
-        version: 2.8.1
+        version: 2.13.0
+    requests-oauthlib:
+        version: 0.8.0
     requests-toolbelt:
         version: 0.4.0
     Routes:
@@ -213,6 +221,8 @@ purepy_packages:
         version: 0.5.3.dev0
     testfixtures:
         version: 4.10.0
+    tzlocal:
+        version: 1.4
     twill:
         version: 0.9.1
     wchartype:
