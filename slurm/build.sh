@@ -17,6 +17,11 @@ su - build -c "rpmbuild -ba ~/rpmbuild/SPECS/munge.spec"
 rpm -ivh ~build/rpmbuild/RPMS/x86_64/munge-{libs-,devel-,}${munge_version}*.rpm
 
 yum-builddep -y ~build/rpmbuild/SPECS/slurm.spec
-su - build -c "rpmbuild -ba ~/rpmbuild/SPECS/slurm.spec"
+yum install -y mariadb-devel
+su - build -c "rpmbuild -ba --with mysql ~/rpmbuild/SPECS/slurm.spec"
 rsync -av ~build/rpmbuild/SRPMS /host
 rsync -av ~build/rpmbuild/RPMS /host
+
+if [ -n "${CHOWN_UID}" ]; then
+    chown -Rh ${CHOWN_UID}:${CHOWN_GID:-0} /host/SRPMS /host/RPMS
+fi
