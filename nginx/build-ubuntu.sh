@@ -31,11 +31,16 @@ fi &&
 if [ "$dch_dist" == 'yakkety' -o "$dch_dist" == 'xenial' ]; then
     sed -i s'/# deb-src/deb-src/' /etc/apt/sources.list &&
     apt-get update
+elif [ "$NAME" == 'Debian GNU/Linux' ] && [ "$VERSION" == "8 (jessie)" ]; then
+    cp /etc/apt/sources.list /etc/apt/sources.list.bak &&
+    sed -i s'/deb/deb-src/' /etc/apt/sources.list &&
+    cat /etc/apt/sources.list.bak >> /etc/apt/sources.list &&
+    apt-get update
 fi &&
 apt-get source $pkg &&
-ubuntu_version=$(grep Version: *.dsc| cut -d' ' -f2-| head -n1) &&
+distrib_version=$(grep Version: *.dsc| cut -d' ' -f2-| head -n1) &&
 nginx_version=$(ls *.orig.tar.gz|sed 's/\.orig\.tar\.gz//'|sed 's/nginx_//g') &&
-ppa_version=${ubuntu_version}ppa1 &&
+ppa_version=${distrib_version}ppa1 &&
 git clone -b 2.2 --single-branch https://github.com/vkholodkov/nginx-upload-module.git/ \
     nginx-${nginx_version}/debian/modules/nginx-upload &&
 upload_module_shortrev=$(git --git-dir=nginx-${nginx_version}/debian/modules/nginx-upload/.git rev-parse --short HEAD) &&
@@ -53,7 +58,7 @@ else
     -i nginx-${nginx_version}/debian/rules
 fi &&
 cd nginx-${nginx_version} &&
-dch -v ${ppa_version} -D ${dch_dist} "${dch_message}" &&
+dch -v ${ppa_version} --force-distribution -D "${dch_dist}" "${dch_message}" &&
 debuild -S -sd -us -uc &&
 if [ -f "$GPG_KEY" ]; then
     echo "Signing source.changes and uploading to ppa" &&
