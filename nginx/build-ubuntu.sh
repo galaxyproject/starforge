@@ -7,6 +7,7 @@ set -e
 
 apt-get -qq update && apt-get install -y lsb-release tzdata
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pkg=nginx
 dch_message="Restore the nginx-upload module from 2.2 branch in Github, compatible with nginx 1.x."
 DEBFULLNAME="${DEBFULLNAME:-Nathan Coraor}"
@@ -64,7 +65,11 @@ if [ -f "$GPG_KEY" ]; then
     echo "Signing source.changes and uploading to ppa" &&
     gpg2 --import --batch "$GPG_KEY" &&
     debsign -p "gpg2 --batch" -S ${build}/${pkg}_${ppa_version}_source.changes &&
-    dput -u "$PPA" $build/${pkg}_${ppa_version}_source.changes
+    if [ "$VERSION" == "8 (jessie)" ];then
+        dput -c $DIR/dput.cf  -u "$PPA" $build/${pkg}_${ppa_version}_source.changes
+    else
+        dput -u "$PPA" $build/${pkg}_${ppa_version}_source.changes
+    fi
 else
     echo "To sign: debsign -S ${pkg}_${ppa_version}_source.changes" &&
     echo "To push: dput "$PPA" ${pkg}_${ppa_version}_source.changes"
