@@ -140,6 +140,8 @@ purepy_packages:
         version: 1.10.2
     galaxy_sequence_utils:
         version: 1.0.2
+    ipaddress:
+        version: 1.0.18
     jstree:
         version: 0.4
     kamaki:
