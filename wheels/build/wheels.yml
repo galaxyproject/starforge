@@ -137,7 +137,7 @@ purepy_packages:
     ecdsa:
         version: 0.13
     Fabric:
-        version: 1.10.2
+        version: 1.13.2
     galaxy_sequence_utils:
         version: 1.0.2
     ipaddress:
@@ -158,7 +158,7 @@ purepy_packages:
     numpy-stl:
         version: 1.9.1
     paramiko:
-        version: 1.15.2
+        version: 2.2.1
     Parsley:
         version: 1.3
         insert_setuptools: true
