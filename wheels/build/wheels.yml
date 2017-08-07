@@ -124,7 +124,7 @@ purepy_packages:
     chronos-python:
         version: 0.38.0
     cloudbridge:
-        version: 0.3.1
+        version: 0.3.2
     decorator:
         version: 4.0.2
     dictobj:
