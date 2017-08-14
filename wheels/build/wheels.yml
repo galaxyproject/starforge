@@ -140,6 +140,8 @@ purepy_packages:
         version: 1.13.2
     galaxy_sequence_utils:
         version: 1.0.2
+    httplib2:
+        version: 0.10.3
     ipaddress:
         version: 1.0.18
     jstree:
