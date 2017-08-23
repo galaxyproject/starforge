@@ -171,7 +171,7 @@ purepy_packages:
     PasteDeploy:
         version: 1.5.2
     pbr:
-        version: 1.8.0
+        version: 2.0.0
     pip:
         version: 8.0.2+gx2
         src:
@@ -204,7 +204,7 @@ purepy_packages:
     six:
         version: 1.10.0
     sqlalchemy-migrate:
-        version: 0.10.0
+        version: 0.11.0
     sqlparse:
         version: 0.1.16
     starforge:
