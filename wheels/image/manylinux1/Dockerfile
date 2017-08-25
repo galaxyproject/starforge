@@ -8,7 +8,7 @@ RUN yum install -y PyYAML
 WORKDIR /work
 
 ADD https://pypi.python.org/packages/source/v/virtualenv/virtualenv-15.0.1.tar.gz /work/
-RUN tar zxf virtualenv-15.0.1.tar.gz
+RUN if [ ! -d "virtualenv-15.0.1" ]; then tar zxf virtualenv-15.0.1.tar.gz; fi
 RUN /opt/python/cp27-cp27mu/bin/python ./virtualenv-15.0.1/virtualenv.py -p /opt/python/cp27-cp27mu/bin/python /opt/wheelenv
 
 WORKDIR /
