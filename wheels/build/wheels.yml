@@ -48,6 +48,8 @@ packages:
         insert_setuptools: true
     pysam:
         version: 0.12
+        prebuild:
+            wheel: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython' || exit 1; done
         yum:
             - zlib-devel
     pysqlite:
