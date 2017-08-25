@@ -49,9 +49,14 @@ packages:
     pysam:
         version: 0.12
         prebuild:
+            #wheel: sed -i '/\[bdist_wheel\]/a extra_compile_args = -D_GNU_SOURCE' ${SRC_ROOT}/setup.cfg && cat ${SRC_ROOT}/setup.cfg && for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython' || exit 1; done
             wheel: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython' || exit 1; done
         yum:
+            - bzip2-devel
             - zlib-devel
+            - xz-devel
+            - curl-devel
+        build_args: build_ext -D_GNU_SOURCE --disable-libcurl
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it
