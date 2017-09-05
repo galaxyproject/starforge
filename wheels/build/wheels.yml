@@ -117,8 +117,8 @@ purepy_packages:
     bioblend:
         version: 0.7.0
     bz2file:
-        prebuild: sed -i -e 's/distutils.core/setuptools/' ${SRC_ROOT}/setup.py
         version: 0.98
+        insert_setuptools: true
     boto:
         version: 2.38.0
     cloudbridge:
