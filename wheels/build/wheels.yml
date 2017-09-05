@@ -119,6 +119,9 @@ purepy_packages:
         version: 1.7.0
     bioblend:
         version: 0.7.0
+    bz2file:
+        version: 0.98
+        insert_setuptools: true
     boto:
         version: 2.38.0
     chronos-python:
