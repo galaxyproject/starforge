@@ -116,6 +116,8 @@ purepy_packages:
         version: 1.7.0
     bioblend:
         version: 0.7.0
+    bz2file:
+        version: 0.98
     boto:
         version: 2.38.0
     cloudbridge:
