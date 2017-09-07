@@ -55,7 +55,6 @@ packages:
             - bzip2-devel
             - zlib-devel
             - xz-devel
-        build_args: build_ext -D_GNU_SOURCE
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it
