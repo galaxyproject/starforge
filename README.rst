@@ -85,7 +85,7 @@ starforge`` (to install from PyPI_) or ``python setup.py install`` to install
 from the source.
 
 Docker (and QEMU) images to use are specified in `starforge/config/default.yml
-<https://github.com/galaxyproject/starforge/blob/master/wheels/build/wheels.yml>`_.
+<https://github.com/galaxyproject/starforge/blob/master/starforge/config/default.yml>`_.
 To modify this file, copy it to
 ``$XDG_CONFIG_HOME/galaxy-starforge/config.yml`` (``$XDG_CONFIG_HOME`` is, by
 default ``~/.config``). The sample file `wheels/build/wheels.yml`_ is used to
