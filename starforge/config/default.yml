@@ -16,6 +16,11 @@ imagesets:
         - starforge/manylinux1:latest
         - starforge/manylinux1-32:latest
         - starforge/osx-wheel:10.6
+    linux-wheel:
+        - starforge/manylinux1:latest
+        - starforge/manylinux1-32:latest
+    macos-wheel:
+        - starforge/osx-wheel:10.6
     full-wheel:
         - starforge/debian-wheel:7
         - starforge/debian-wheel:8
@@ -123,6 +128,7 @@ images:
         pythons:
             - /python/cp27m-{arch}/bin/python
         plat_name: macosx_10_6_intel
+        postbuild: for whl in dist/*.whl; do /python/wheelenv/bin/delocate-wheel -v $whl; done
         run_cmd: >
             qemu-system-x86_64
             -enable-kvm
