@@ -5,6 +5,12 @@ Starforge is maintained by the `Galaxy`_ Project and community. A `list of
 contributors <https://github.com/galaxyproject/starforge/graphs/contributors>`_
 to the project can be found on GitHub.
 
+0.3.1 (2017-09-08)
+~~~~~~~~~~~~~~~~~~
+
+- Fix a bug with ``sudo`` and ``brew install`` on macOS. (#151).
+- Short circuit platform caching on OS X (#150).
+
 0.3 (2017-01-10)
 ~~~~~~~~~~~~~~~~
 
