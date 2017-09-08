@@ -47,14 +47,15 @@ packages:
         version: 2.6.1
         insert_setuptools: true
     pysam:
-        version: 0.12
+        version: 0.12.0.1
         prebuild:
-            #wheel: sed -i '/\[bdist_wheel\]/a extra_compile_args = -D_GNU_SOURCE' ${SRC_ROOT}/setup.cfg && cat ${SRC_ROOT}/setup.cfg && for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython' || exit 1; done
-            wheel: for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install 'cython' || exit 1; done
-        yum:
-            - bzip2-devel
-            - zlib-devel
-            - xz-devel
+            wheel: >
+              sed -i '' -e 's/^HTSLIB_CONFIGURE_OPTIONS = .*/HTSLIB_CONFIGURE_OPTIONS = "--disable-libcurl"/' ${SRC_ROOT}/setup.py;
+              for py in /python/cp*-`uname -m`; do
+                  ${py}/bin/pip install 'cython' || exit 1;
+              done
+        # manylinux wheels are in PyPI
+        imageset: macos-wheel
         brew:
             - xz
     pysqlite:
