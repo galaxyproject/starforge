@@ -5,6 +5,11 @@ Starforge is maintained by the `Galaxy`_ Project and community. A `list of
 contributors <https://github.com/galaxyproject/starforge/graphs/contributors>`_
 to the project can be found on GitHub.
 
+0.3.3 (2017-09-08)
+~~~~~~~~~~~~~~~~~~
+
+- Do not build sdists with the `wheel` subcommand by default. (#155)
+
 0.3.2 (2017-09-08)
 ~~~~~~~~~~~~~~~~~~
 

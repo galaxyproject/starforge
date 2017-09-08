@@ -45,6 +45,9 @@ GUEST_SHARE = '/share'
                               resolve_path=False),
               help='Path file containing OSK, if the guest requires it '
                    '(default: %s)' % xdg_config_file(name='osk.txt'))
+@click.option('--sdist/--no-sdist',
+              default=False,
+              help='Build source distribution')
 @click.option('--docker/--no-docker',
               default=True,
               help='Build under Docker')
@@ -61,7 +64,7 @@ GUEST_SHARE = '/share'
                    'even if a previous image fails)')
 @click.argument('wheel')
 @pass_context
-def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port,
+def cli(ctx, wheels_config, osk, sdist, docker, qemu, wheel, qemu_port,
         exit_on_failure):
     """ Build a wheel.
     """
@@ -103,6 +106,9 @@ def cli(ctx, wheels_config, osk, docker, qemu, wheel, qemu_port,
                 fatal("Exiting due to missing wheels")
         else:
             info('All wheels from image %s already built', image_name)
+
+    if not sdist:
+        return
 
     image = filter(lambda x: x.type == 'docker',
                    itervalues(wheel_config.images))[0]
