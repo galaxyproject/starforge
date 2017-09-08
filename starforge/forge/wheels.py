@@ -189,7 +189,8 @@ class ForgeWheel(object):
             elif pkgtool == 'brew':
                 if '/usr/local/bin' not in os.environ['PATH']:
                     os.environ['PATH'] = '/usr/local/bin:' + os.environ['PATH']
-                self.execute(['sudo', '-u', 'admin',
+                # FIXME: this sudo usage is specific to the macOS images in use in the Galaxy Jenkins architecture.
+                self.execute(['sudo', '-i', '-u', 'admin',
                               'brew', 'install'] + pkgs, cwd='/tmp')
             else:
                 warn('Skipping installation of dependencies: %s',
