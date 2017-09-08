@@ -133,8 +133,7 @@ class ForgeWheel(object):
             arc = Archive.open(arc_path)
             assert len(arc.roots) == 1, \
                 "Could not determine root directory in archive"
-            root = next(iter(arc.roots))
-            root_t = abspath(join(getcwd(), root))
+            root_t = abspath(join(getcwd(), next(iter(arc.roots))))
             os.environ['SRC_ROOT_%d' % i] = root_t
             # will cd to first root
             if i == 0:
