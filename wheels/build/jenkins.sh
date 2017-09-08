@@ -27,7 +27,7 @@ function build_wheel()
     outtmp=$(ssh ${sfuser}@${sfbuild} mktemp -d)
     ssh ${sfuser}@${sfbuild} "cd $outtmp && PATH="/sbin:\$PATH" && . ${sfvenv}/bin/activate && starforge --debug wheel --wheels-config=$l_new --exit-on-failure $l_wheel"
     [ ! -d ${output} ] && mkdir -p ${output}
-    scp ${sfuser}@${sfbuild}:${outtmp}/\*.whl ${sfuser}@${sfbuild}:${outtmp}/\*.tar.gz ${output}
+    scp ${sfuser}@${sfbuild}:${outtmp}/\*.whl ${output}
     echo "Contents of ${output} after building ${l_wheel}:"
     ls -l ${output}
 }
@@ -58,7 +58,7 @@ if [ -z "$1" -o "$1" = 'none' ]; then
             esac
         done < <(ssh ${sfuser}@${sfbuild} ${sfvenv}/bin/starforge wheel_diff --wheels-config=$new $old)
         for wheel in "${build_wheels[@]}"; do
-            echo "Building '$wheel' wheel and sdist"
+            echo "Building '$wheel' wheel"
             build_wheel $wheel $new
         done
         ssh ${sfuser}@${sfbuild} "rm ${new} ${old}"
