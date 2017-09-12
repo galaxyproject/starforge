@@ -50,14 +50,19 @@ packages:
         version: 0.12.0.1
         prebuild:
             wheel: >
-              sed -i '' -e 's/^HTSLIB_CONFIGURE_OPTIONS = .*/HTSLIB_CONFIGURE_OPTIONS = "--disable-libcurl"/' ${SRC_ROOT}/setup.py;
+              sed -i'' -e 's/^HTSLIB_CONFIGURE_OPTIONS = .*/HTSLIB_CONFIGURE_OPTIONS = "--disable-libcurl"/' ${SRC_ROOT}/setup.py;
               for py in /python/cp*-`uname -m`; do
                   ${py}/bin/pip install 'cython' || exit 1;
               done
-        # manylinux wheels are in PyPI
-        imageset: macos-wheel
+        auditwheel_args: 'repair -w dist -L .'
+        # manylinux1 x86_64 wheels are in PyPI
+        imageset: linux32-macos-wheel
         brew:
             - xz
+        yum:
+            - bzip2-devel
+            - xz-devel
+            - zlib-devel
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it
