@@ -22,6 +22,10 @@ SETUP_PY_WRAPPER = '''#!/usr/bin/env python
 {import_setuptools}
 execfile('setup_wrapped.py')
 '''
+AUDITWHEEL_CMD = 'for whl in dist/*.whl; do auditwheel {auditwheel_args} $whl; rm $whl; done'
+DELOCATE_CMD = 'for whl in dist/*.whl; do delocate-wheel {delocate_args} $whl; done'
+DEFAULT_AUDITWHEEL_ARGS = 'repair -w dist'
+DEFAULT_DELOCATE_ARGS = '-v'
 
 
 class ForgeWheel(object):
@@ -224,6 +228,16 @@ class ForgeWheel(object):
                 cmd.append('--plat-name=%s' % platform)
             self.execute(cmd)
             rmtree('build')
+
+        if self.image.use_auditwheel:
+            auditwheel_cmd = AUDITWHEEL_CMD.format(auditwheel_args=self.wheel_config.auditwheel_args or DEFAULT_AUDITWHEEL_ARGS)
+            info('Running auditwheel command: %s', auditwheel_cmd)
+            subprocess.check_call(auditwheel_cmd, shell=True)
+
+        if self.image.use_delocate:
+            delocate_cmd = DELOCATE_CMD.format(delocate_args=self.wheel_config.delocate_args or DEFAULT_DELOCATE_ARGS)
+            info('Running delocate command: %s', delocate_cmd)
+            subprocess.check_call(delocate_cmd, shell=True)
 
         if self.image.postbuild is not None:
             info('Running image postbuild command: %s', self.image.postbuild)
