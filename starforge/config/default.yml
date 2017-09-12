@@ -21,6 +21,9 @@ imagesets:
         - starforge/manylinux1-32:latest
     macos-wheel:
         - starforge/osx-wheel:10.6
+    linux32-macos-wheel:
+        - starforge/manylinux1-32:latest
+        - starforge/osx-wheel:10.6
     full-wheel:
         - starforge/debian-wheel:7
         - starforge/debian-wheel:8
@@ -56,7 +59,7 @@ images:
             - /python/cp27mu-x86_64/bin/python
         plat_name: manylinux1_x86_64
         force_plat: false
-        postbuild: for whl in dist/*.whl; do auditwheel repair $whl -w dist; rm $whl; done
+        use_auditwheel: true
     starforge/manylinux1-32:latest:
         pkgtool: yum
         buildpy: /opt/wheelenv/bin/python
@@ -65,7 +68,7 @@ images:
             - /python/cp27mu-i686/bin/python
         plat_name: manylinux1_i686
         force_plat: false
-        postbuild: for whl in dist/*.whl; do auditwheel repair $whl -w dist; rm $whl; done
+        use_auditwheel: true
     starforge/purepy-wheel:
         pythons:
             - /python/cp27mu-{arch}/bin/python
@@ -128,7 +131,7 @@ images:
         pythons:
             - /python/cp27m-{arch}/bin/python
         plat_name: macosx_10_6_intel
-        postbuild: for whl in dist/*.whl; do /python/wheelenv/bin/delocate-wheel -v $whl; done
+        use_delocate: true
         run_cmd: >
             qemu-system-x86_64
             -enable-kvm
@@ -148,13 +151,13 @@ images:
             smp: -smp 2,cores=2
             bootloader: boot
             drives:
-                -file: hd.img
+                - file: hd.img
         ssh:
             user: root
             args: '-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -q'
             keyfile: ~/.ssh/id_rsa_osx_wheel_10_6
         snap_root: ~/snapshots
-        snap_src: '@starforge-wheel'
+        snap_src: '@starforge'
         # place osk in $XDG_CONFIG_DIR/galaxy-starforge/osk.txt
         insert_osk: yes
         vvfat_mount_base: /Volumes

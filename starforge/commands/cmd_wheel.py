@@ -21,10 +21,10 @@ from ..util import xdg_data_dir, xdg_config_file
 
 
 BDIST_WHEEL_CMD_TEMPLATE = (
-    'starforge --config-file {config} bdist_wheel --wheels-config '
+    'starforge {debug} --config-file {config} bdist_wheel --wheels-config '
     '{wheels_config} -i {image} -o {output} -u {uid} -g {gid} {name}')
 SDIST_CMD_TEMPLATE = (
-    'starforge --config-file {config} sdist --wheels-config {wheels_config} '
+    'starforge {debug} --config-file {config} sdist --wheels-config {wheels_config} '
     '-i {image} -o {output} -u {uid} -g {gid} {name}')
 GUEST_HOST = '/host'
 GUEST_SHARE = '/share'
@@ -94,7 +94,7 @@ def cli(ctx, wheels_config, osk, sdist, docker, qemu, wheel, qemu_port,
             else:
                 build_wheel = True
         if build_wheel:
-            cmd, share, env = _prep_build(ctx.config, wheels_config,
+            cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config,
                                           BDIST_WHEEL_CMD_TEMPLATE, image,
                                           wheel)
             with ectx.run_context(share=share, env=env) as run:
@@ -121,7 +121,7 @@ def cli(ctx, wheels_config, osk, sdist, docker, qemu, wheel, qemu_port,
             break
     else:
         forge.cache_sources()
-        cmd, share, env = _prep_build(ctx.config, wheels_config,
+        cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config,
                                       SDIST_CMD_TEMPLATE, image, wheel)
         with ectx.run_context(share=share, env=env) as run:
             run(cmd)
@@ -136,13 +136,14 @@ def cli(ctx, wheels_config, osk, sdist, docker, qemu, wheel, qemu_port,
                 warn(msg)
 
 
-def _prep_build(global_config, wheels_config, template, image, wheel_name):
+def _prep_build(debug, global_config, wheels_config, template, image, wheel_name):
     # make wheels.yml accessible in guest
     copy(wheels_config, join(xdg_data_dir(), 'wheels.yml'))
     with open(join(xdg_data_dir(), 'config.yml'), 'w') as f:
         yaml.dump(global_config.dump_config(), f)
-    cmd = template.format(config=join(
-        GUEST_SHARE, 'galaxy-starforge', 'config.yml'),
+    cmd = template.format(
+        debug='--debug' if debug else '',
+        config=join(GUEST_SHARE, 'galaxy-starforge', 'config.yml'),
         wheels_config=join(GUEST_SHARE, 'galaxy-starforge', 'wheels.yml'),
         image=image.name,
         output=GUEST_HOST,

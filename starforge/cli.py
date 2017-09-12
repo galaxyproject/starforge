@@ -21,6 +21,7 @@ cmd_folder = abspath(join(dirname(__file__), 'commands'))
 
 class Context(object):
     def __init__(self):
+        self.debug = False
         self.config_file = None
         self.__config = None
 
@@ -84,4 +85,5 @@ def starforge(ctx, debug, config_file):
     """ Build Galaxy things under virtualization
     """
     set_debug(debug)
+    ctx.debug = debug
     ctx.config_file = config_file
