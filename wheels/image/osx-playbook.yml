@@ -1,6 +1,6 @@
 ---
 
-- hosts: osxhost
+- hosts: localhost
   remote_user: root
   vars:
     work_dir: /build
@@ -100,6 +100,19 @@
       - pip
       - setuptools
       - delocate
+
+  - name: Create delocate symlinks
+    file:
+      src: "/python/wheelenv/bin/{{ item }}"
+      dest: "/usr/bin/{{ item }}"
+      state: link
+    with_items:
+      - delocate-addplat
+      - delocate-fuse
+      - delocate-listdeps
+      - delocate-patch
+      - delocate-path
+      - delocate-wheel
 
   - name: Fetch get-pip
     get_url:
