@@ -213,6 +213,8 @@ purepy_packages:
         version: 4.10.0
     twill:
         version: 0.9.1
+    watchdog:
+        version: 0.8.3
     wchartype:
         version: 0.1
         insert_setuptools: true
