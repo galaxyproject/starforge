@@ -17,6 +17,7 @@ function print_usage() {
     echo '  -g: Append git short rev to version (automatic if version ends with `.dev*`)'
     echo '  -l: Build manylinux1 Docker images'
     echo '  -m: Build macOS QEMU images'
+    echo "  -n: Don't update the 'latest' tag"
 }
 
 function get_tag() {
@@ -51,9 +52,10 @@ function remove_new_images() {
 
 linux=0
 macos=0
+no_latest=0
 shortrev=0
 cmds=(uuidgen)
-while getopts "lmg" opt; do
+while getopts "lmgn" opt; do
     case "$opt" in
         l)
             linux=1
@@ -62,6 +64,9 @@ while getopts "lmg" opt; do
         m)
             macos=1
             cmds+=(ansible-playbook)
+            ;;
+        n)
+            no_latest=1
             ;;
         g)
             shortrev=1
@@ -127,8 +132,10 @@ if [ $linux -eq 1 ]; then
     cd "${dir}"
 
     for base in 'starforge/manylinux1' 'starforge/manylinux1-32'; do
-        if docker inspect --type=image ${base}:${new_ver} >/dev/null 2>&1; then
+        if ! docker inspect --type=image ${base}:${new_ver} >/dev/null 2>&1; then
             echo "Image exists: '${base}:${new_ver}', skipped"
+        elif [ $no_latest -ne 1 ]; then
+            continue # nothing to do
         elif ! docker inspect --type=image ${base}:latest >/dev/null 2>&1; then
             echo "Image '${base}:latest' does not exist, will create"
         else
@@ -170,7 +177,9 @@ if [ $linux -eq 1 ]; then
         new_image="$(docker images -q ${base}:${new_ver}-${tmp_tag})" || { remove_new_images "Failed to get image ID for ${base}:${new_ver}-${tmp_tag}"; exit 1; }
         new_images+=("${new_image}")
         echo "New image for ${base} is ${new_image}"
-        for tag in "${new_ver}" 'latest'; do
+        tags=("${new_ver}")
+        [ $no_latest -ne 1 ] && tags+=('latest')
+        for tag in $tags; do
             echo "Tagging image ${new_image} with ${base}:${tag}"
             docker tag -f "${new_image}" "${base}:${tag}" || { remove_new_images "Failed to tag ${new_image} with tag ${base}:${tag}"; exit 1; }
         done
