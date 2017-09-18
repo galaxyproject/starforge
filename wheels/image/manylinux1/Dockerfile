@@ -3,7 +3,7 @@ MAINTAINER Nate Coraor <nate@bx.psu.edu>
 
 VOLUME ["/host"]
 
-RUN yum install -y PyYAML
+RUN yum install -y PyYAML xz-devel
 
 WORKDIR /work
 
@@ -17,7 +17,7 @@ RUN /opt/wheelenv/bin/pip install --upgrade pip setuptools
 WORKDIR /
 
 COPY starforge.tar.gz /work/starforge.tar.gz
-RUN /opt/wheelenv/bin/pip install /work/starforge.tar.gz
+RUN /opt/wheelenv/bin/pip install /work/starforge.tar.gz[lzma]
 
 RUN rm -rf /work /root/.cache && \
     yum clean all

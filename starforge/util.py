@@ -9,11 +9,20 @@ import zipfile
 from os.path import join, abspath, expanduser
 from subprocess import Popen, CalledProcessError, PIPE
 try:
+    import lzma
+except ImportError:
+    try:
+        import backports.lzma as lzma
+    except ImportError:
+        lzma = None
+try:
     from configparser import ConfigParser, NoSectionError, NoOptionError
 except ImportError:
     from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
 from six import iteritems, string_types
+
+UNSUPPORTED_ARCHIVE_MESSAGE = "Missing support for '{arctype}' archives, use `pip install starforge[{extra}]` to install"
 
 
 def dict_merge(old, new):
@@ -82,6 +91,9 @@ class Archive(object):
         elif zipfile.is_zipfile(arcfile):
             self.arctype = 'zip'
             self.arc = zipfile.ZipFile(arcfile)
+        elif arcfile.endswith('.tar.xz'):
+            self.arctype = 'tar'
+            self.arc = tarfile.open(fileobj=lzma.open(arcfile))
         else:
             raise Exception('Unknown archive type: %s' % arcfile)
 
@@ -131,3 +143,25 @@ class Archive(object):
             return asbool(universal)
         except (KeyError, NoSectionError, NoOptionError):
             return False
+
+
+class UnsupportedArchiveModule(object):
+    def __init__(self, arctype, extra):
+        self.arctype = arctype
+        self.extra = extra
+
+    def open(self, *args, **kwargs):
+        raise UnsupportedArchiveType(
+            UNSUPPORTED_ARCHIVE_MESSAGE.format(
+                arctype=self.arctype,
+                extra=self.extra,
+            )
+        )
+
+
+class UnsupportedArchiveType(Exception):
+    pass
+
+
+if lzma is None:
+    lzma = UnsupportedArchiveModule('xz', 'lzma')
