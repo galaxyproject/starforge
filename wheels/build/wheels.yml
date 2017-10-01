@@ -218,9 +218,7 @@ purepy_packages:
     sqlparse:
         version: 0.1.16
     starforge:
-        version: 0.1.1
-        src:
-            - https://github.com/galaxyproject/starforge/archive/0.1.1.tar.gz
+        version: 0.3.4
     statsd:
         version: 3.2.1
     svgwrite:
