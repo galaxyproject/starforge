@@ -125,7 +125,7 @@
       - 2.7
 
   - name: Install Starforge
-    command: /python/{{ item }}/bin/pip install {{ work_dir }}/starforge.tar.gz
+    command: /python/{{ item }}/bin/pip install {{ work_dir }}/starforge.tar.gz[lzma]
     args:
       creates: /python/{{ item }}/bin/starforge
     with_items:

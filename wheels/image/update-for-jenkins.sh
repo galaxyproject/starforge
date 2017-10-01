@@ -17,7 +17,7 @@ function print_usage() {
     echo '  -g: Append git short rev to version (automatic if version ends with `.dev*`)'
     echo '  -l: Build manylinux1 Docker images'
     echo '  -m: Build macOS QEMU images'
-    echo "  -n: Don't update the 'latest' tag"
+    echo "  -n: Don't update the 'latest' tag (automatic if version ends with \`.dev*\`)"
 }
 
 function get_tag() {
@@ -116,6 +116,11 @@ if [ $shortrev -ne 0 -o "${last:0:3}" == "dev" ]; then
     shortrev="$(git rev-parse --short HEAD)"
     new_ver+="-${shortrev}"
     echo "Adding git shortrev '${shortrev}' to version, version is: $new_ver"
+fi
+
+if [ "${last:0:3}" == "dev" ]; then
+    no_latest=1
+    macos_snap_users="$USER"
 fi
 
 tmp_tag="$(uuidgen)" || { "Failed to generate UUID for temporary build tag"; exit 1; }
@@ -240,6 +245,8 @@ if [ $macos -eq 1 ]; then
             echo "Waiting for guest shutdown..."
             sleep 5
         done
+        echo "Setting version in snapshot version file"
+        echo "${new_ver}" | sudo tee ${tmp_snap_path}/version
         echo "Creating RO snapshot"
         sudo btrfs subvolume snapshot -r ${tmp_snap_path} ${new_snap_path}
         echo "Removing RW snapshot"
