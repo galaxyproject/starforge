@@ -13,6 +13,9 @@ long_description += '\n\n'
 with open('HISTORY.rst') as file:
     long_description += file.read()
 
+with open('requirements.txt') as file:
+    requirements = file.readlines()
+
 # Strip RTD :doc: links for PyPI
 long_description = long_description.replace(':doc:', '')
 
@@ -35,13 +38,7 @@ setup(
     package_data = {'': [
         'config/default.yml',
     ]},
-    install_requires = [
-        'pyyaml',
-        'click',
-        'requests',
-        'six',
-        'wheel'
-    ],
+    install_requires = requirements,
     extras_require = {
         ':python_version=="2.6"': ["ordereddict"],
         'platform_specific': ["lionshead"],

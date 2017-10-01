@@ -95,7 +95,7 @@
       name: "{{ item }}"
       state: latest
       virtualenv: /python/wheelenv
-      virtualenv_command: /usr/bin/python {{ work_dir }}/virtualenv-{{ virtualenv_version }}/virtualenv.py
+      virtualenv_command: /Library/Frameworks/Python.framework/Versions/2.7/bin/python {{ work_dir }}/virtualenv-{{ virtualenv_version }}/virtualenv.py
     with_items:
       - pip
       - setuptools

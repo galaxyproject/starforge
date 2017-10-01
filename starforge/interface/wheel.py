@@ -48,23 +48,23 @@ def bdist_wheel_initialize_options(self):
 def bdist_wheel_finalize_options(self):
     self._finalize_options()
     if not self.plat_name_supplied and self.plat_name == distutils.util.get_platform():
-	self.plat_name = get_platforms(major_only=True)[0]
+        self.plat_name = get_platforms(major_only=True)[0]
 
 
 def bdist_wheel_plat_compat(self):
     if self.__plat_compat is None:
-	compat_files = [os.path.join(os.sep, 'etc', 'python', 'binary-compatibility.cfg')]
-	if 'VIRTUAL_ENV' in os.environ:
-	    compat_files.append(os.path.join(os.environ['VIRTUAL_ENV'], 'binary-compatibility.cfg'))
-	self.__plat_compat = {}
-	for compat_file in compat_files:
-	    try:
-		with open(compat_file) as compat:
-		    self.__plat_compat.update(json.load(compat))
-	    except IOError as exc:
-		# Should EACCES issue a warning instead?
-		if exc.errno != errno.ENOENT:
-		    raise
+        compat_files = [os.path.join(os.sep, 'etc', 'python', 'binary-compatibility.cfg')]
+        if 'VIRTUAL_ENV' in os.environ:
+            compat_files.append(os.path.join(os.environ['VIRTUAL_ENV'], 'binary-compatibility.cfg'))
+        self.__plat_compat = {}
+        for compat_file in compat_files:
+            try:
+                with open(compat_file) as compat:
+                    self.__plat_compat.update(json.load(compat))
+            except IOError as exc:
+                # Should EACCES issue a warning instead?
+                if exc.errno != errno.ENOENT:
+                    raise
     return self.__plat_compat
 
 
@@ -73,25 +73,25 @@ def bdist_wheel_get_tag(self):
     supported_tags = pep425tags_get_supported(supplied_platform=supplied)
 
     if self.root_is_pure:
-	if self.universal:
-	    impl = 'py2.py3'
-	else:
-	    impl = self.python_tag
-	tag = (impl, 'none', 'any')
+        if self.universal:
+            impl = 'py2.py3'
+        else:
+            impl = self.python_tag
+        tag = (impl, 'none', 'any')
     else:
-	plat_name = self.plat_name
-	if plat_name is None:
-	    plat_name = get_platforms(major_only=True)[0]
-	plat_name = plat_name.replace('-', '_').replace('.', '_')
-	impl_name = get_abbr_impl()
-	impl_ver = get_impl_ver()
-	# PEP 3149
-	abi_tag = str(get_abi_tag()).lower()
-	tag = (impl_name + impl_ver, abi_tag, plat_name)
-	# XXX switch to this alternate implementation for non-pure:
-	assert tag in supported_tags
-	if plat_name in self.plat_compat and 'build' in self.plat_compat[plat_name]:
-	    tag = (impl_name + impl_ver, abi_tag, self.plat_compat[plat_name]['build'])
+        plat_name = self.plat_name
+        if plat_name is None:
+            plat_name = get_platforms(major_only=True)[0]
+        plat_name = plat_name.replace('-', '_').replace('.', '_')
+        impl_name = get_abbr_impl()
+        impl_ver = get_impl_ver()
+        # PEP 3149
+        abi_tag = str(get_abi_tag()).lower()
+        tag = (impl_name + impl_ver, abi_tag, plat_name)
+        # XXX switch to this alternate implementation for non-pure:
+        assert tag in supported_tags
+        if plat_name in self.plat_compat and 'build' in self.plat_compat[plat_name]:
+            tag = (impl_name + impl_ver, abi_tag, self.plat_compat[plat_name]['build'])
     return tag
 
 
@@ -99,7 +99,7 @@ def pep425tags_get_supported(versions=None, supplied_platform=None):
     """Return a list of supported tags for each version specified in
     `versions`.
 
-    :param versions: a list of string versions, of the form ["33", "32"], 
+    :param versions: a list of string versions, of the form ["33", "32"],
         or None. The first version will be assumed to support our ABI.
     """
     supported = []
@@ -142,7 +142,7 @@ def pep425tags_get_supported(versions=None, supplied_platform=None):
     for i, version in enumerate(versions):
         supported.append(('%s%s' % (impl, version), 'none', 'any'))
         if i == 0:
-            # Tagged specifically as being cross-version compatible 
+            # Tagged specifically as being cross-version compatible
             # (with just the major version specified)
             supported.append(('%s%s' % (impl, versions[0][0]), 'none', 'any'))
 
