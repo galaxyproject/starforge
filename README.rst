@@ -18,13 +18,18 @@ QEMU/KVM virtualized systems.
 Documentation can be found at `starforge.readthedocs.org
 <http://starforge.readthedocs.org/>`_
 
+Starforge is maintained by the `Galaxy`_ Project and community. A `list of
+contributors <https://github.com/galaxyproject/starforge/graphs/contributors>`_
+to the project can be found on GitHub.
+
 Quick Start
 -----------
 
 For all types of builds, begin by `installing Docker`_.
 
+----------------------
 Tool Shed Dependencies
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 There are two scripts that can be used, depending on the package recipes
 available:
@@ -75,8 +80,9 @@ The ``<version>`` option is optional, and defaults to the string ``'default'``,
 which is useful for recipes that don't have version specific changes (E.g.
 bcftools 1.0 builds identically to 1.2)
 
+-------------
 Python Wheels
-~~~~~~~~~~~~~
+-------------
 
 Starforge can build both pure Python and C-extension Python modules into wheels
 for Linux under Docker and for Mac OS X under QEMU/KVM. To do this, you'll want
