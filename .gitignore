@@ -3,6 +3,7 @@
 *.*.swp
 *.tar.gz
 image/Dockerfile
+.eggs
 
 */*/build.sh
 

@@ -128,7 +128,7 @@ _release-test-artifacts:
 
 dist-all: dist
 
-release-test-artifacts: dist-all _release-test-artifacts
+release-test-artifacts: dist-all lint-readme _release-test-artifacts
 
 _release-artifacts:
 	@while [ -z "$$CONTINUE" ]; do \

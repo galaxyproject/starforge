@@ -18,6 +18,10 @@ QEMU/KVM virtualized systems.
 Documentation can be found at `starforge.readthedocs.org
 <http://starforge.readthedocs.org/>`_
 
+Starforge is maintained by the `Galaxy`_ Project and community. A `list of
+contributors <https://github.com/galaxyproject/starforge/graphs/contributors>`_
+to the project can be found on GitHub.
+
 Quick Start
 -----------
 
