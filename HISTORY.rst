@@ -10,7 +10,7 @@ History
 .. to_doc
 
 ---------------------
-0.3.5.dev0
+0.3.5 (2017-10-01)
 ---------------------
 
 * Support xz/lzma tarballs for wheel builds `Pull Request 166`_
