@@ -9,6 +9,8 @@ image/Dockerfile
 */build.log
 *.gz
 
+.venv
+
 wheels/dist/
 wheels/dist-qemu/
 wheels/build/cache/
@@ -16,5 +18,7 @@ wheels/build/cache/
 .tox
 #Dockerfile
 starforge.egg-info
+build
+dist
 
 docs/_build

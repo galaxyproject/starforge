@@ -1,8 +1,5 @@
 pyyaml
-beautifulsoup4
-filecache
 click
 requests
 six
--i https://wheels.galaxyproject.org/simple/
-wheel==0.26.0+gx1
+wheel
