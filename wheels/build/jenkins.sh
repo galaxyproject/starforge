@@ -21,21 +21,10 @@ function build_wheel()
     l_wheel=$1
 
     [ ! -d $output ] && mkdir -p $output
+    cd $output
     starforge --debug wheel --wheels-config=$WORKSPACE/wheels/build/wheels.yml --exit-on-failure $l_wheel
     echo "Contents of $output after building $l_wheel:"
     ls -l $output
-}
-
-function make_html()
-{
-    url="https://depot.galaxyproject.org/starforge/wheels/build-${BUILD_NUMBER}"
-    cat >$output/index.html <<EOF
-<html>
-    <body>
-        Built wheels can be found at <a href="$url">$url</a>
-    </body>
-</html>
-EOF
 }
 
 
@@ -45,8 +34,6 @@ virtualenv $tempdir/venv
 . $tempdir/venv/bin/activate
 pip install --upgrade pip setuptools wheel
 pip install .
-
-cd $tempdir
 
 if [ -z "$1" -o "$1" = 'none' ]; then
 
@@ -74,8 +61,6 @@ if [ -z "$1" -o "$1" = 'none' ]; then
         done
     fi
 
-    rm $wheels_patch $wheels_tmp
-
 else
 
     for wheel in "$@"; do
@@ -93,5 +78,5 @@ if [ -d ${output} ]; then
     ssh ${depotuser}@${depothost} "mkdir -p ${depotroot}/build-${BUILD_NUMBER}"
     scp ${output}/* ${depotuser}@${depothost}:${depotroot}/build-${BUILD_NUMBER}
     ssh ${depotuser}@${depothost} "chmod 0644 ${depotroot}/build-${BUILD_NUMBER}/*"
-    make_html
+    echo "Wheels available at: https://depot.galaxyproject.org/starforge/wheels/build-${BUILD_NUMBER}"
 fi
