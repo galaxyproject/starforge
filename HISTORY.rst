@@ -7,11 +7,13 @@ to the project can be found on GitHub.
 History
 -------
 
+.. to_doc
+
 ---------------------
-0.4.0.dev0
+0.3.5.dev0
 ---------------------
 
-.. to_doc
+* Support xz/lzma tarballs for wheel builds `Pull Request 166`_
 
 ---------------------
 0.3.4 (2017-09-12)
@@ -95,6 +97,7 @@ Vagrant and Ansible called vadebuildsible).
 .. _Galaxy: http://galaxyproject.org/
 
 .. github_links
+.. _Pull Request 166: https://github.com/galaxyproject/starforge/pull/166
 .. _9008c57: https://github.com/galaxyproject/starforge/commit/9008c57b09521298b919fac1de00fb62a448bcab
 .. _97b4ba4: https://github.com/galaxyproject/starforge/commit/97b4ba4a591e359b01dc69161925c301c9a7d1b7
 .. _0dbecb7: https://github.com/galaxyproject/starforge/commit/0dbecb79e28baecb62546b629cae9dbebf46df19
