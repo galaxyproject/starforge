@@ -229,7 +229,8 @@ if [ $macos -eq 1 ]; then
             sleep 5
         done
         echo "Running Playbook"
-        ansible-playbook -i localhost, -e "ansible_ssh_port=${macos_ssh_port}" -e "ansible_ssh_private_key_file=${macos_ssh_identity_file}" -e "ssh_args='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'" osx-playbook.yml
+        failed=0
+        ansible-playbook -i localhost, -e "ansible_ssh_port=${macos_ssh_port}" -e "ansible_ssh_private_key_file=${macos_ssh_identity_file}" -e "ssh_args='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'" osx-playbook.yml || failed=1
         echo "Shutting down"
         ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ${macos_ssh_port} -i ${macos_ssh_identity_file} root@localhost shutdown -h now || true  # returns 255
         count=0
@@ -245,15 +246,18 @@ if [ $macos -eq 1 ]; then
             echo "Waiting for guest shutdown..."
             sleep 5
         done
-        echo "Setting version in snapshot version file"
-        echo "${new_ver}" | sudo tee ${tmp_snap_path}/version
-        echo "Creating RO snapshot"
-        sudo btrfs subvolume snapshot -r ${tmp_snap_path} ${new_snap_path}
+        if [ $failed -eq 0 ]; then
+            echo "Setting version in snapshot version file"
+            echo "${new_ver}" | sudo tee ${tmp_snap_path}/version
+            echo "Creating RO snapshot"
+            sudo btrfs subvolume snapshot -r ${tmp_snap_path} ${new_snap_path}
+        fi
         echo "Removing RW snapshot"
         sudo btrfs subvolume delete ${tmp_snap_path}
+        [ $failed -eq 1 ] && exit 1
         for user in ${macos_snap_users}; do
             echo "Snapshotting for $user"
-            sudo bash -c "cd ${new_snap_path}; ./snap_for $user"
+            sudo bash -c "cd ${new_snap_path}; ./snap_for $user $no_latest"
         done
     fi
 
