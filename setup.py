@@ -41,6 +41,7 @@ setup(
     install_requires = requirements,
     extras_require = {
         ':python_version=="2.6"': ["ordereddict"],
+        'lzma:python_version<="3.3"': ['backports.lzma'],
         'platform_specific': ["lionshead"],
     },
     entry_points = {

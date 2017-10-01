@@ -124,14 +124,6 @@
     with_items:
       - 2.7
 
-  - name: Install Starforge
-    command: /python/{{ item }}/bin/pip install {{ work_dir }}/starforge.tar.gz
-    args:
-      creates: /python/{{ item }}/bin/starforge
-    with_items:
-      - wheelenv
-      - cp27m-x86_64
-
   - name: Allow admin(s) to sudo without a password
     lineinfile:
       dest: /etc/sudoers
@@ -143,3 +135,16 @@
     shell: ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" </dev/null
     args:
       creates: /usr/local/bin/brew
+
+  - name: Install xz
+    remote_user: admin
+    homebrew:
+      name: xz
+
+  - name: Install Starforge
+    command: /python/{{ item }}/bin/pip install {{ work_dir }}/starforge.tar.gz[lzma]
+    args:
+      creates: /python/{{ item }}/bin/starforge
+    with_items:
+      - wheelenv
+      - cp27m-x86_64

@@ -17,6 +17,7 @@ function print_usage() {
     echo '  -g: Append git short rev to version (automatic if version ends with `.dev*`)'
     echo '  -l: Build manylinux1 Docker images'
     echo '  -m: Build macOS QEMU images'
+    echo "  -n: Don't update the 'latest' tag (automatic if version ends with \`.dev*\`)"
 }
 
 function get_tag() {
@@ -51,9 +52,10 @@ function remove_new_images() {
 
 linux=0
 macos=0
+no_latest=0
 shortrev=0
 cmds=(uuidgen)
-while getopts "lmg" opt; do
+while getopts "lmgn" opt; do
     case "$opt" in
         l)
             linux=1
@@ -62,6 +64,9 @@ while getopts "lmg" opt; do
         m)
             macos=1
             cmds+=(ansible-playbook)
+            ;;
+        n)
+            no_latest=1
             ;;
         g)
             shortrev=1
@@ -113,6 +118,11 @@ if [ $shortrev -ne 0 -o "${last:0:3}" == "dev" ]; then
     echo "Adding git shortrev '${shortrev}' to version, version is: $new_ver"
 fi
 
+if [ "${last:0:3}" == "dev" ]; then
+    no_latest=1
+    macos_snap_users="$USER"
+fi
+
 tmp_tag="$(uuidgen)" || { "Failed to generate UUID for temporary build tag"; exit 1; }
 
 if [ $linux -eq 1 ]; then
@@ -127,8 +137,10 @@ if [ $linux -eq 1 ]; then
     cd "${dir}"
 
     for base in 'starforge/manylinux1' 'starforge/manylinux1-32'; do
-        if docker inspect --type=image ${base}:${new_ver} >/dev/null 2>&1; then
+        if ! docker inspect --type=image ${base}:${new_ver} >/dev/null 2>&1; then
             echo "Image exists: '${base}:${new_ver}', skipped"
+        elif [ $no_latest -ne 1 ]; then
+            continue # nothing to do
         elif ! docker inspect --type=image ${base}:latest >/dev/null 2>&1; then
             echo "Image '${base}:latest' does not exist, will create"
         else
@@ -170,7 +182,9 @@ if [ $linux -eq 1 ]; then
         new_image="$(docker images -q ${base}:${new_ver}-${tmp_tag})" || { remove_new_images "Failed to get image ID for ${base}:${new_ver}-${tmp_tag}"; exit 1; }
         new_images+=("${new_image}")
         echo "New image for ${base} is ${new_image}"
-        for tag in "${new_ver}" 'latest'; do
+        tags=("${new_ver}")
+        [ $no_latest -ne 1 ] && tags+=('latest')
+        for tag in $tags; do
             echo "Tagging image ${new_image} with ${base}:${tag}"
             docker tag -f "${new_image}" "${base}:${tag}" || { remove_new_images "Failed to tag ${new_image} with tag ${base}:${tag}"; exit 1; }
         done
@@ -215,7 +229,8 @@ if [ $macos -eq 1 ]; then
             sleep 5
         done
         echo "Running Playbook"
-        ansible-playbook -i localhost, -e "ansible_ssh_port=${macos_ssh_port}" -e "ansible_ssh_private_key_file=${macos_ssh_identity_file}" -e "ssh_args='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'" osx-playbook.yml
+        failed=0
+        ansible-playbook -i localhost, -e "ansible_ssh_port=${macos_ssh_port}" -e "ansible_ssh_private_key_file=${macos_ssh_identity_file}" -e "ssh_args='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'" osx-playbook.yml || failed=1
         echo "Shutting down"
         ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -p ${macos_ssh_port} -i ${macos_ssh_identity_file} root@localhost shutdown -h now || true  # returns 255
         count=0
@@ -231,13 +246,18 @@ if [ $macos -eq 1 ]; then
             echo "Waiting for guest shutdown..."
             sleep 5
         done
-        echo "Creating RO snapshot"
-        sudo btrfs subvolume snapshot -r ${tmp_snap_path} ${new_snap_path}
+        if [ $failed -eq 0 ]; then
+            echo "Setting version in snapshot version file"
+            echo "${new_ver}" | sudo tee ${tmp_snap_path}/version
+            echo "Creating RO snapshot"
+            sudo btrfs subvolume snapshot -r ${tmp_snap_path} ${new_snap_path}
+        fi
         echo "Removing RW snapshot"
         sudo btrfs subvolume delete ${tmp_snap_path}
+        [ $failed -eq 1 ] && exit 1
         for user in ${macos_snap_users}; do
             echo "Snapshotting for $user"
-            sudo bash -c "cd ${new_snap_path}; ./snap_for $user"
+            sudo bash -c "cd ${new_snap_path}; ./snap_for $user $no_latest"
         done
     fi
 
