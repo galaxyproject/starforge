@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 # to debug:
-set -xv
+#set -xv
 
 depotuser='depot'
 depothost='orval.galaxyproject.org'
