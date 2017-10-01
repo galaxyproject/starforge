@@ -63,6 +63,12 @@ packages:
             - bzip2-devel
             - xz-devel
             - zlib-devel
+    backports.lzma:
+        version: 0.0.8
+        brew:
+            - xz
+        yum:
+            - xz-devel
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it
