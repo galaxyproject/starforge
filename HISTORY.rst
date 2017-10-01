@@ -84,9 +84,9 @@ History
   command line
 - Wrote some documentation
 
-~~~~~~~~~~~~~~~~
+---------------------
 Older than 0.1
-~~~~~~~~~~~~~~~~
+---------------------
 
 Originally Galaxy docker-build and later renamed Starforge, but as a collection
 of disjointed shell scripts, Python, and YAML used to build Galaxy Tool Shed
