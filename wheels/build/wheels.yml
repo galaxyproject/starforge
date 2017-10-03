@@ -75,18 +75,54 @@ packages:
             wheel: for f in sqlite3.h sqlite3.c sqlite3ext.h; do cp ${SRC_ROOT_1}/$f $f || return 1; done && echo 'include_dirs=.' >>${SRC_ROOT_0}/setup.cfg
         build_args: build_static bdist_wheel
     python-ldap:
-        version: 2.4.27
+        version: 2.4.44
         src:
-            - http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.44.tgz
-            - https://pypi.python.org/packages/fc/99/9eed836fe4d916792994838df125da9c25c5f7c31abfbf6f0ab076e5f419/python-ldap-2.4.27.tar.gz
+            - https://gmplib.org/download/gmp/gmp-6.1.2.tar.bz2
+            - https://ftp.gnu.org/gnu/nettle/nettle-3.3.tar.gz
+            - https://www.gnupg.org/ftp/gcrypt/gnutls/v3.5/gnutls-3.5.15.tar.xz
+            - http://www.openssl.org/source/openssl-1.0.2l.tar.gz
+            - http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.45.tgz
         prebuild:
-            wheel: if [ `uname -s` == 'Darwin' ] ; then sed -e 's/^library_dirs.*//' -e 's#^include_dirs.*#include_dirs = /Developer/SDKs/MacOSX10.6.sdk/usr/include /Developer/SDKs/MacOSX10.6.sdk/usr/include/sasl#' -i .orig ${SRC_ROOT_0}/setup.cfg ; sed -e $'$i\\\n#define LDAP_VLV_ERROR 0x4C\n' -i .orig ${SRC_ROOT_0}/Modules/errors.h ; else cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --disable-shared --enable-backends=no --enable-slapd=no && make install && sed -i -e 's/extra_compile_args = /extra_compile_args = -static/' ${SRC_ROOT_0}/setup.cfg && sed -i -e 's/libs = ldap_r/libs = lber sasl2 ldap_r/' ${SRC_ROOT_0}/setup.cfg ; fi
+            wheel: >
+              if [ `uname -s` == 'Darwin' ] ; then
+                  sed -e 's/^library_dirs.*//' -e 's#^include_dirs.*#include_dirs = /Developer/SDKs/MacOSX10.6.sdk/usr/include /Developer/SDKs/MacOSX10.6.sdk/usr/include/sasl#' -i .orig ${SRC_ROOT_0}/setup.cfg ;
+                  sed -e $'$i\\\n#define LDAP_VLV_ERROR 0x4C\n' -i .orig ${SRC_ROOT_0}/Modules/errors.h ;
+              else
+                  cd $SRC_ROOT_1 ;
+                  ./configure ;
+                  make ;
+                  make install ;
+                  cd $SRC_ROOT_2 ;
+                  ./configure ;
+                  make ;
+                  make install ;
+                  export PKG_CONFIG_PATH=/usr/local/lib64/pkgconfig/:$PKG_CONFIG_PATH ;
+                  cd $SRC_ROOT_3 ;
+                  ./configure --with-included-libtasn1 --with-included-unistring --without-p11-ki ;
+                  make ;
+                  make install ;
+                  cd $SRC_ROOT_4 ;
+                  ./config shared enable-ssl2 enable-ssl3 ;
+                  make depend ;
+                  make ;
+                  make install ;
+                  cd $SRC_ROOT_5 ;
+                  CFLAGS="-fpic -I/usr/local/ssl/include/ -L/usr/local/ssl/lib/" ./configure --disable-shared --enable-backends=no --enable-slapd=no ;
+                  make depend ;
+                  make ;
+                  make install ;
+                  sed -i -e 's#library_dirs =#library_dirs = /usr/local/ssl/lib#' ${SRC_ROOT_0}/setup.cfg ;
+                  sed -i -e 's#include_dirs =#include_dirs = /usr/local/ssl/include/openssl/#' ${SRC_ROOT_0}/setup.cfg ;
+                  sed -i -e 's/libs = ldap_r/libs = lber sasl2 ldap_r ssl crypto/' ${SRC_ROOT_0}/setup.cfg ;
+              fi
         apt:
             - groff
             - libsasl2-dev
+            - libidn11-dev
         yum:
             - groff
             - cyrus-sasl-devel
+            - libidn-devel
     python_lzo:
         version: 1.8
         src:
