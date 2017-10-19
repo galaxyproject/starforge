@@ -6,12 +6,26 @@ from __future__ import absolute_import
 import os
 import shlex
 import subprocess
-from os import uname, makedirs, chown, getcwd, chdir, rename, listdir
-from os.path import exists, join, abspath
-from shutil import rmtree, copy
+from os import (
+    chdir,
+    chown,
+    getcwd,
+    listdir,
+    makedirs,
+    rename,
+    uname
+)
+from os.path import (
+    abspath,
+    exists,
+    join
+)
+from shutil import (
+    copy,
+    rmtree
+)
 
 from pkg_resources import parse_version
-from six.moves import map
 
 from ..io import debug, info, warn
 from ..util import Archive
@@ -20,7 +34,9 @@ from ..util import Archive
 SETUP_PY_WRAPPER = '''#!/usr/bin/env python
 {import_interface_wheel}
 {import_setuptools}
-execfile('setup_wrapped.py')
+with open('setup_wrapped.py') as f:
+    code = compile(f.read(), 'setup_wrapped.py', 'exec')
+exec(code)
 '''
 AUDITWHEEL_CMD = 'for whl in dist/*.whl; do auditwheel {auditwheel_args} $whl; rm $whl; done'
 DELOCATE_CMD = 'for whl in dist/*.whl; do delocate-wheel {delocate_args} $whl; done'
@@ -180,7 +196,7 @@ class ForgeWheel(object):
             if pkgtool == 'apt':
                 if arch == 'i686' and exists('/usr/lib/x86_64-linux-gnu'):
                     # multiarch install
-                    pkgs = map(lambda x: '%s:i386' % x, pkgs)
+                    pkgs = ['%s:i386' % x for x in pkgs]
                 os.environ['DEBIAN_FRONTEND'] = 'noninteractive'
                 self.execute(['apt-get', '-qq', 'update'])
                 self.execute(['apt-get', 'install',
