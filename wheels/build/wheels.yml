@@ -167,6 +167,8 @@ purepy_packages:
         insert_setuptools: true
     boto:
         version: 2.38.0
+    certifi:
+        version: 2017.7.27.1
     chronos-python:
         version: 0.38.0
     cloudbridge:
@@ -184,6 +186,8 @@ purepy_packages:
         version: 0.13
     Fabric:
         version: 1.13.2
+    futures:
+        version: 3.1.1
     galaxy_sequence_utils:
         version: 1.0.2
     httplib2:
@@ -229,7 +233,7 @@ purepy_packages:
     Pygments:
         version: 2.0.2
     pykwalify:
-        version: 1.5.1
+        version: 1.6.0
     pyparsing:
         # required by svgwrite
         version: 2.1.1
@@ -238,11 +242,11 @@ purepy_packages:
     pytz:
         version: 2015.4
     repoze.lru:
-        version: 0.6
+        version: 0.7
     requests:
-        version: 2.10.0
+        version: 2.18.4
     requests-toolbelt:
-        version: 0.4.0
+        version: 0.8.0
     Routes:
         version: 2.4.1
     selenium:
@@ -265,6 +269,8 @@ purepy_packages:
         version: 4.10.0
     twill:
         version: 0.9.1
+    urllib3:
+        version: 1.22
     watchdog:
         version: 0.8.3
     wchartype:
