@@ -169,6 +169,8 @@ purepy_packages:
         version: 2.38.0
     certifi:
         version: 2017.7.27.1
+    chardet:
+        version: 3.0.4
     chronos-python:
         version: 0.38.0
     cloudbridge:
@@ -192,6 +194,8 @@ purepy_packages:
         version: 1.0.2
     httplib2:
         version: 0.10.3
+    idna:
+        version: 2.6
     ipaddress:
         version: 1.0.18
     jstree:
