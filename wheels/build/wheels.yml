@@ -157,7 +157,7 @@ purepy_packages:
     azure-storage:
         version: 0.32.0
     Babel:
-        version: 2.4.0
+        version: 2.5.1
     Beaker:
         version: 1.7.0
     bioblend:
