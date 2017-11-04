@@ -11,7 +11,7 @@ env:
   global:
   - DEBFULLNAME="Marius van den Beek (travis-ci)"
   - DEBEMAIL="m.vandenbeek@gmail.com"
-  - PPA="ppa:m-vandenbeek/nginx-upload-store"
+  - PPA="ppa:galaxyproject/nginx"
 install:
 - docker pull $CODENAME
 script:
