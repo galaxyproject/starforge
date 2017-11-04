@@ -7,10 +7,7 @@ language: python
 env:
   matrix:
   - CODENAME="ubuntu:trusty"
-  - CODENAME="ubuntu:wily"
   - CODENAME="ubuntu:xenial"
-  - CODENAME="ubuntu:yakkety"
-  - CODENAME="debian:jessie"
   global:
   - DEBFULLNAME="Marius van den Beek (travis-ci)"
   - DEBEMAIL="m.vandenbeek@gmail.com"
