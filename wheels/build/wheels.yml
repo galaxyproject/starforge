@@ -146,7 +146,7 @@ packages:
         prebuild:
             all: cp ${SRC_ROOT_0}/setup.cpyext.py ${SRC_ROOT_0}/setup.py
             wheel: >
-              [ `uname -s` = 'Darwin' ] &&
+              [ `uname -s` != 'Darwin' ] ||
               curl https://github.com/natefoo/uwsgi/commit/2a85be614afac37a467712d048f1d9eef6e7d622.patch |
               patch -d ${SRC_ROOT_0} -p1
 purepy_packages:
