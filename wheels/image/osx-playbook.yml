@@ -17,6 +17,9 @@
   # - Install Xcode
   # - Copy the 10.6 SDK to /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs
   # - Run gcc once to accept the Xcode license
+  # - As of 2017-11-27 (possibly due to a brew version upgrade) it was necessary to run `xcode-select --install` on the
+  #   old image that had had the previous steps performed a couple years ago. If done from scratch this might not be
+  #   necessary.
 
   - name: Enable user environment via ssh
     lineinfile:
@@ -54,10 +57,44 @@
     args:
       creates: "/Library/Frameworks/Python.framework/Versions/2.7/bin/python2.7"
 
+  # Explicitly naming these makes it idempotent
   - name: Remove /usr/local symlinks
     file:
-      path: /usr/local/bin
+      path: /usr/local/bin/{{ item }}
       state: absent
+    with_items:
+      - 2to3
+      - 2to3-2
+      - 2to3-2.7
+      - easy_install
+      - easy_install-2.7
+      - idle
+      - idle2
+      - idle2.7
+      - pip
+      - pip2
+      - pip2.7
+      - pydoc
+      - pydoc2
+      - pydoc2.7
+      - python
+      - python-32
+      - python-config
+      - python2
+      - python2-32
+      - python2-config
+      - python2.7
+      - python2.7-32
+      - python2.7-config
+      - pythonw
+      - pythonw-32
+      - pythonw2
+      - pythonw2-32
+      - pythonw2.7
+      - pythonw2.7-32
+      - smtpd.py
+      - smtpd2.py
+      - smtpd2.7.py
 
   - name: Create /python
     file:
@@ -83,12 +120,16 @@
       sha256sum: "{{ virtualenv_sha256 }}"
       dest: "{{ work_dir }}/virtualenv-{{ virtualenv_version }}.tar.gz"
 
+  # Apparently unarchive now requires GNU tar
   - name: Untar virtualenv
-    unarchive:
-      src: "{{ work_dir }}/virtualenv-{{ virtualenv_version }}.tar.gz"
-      dest: "{{ work_dir }}"
+    #unarchive:
+    #  src: "{{ work_dir }}/virtualenv-{{ virtualenv_version }}.tar.gz"
+    #  dest: "{{ work_dir }}"
+    command: tar zxf virtualenv-{{ virtualenv_version }}.tar.gz
+    args:
+      chdir: "{{ work_dir }}"
       creates: "{{ work_dir }}/virtualenv-{{ virtualenv_version }}"
-      copy: no
+    #  copy: no
 
   - name: Create wheelenv
     pip:
@@ -114,16 +155,6 @@
       - delocate-path
       - delocate-wheel
 
-  - name: Fetch get-pip
-    get_url:
-      url: https://bootstrap.pypa.io/get-pip.py
-      dest: "{{ work_dir }}/get-pip.py"
-
-  - name: Run get-pip
-    command: /python/cp{{ item | replace('.', '') }}m-x86_64/bin/python {{ work_dir }}/get-pip.py
-    with_items:
-      - 2.7
-
   - name: Allow admin(s) to sudo without a password
     lineinfile:
       dest: /etc/sudoers
@@ -136,10 +167,29 @@
     args:
       creates: /usr/local/bin/brew
 
-  - name: Install xz
+  - name: Install Homebrew packages
     remote_user: admin
     homebrew:
-      name: xz
+      name: "{{ item }}"
+    with_items:
+      - xz
+
+  # Curl is used here because get_url on bootstrap.pypa.io fails because that Python's ssl is too old to support TLS > 1.0
+  - name: Fetch get-pip
+    #get_url:
+    #  url: https://bootstrap.pypa.io/get-pip.py
+    #  dest: "{{ work_dir }}/get-pip.py"
+    command: curl -O https://bootstrap.pypa.io/get-pip.py
+    args:
+      chdir: "{{ work_dir }}"
+      creates: "{{ work_dir }}/get-pip.py"
+
+  - name: Run get-pip
+    command: /python/cp{{ item | replace('.', '') }}m-x86_64/bin/python {{ work_dir }}/get-pip.py
+    args:
+      creates: /python/cp{{ item | replace('.', '') }}m-x86_64/bin/pip
+    with_items:
+      - 2.7
 
   - name: Install Starforge
     command: /python/{{ item }}/bin/pip install {{ work_dir }}/starforge.tar.gz[lzma]

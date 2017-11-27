@@ -5,7 +5,7 @@
 set -e
 
 macos_snap_root='/btrfs/snapshots'
-macos_snap_source='@postxcode-clean'
+macos_snap_source='@postxcode-reinstall-clean'
 macos_snap_users='jenkins nate dannon'
 macos_snap_name='@starforge'
 macos_user_snap_dir='snapshots'
