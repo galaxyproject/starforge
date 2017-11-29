@@ -14,7 +14,7 @@
 
 Name:              nginx-galaxy
 Epoch:             1
-Version:           1.10.3
+Version:           1.12.2
 Release:           1%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
@@ -26,7 +26,7 @@ URL:               http://nginx.org/
 
 Source0:           http://nginx.org/download/nginx-%{version}.tar.gz
 Source1:           http://nginx.org/download/nginx-%{version}.tar.gz.asc
-Source2:           https://github.com/natefoo/nginx-upload-module/archive/2.2-nfs.tar.gz
+Source2:           https://github.com/natefoo/nginx-upload-module/archive/2.255-nfs.tar.gz
 Source3:           http://web.iti.upv.es/~sto/nginx/ngx_http_auth_pam_module-1.4.tar.gz
 Source10:          nginx.service
 Source11:          nginx.logrotate
@@ -238,7 +238,7 @@ export DESTDIR=%{buildroot}
 %if 0%{?with_gperftools}
     --with-google_perftools_module \
 %endif
-    --add-module=nginx-upload-module-2.2-nfs \
+    --add-module=nginx-upload-module-2.255-nfs \
     --add-module=ngx_http_auth_pam_module-1.4 \
     --with-debug \
     --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
@@ -434,8 +434,16 @@ fi
 
 
 %changelog
-* Mon Apr  3 2017 Nate Coraor <nate@bx.psu.edu> - 1:1.10.3-1
-- Initial release of nginx-galaxy 1.10.3 for EL7
+* Wed Nov 29 2017 Nate Coraor <nate@bx.psu.edu> - 1:1.12.2-1
+- Initial release of nginx-galaxy 1.12.2 for EL7
+
+* Wed Oct 18 2017 Luboš Uhliarik <luhliari@redhat.com> - 1:1.12.2-1
+- update to upstream release 1.12.2
+- Resolves: #1468584 - (CVE-2017-7529) CVE-2017-7529 nginx: Integer
+  overflow in nginx range filter module leading to memory disclosure
+
+* Mon Sep 18 2017 Luboš Uhliarik <luhliari@redhat.com> - 1:1.10.2-2
+- Resolves: #1478662 - rebuild for ALPN support
 
 * Mon Oct 31 2016 Jamie Nguyen <jamielinux@fedoraproject.org> - 1:1.10.2-1
 - update to upstream release 1.10.2
