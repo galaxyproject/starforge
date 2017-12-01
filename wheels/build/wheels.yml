@@ -149,6 +149,8 @@ packages:
               [ `uname -s` != 'Darwin' ] ||
               curl https://github.com/natefoo/uwsgi/commit/2a85be614afac37a467712d048f1d9eef6e7d622.patch |
               patch -d ${SRC_ROOT_0} -p1
+    watchdog:
+        version: 0.8.3
 purepy_packages:
     amqp:
         version: 1.4.8
@@ -279,8 +281,6 @@ purepy_packages:
         version: 0.9.1
     urllib3:
         version: 1.22
-    watchdog:
-        version: 0.8.3
     wchartype:
         version: 0.1
         insert_setuptools: true
