@@ -139,6 +139,8 @@ packages:
             - libyaml-dev
         yum:
             - libyaml-devel
+    social-auth-core:
+        version: 1.5.0
     SQLAlchemy:
         version: 1.0.15
     uWSGI:
