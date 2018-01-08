@@ -267,6 +267,16 @@ purepy_packages:
         version: 0.1.16
     social-auth-core:
         version: 1.5.0
+    pyjwkest:
+        version: 1.4.0
+    PyJWT:
+        version: 1.4.0
+    requests-oauthlib:
+        version: 0.6.1
+    oauthlib:
+        version: 1.0.3
+    python-openid: 2.2.5
+        version: 
     starforge:
         version: 0.3.4
     statsd:
