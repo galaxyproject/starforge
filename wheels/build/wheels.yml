@@ -219,6 +219,8 @@ purepy_packages:
         version: 1.9.1
     oauth2client:
         version: 4.1.2
+    oauthlib:
+        version: 1.0.3
     paramiko:
         version: 2.2.1
     Parsley:
@@ -240,6 +242,10 @@ purepy_packages:
         prebuild: sed -i -e 's/DEFAULT_PULSAR_GALAXY_LIB = 0/DEFAULT_PULSAR_GALAXY_LIB = 1/' ${SRC_ROOT}/setup.py
     Pygments:
         version: 2.0.2
+    pyjwkest:
+        version: 1.4.0
+    PyJWT:
+        version: 1.4.0
     pykwalify:
         version: 1.6.0
     pyparsing:
@@ -247,12 +253,17 @@ purepy_packages:
         version: 2.1.1
     python-dateutil:
         version: 2.5.3
+    python-openid:
+        version: 2.2.5
+        insert_setuptools: true
     pytz:
         version: 2015.4
     repoze.lru:
         version: 0.7
     requests:
         version: 2.18.4
+    requests-oauthlib:
+        version: 0.6.1
     requests-toolbelt:
         version: 0.8.0
     Routes:
