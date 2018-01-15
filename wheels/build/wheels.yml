@@ -255,6 +255,7 @@ purepy_packages:
         version: 2.5.3
     python-openid:
         version: 2.2.5
+        insert_setuptools: true
     pytz:
         version: 2015.4
     repoze.lru:
