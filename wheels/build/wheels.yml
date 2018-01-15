@@ -253,8 +253,8 @@ purepy_packages:
         version: 2.1.1
     python-dateutil:
         version: 2.5.3
-    python-openid: 2.2.5
-        version: 
+    python-openid:
+        version: 2.2.5
     pytz:
         version: 2015.4
     repoze.lru:
