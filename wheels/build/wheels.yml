@@ -224,6 +224,8 @@ purepy_packages:
         version: 4.1.2
     oauthlib:
         version: 1.0.3
+    packaging:
+        version: 16.8
     paramiko:
         version: 2.2.1
     Parsley:
