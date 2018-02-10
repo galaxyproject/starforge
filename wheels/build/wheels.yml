@@ -123,14 +123,13 @@ packages:
             - groff
             - cyrus-sasl-devel
             - libidn-devel
-    python_lzo:
-        version: 1.8
+    python-lzo:
+        version: 1.11
         src:
-            - http://www.oberhumer.com/opensource/lzo/download/LZO-v1/python-lzo-1.08.tar.gz
-            - http://www.oberhumer.com/opensource/lzo/download/lzo-2.09.tar.gz
+            - http://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz
         insert_setuptools: true
         prebuild:
-            wheel: cd $SRC_ROOT_1 && CFLAGS=-fpic ./configure --prefix=${SRC_ROOT_0}/lzo --disable-shared && make install && sed -i -e 's/\["lzo"\]/\["lzo2"\]/' ${SRC_ROOT_0}/setup.py
+            wheel: cd ${SRC_ROOT_1} && CFLAGS=-fpic ./configure --prefix=${SRC_ROOT_0}/lzo --disable-shared && make install && sed -i -e 's/\["lzo"\]/\["lzo2"\]/' ${SRC_ROOT_0}/setup.py
         build_args: build_ext -I lzo/include:lzo/include/lzo -L lzo/lib bdist_wheel
     PyYAML:
         version: 3.11
