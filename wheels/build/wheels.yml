@@ -140,7 +140,7 @@ packages:
         yum:
             - libyaml-devel
     SQLAlchemy:
-        version: 1.0.15
+        version: 1.2.2
     uWSGI:
         version: 2.0.15
         prebuild:
