@@ -19,7 +19,7 @@ packages:
     Cheetah:
         version: 2.4.4
     MarkupSafe:
-        version: 0.23
+        version: 1.0
     mercurial:
         version: 3.7.3
         insert_setuptools: true
@@ -132,7 +132,7 @@ packages:
             wheel: cd ${SRC_ROOT_1} && CFLAGS=-fpic ./configure --prefix=${SRC_ROOT_0}/lzo --disable-shared && make install && sed -i -e 's/\["lzo"\]/\["lzo2"\]/' ${SRC_ROOT_0}/setup.py
         build_args: build_ext -I lzo/include:lzo/include/lzo -L lzo/lib bdist_wheel
     PyYAML:
-        version: 3.11
+        version: 3.12
         insert_setuptools: true
         apt:
             - libyaml-dev
