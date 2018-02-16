@@ -280,6 +280,8 @@ purepy_packages:
         version: 1.10.0
     sqlalchemy-migrate:
         version: 0.11.0
+    SQLAlchemy-Utils:
+        version: 0.32.19
     sqlparse:
         version: 0.1.16
     social-auth-core:
