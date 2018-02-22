@@ -7,9 +7,9 @@ packages:
             wheel: "for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install pip; ${py}/bin/pip install --upgrade pip ; ${py}/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1; done"
         insert_setuptools: true
     bx-python:
-        version: 0.7.3
+        version: 0.8.1
         prebuild:
-            wheel: "git clone -b linux-wheels https://github.com/natefoo/pip && cd pip && for py in /python/cp*-`uname -m`; do ${py}/bin/python setup.py install && ${py}/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1; done"
+            wheel: "for py in /python/cp*-`uname -m`; do ${py}/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy python-lzo || exit 1; done"
         apt:
             - git
         yum:
