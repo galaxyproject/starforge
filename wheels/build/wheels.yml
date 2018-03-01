@@ -242,6 +242,8 @@ purepy_packages:
     pulsar-galaxy-lib:
         version: 0.7.0.dev4
         prebuild: sed -i -e 's/DEFAULT_PULSAR_GALAXY_LIB = 0/DEFAULT_PULSAR_GALAXY_LIB = 1/' ${SRC_ROOT}/setup.py
+    pycparser:
+        version: 2.18
     Pygments:
         version: 2.0.2
     pyjwkest:
@@ -255,6 +257,8 @@ purepy_packages:
         version: 2.1.1
     python-dateutil:
         version: 2.5.3
+    python-genomespaceclient:
+        version: 0.1.8
     python-openid:
         version: 2.2.5
         insert_setuptools: true
@@ -276,6 +280,8 @@ purepy_packages:
         version: 1.10.0
     sqlalchemy-migrate:
         version: 0.11.0
+    SQLAlchemy-Utils:
+        version: 0.32.19
     sqlparse:
         version: 0.1.16
     social-auth-core:
