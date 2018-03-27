@@ -47,7 +47,7 @@ packages:
         version: 2.6.1
         insert_setuptools: true
     pysam:
-        version: 0.14
+        version: 0.14.1
         prebuild:
             wheel: >
               sed -i'' -e 's/^HTSLIB_CONFIGURE_OPTIONS = .*/HTSLIB_CONFIGURE_OPTIONS = "--disable-libcurl"/' ${SRC_ROOT}/setup.py;
