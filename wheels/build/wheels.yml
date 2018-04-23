@@ -204,7 +204,7 @@ purepy_packages:
         version: 2.6
     ipaddress:
         version: 1.0.18
-    isa.rwval:
+    isa-rwval:
         version: 0.10.0
     jstree:
         version: 0.4
