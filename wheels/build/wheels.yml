@@ -179,6 +179,8 @@ purepy_packages:
         version: 3.0.4
     chronos-python:
         version: 0.38.0
+    cloudauthz:
+        version: 0.0.1    
     cloudbridge:
         version: 0.3.3
     decorator:
