@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '0.3.6'
+__version__ = '0.4.0.dev0'
 
 PROJECT_NAME = "starforge"
 PROJECT_OWNER = PROJECT_USERNAME = "galaxyproject"
