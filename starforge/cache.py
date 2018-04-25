@@ -141,7 +141,7 @@ class PipSourceCacher(TarballCacher):
             try:
                 # TODO: use the pip API
                 cmd = [
-                    'pip', '--no-cache-dir', 'install', '-d', self.cache_path,
+                    'pip', '--no-cache-dir', 'download', '-d', self.cache_path,
                     '--no-binary', ':all:', '--no-deps', name + '==' + version
                 ]
                 info('Fetching sdist: %s', name)
