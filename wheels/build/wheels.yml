@@ -16,8 +16,8 @@ packages:
             # manylinux1 images don't preinstall these, which is probably the
             # way they should all work
             - zlib-devel
-    Cheetah:
-        version: 2.4.4
+    Cheetah3:
+        version: 3.1.0
     MarkupSafe:
         version: 1.0
     mercurial:
