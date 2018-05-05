@@ -138,6 +138,14 @@ packages:
             - libyaml-dev
         yum:
             - libyaml-devel
+    netCDF4:
+        version: 1.2.4
+        apt:
+            - libhdf5-dev
+            - libnetcdf-dev
+        yum:
+            - hdf5-devel
+            - netcdf-devel
     SQLAlchemy:
         version: 1.2.2
     uWSGI:
