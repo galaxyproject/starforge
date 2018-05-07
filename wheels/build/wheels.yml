@@ -242,7 +242,7 @@ purepy_packages:
             - https://github.com/natefoo/pip/archive/03c981a2d4659d3087397dc9fd6500437998be5c.tar.gz
         prebuild: sed -i -e 's/__version__ = "8\.0\.2"/__version__ = "8.0.2+gx2"/' ${SRC_ROOT}/pip/__init__.py
     pulsar-galaxy-lib:
-        version: 0.7.0.dev4
+        version: 0.8.0
         prebuild: sed -i -e 's/DEFAULT_PULSAR_GALAXY_LIB = 0/DEFAULT_PULSAR_GALAXY_LIB = 1/' ${SRC_ROOT}/setup.py
     pycparser:
         version: 2.18
