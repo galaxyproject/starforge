@@ -140,6 +140,9 @@ packages:
             - libyaml-dev
         yum:
             - libyaml-devel
+    subprocess32:
+        version: 3.5.0
+        insert_setuptools: true
     SQLAlchemy:
         version: 1.2.2
     uWSGI:
