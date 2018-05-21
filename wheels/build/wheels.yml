@@ -167,8 +167,6 @@ purepy_packages:
     bagit:
         version: 1.6.4
         insert_setuptools: true
-        prebuild:
-            wheel: "for py in /python/cp*-`uname -m`; do ${py}/bin/pip install --trusted-host pypi.python.org --upgrade pip;  ${py}/bin/pip install --trusted-host files.pythonhosted.org 'https://files.pythonhosted.org/packages/4d/a0/371355cbd608ef1d865738b94f7681e2fe56ef951070a66a892f30042a86/setuptools_scm-2.1.0-py2.py3-none-any.whl#sha256=1261fb48def5ac5e4d04cb6196886cb8c2de5dc066ed2bfee99d4bb21aecb781' || exit 1; done"
     bdbag:
         version: 1.2.4
     Beaker:
