@@ -28,7 +28,7 @@ packages:
         yum:
             - atlas-devel
     psutil:
-        version: 4.1.0
+        version: 5.4.3
     psycopg2:
         version: 2.6.1
         src:
