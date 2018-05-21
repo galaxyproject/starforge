@@ -153,6 +153,12 @@ packages:
               [ `uname -s` != 'Darwin' ] ||
               curl https://github.com/natefoo/uwsgi/commit/2a85be614afac37a467712d048f1d9eef6e7d622.patch |
               patch -d ${SRC_ROOT_0} -p1
+        apt:
+            - libpcre2-dev
+        yum:
+            - pcre-devel
+        brew:
+            - pcre
     watchdog:
         version: 0.8.3
         imageset: macos-wheel
