@@ -146,7 +146,7 @@ packages:
     SQLAlchemy:
         version: 1.2.2
     uWSGI:
-        version: 2.0.15
+        version: 2.0.17
         prebuild:
             all: cp ${SRC_ROOT_0}/setup.cpyext.py ${SRC_ROOT_0}/setup.py
             wheel: >
