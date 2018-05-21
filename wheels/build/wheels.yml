@@ -175,6 +175,9 @@ purepy_packages:
         version: 0.32.0
     Babel:
         version: 2.5.1
+    bagit:
+        version: 1.6.4
+        insert_setuptools: true
     bdbag:
         version: 1.2.4
     Beaker:
@@ -291,8 +294,6 @@ purepy_packages:
         version: 2.4.1
     selenium:
         version: 3.0.1
-    #setuptools-scm:
-    #    version: 2.1.0
     six:
         version: 1.10.0
     sqlalchemy-migrate:
