@@ -10,8 +10,7 @@ qemu:
 
 imagesets:
     purepy-wheel:
-        # just a tag on starforge/manylinux1:latest
-        - starforge/purepy-wheel
+        - starforge/manylinux1:purepy
     default-wheel:
         - starforge/manylinux1:latest
         - starforge/manylinux1-32:latest
@@ -69,7 +68,7 @@ images:
         plat_name: manylinux1_i686
         force_plat: false
         use_auditwheel: true
-    starforge/purepy-wheel:
+    starforge/manylinux1:purepy:
         buildpy: /opt/wheelenv/bin/python
         pythons:
             - /python/cp27mu-{arch}/bin/python
