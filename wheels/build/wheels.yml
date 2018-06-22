@@ -151,7 +151,7 @@ packages:
             all: cp ${SRC_ROOT_0}/setup.cpyext.py ${SRC_ROOT_0}/setup.py
             wheel: >
               [ `uname -s` != 'Darwin' ] ||
-              curl https://github.com/natefoo/uwsgi/commit/2a85be614afac37a467712d048f1d9eef6e7d622.patch |
+              curl https://github.com/natefoo/uwsgi/commit/24c49361613fa3dbd0b61eb1a97733d48c00ff39.patch |
               patch -d ${SRC_ROOT_0} -p1
         apt:
             - libpcre2-dev
