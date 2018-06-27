@@ -56,6 +56,9 @@ images:
         pythons:
             - /python/cp27m-x86_64/bin/python
             - /python/cp27mu-x86_64/bin/python
+            - /python/cp34m-x86_64/bin/python
+            - /python/cp35m-x86_64/bin/python
+            - /python/cp36m-x86_64/bin/python
         plat_name: manylinux1_x86_64
         force_plat: false
         use_auditwheel: true
@@ -65,6 +68,9 @@ images:
         pythons:
             - /python/cp27m-i686/bin/python
             - /python/cp27mu-i686/bin/python
+            - /python/cp34m-i686/bin/python
+            - /python/cp35m-i686/bin/python
+            - /python/cp36m-i686/bin/python
         plat_name: manylinux1_i686
         force_plat: false
         use_auditwheel: true
@@ -127,9 +133,10 @@ images:
     starforge/osx-wheel:10.6:
         type: qemu
         pkgtool: brew
-        buildpy: /python/wheelenv/bin/python
+        buildpy: ~/venv/bin/python
         pythons:
-            - /python/cp27m-{arch}/bin/python
+            - python
+        #    - /python/cp27m-{arch}/bin/python
         plat_name: macosx_10_6_intel
         use_delocate: true
         run_cmd: >

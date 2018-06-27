@@ -18,7 +18,10 @@ DEFAULT_IMAGE_TYPE = 'docker'
 DEFAULT_IMAGE_PKGTOOL = 'apt'
 DEFAULT_IMAGE_PYTHONS = [
     '/python/cp27m-{arch}/bin/python',
-    '/python/cp27mu-{arch}/bin/python'
+    '/python/cp27mu-{arch}/bin/python',
+    '/python/cp34m-{arch}/bin/python',
+    '/python/cp35m-{arch}/bin/python',
+    '/python/cp36m-{arch}/bin/python',
 ]
 
 
@@ -30,7 +33,7 @@ class Image(object):
         self.plat_name = image.get('plat_name', None)
         self.force_plat = image.get('force_plat', True)
         self.plat_specific = image.get('plat_specific', False)
-        self.buildpy = image.get('buildpy', 'python')
+        self.buildpy = expanduser(image.get('buildpy', 'python'))
         self.pythons = image.get('pythons', DEFAULT_IMAGE_PYTHONS)
         self.run_cmd = image.get('run_cmd', None)
         self.run_args = image.get('run_args', {})
