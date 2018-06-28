@@ -38,7 +38,7 @@ class DockerExecutionContext(ExecutionContext):
         run_cmd.extend(self.share_args)
         for (k, v) in iteritems(self.env):
             run_cmd.append('--env={k}={v}'.format(k=k, v=v))
-        run_cmd.append(self.image.name)
+        run_cmd.append(self.image.image)
         run_cmd.extend(cmd)
         if self.use_sudo:
             run_cmd = ['sudo'] + run_cmd

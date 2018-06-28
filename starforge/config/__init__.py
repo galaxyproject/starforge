@@ -28,6 +28,7 @@ DEFAULT_IMAGE_PYTHONS = [
 class Image(object):
     def __init__(self, name, image):
         self.name = name
+        self.image = image.get('image', name)
         self.type = image.get('type', DEFAULT_IMAGE_TYPE)
         self.pkgtool = image.get('pkgtool', DEFAULT_IMAGE_PKGTOOL)
         self.plat_name = image.get('plat_name', None)

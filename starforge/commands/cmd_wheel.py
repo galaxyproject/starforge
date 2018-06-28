@@ -48,6 +48,9 @@ GUEST_SHARE = '/share'
 @click.option('--sdist/--no-sdist',
               default=False,
               help='Build source distribution')
+@click.option('--image',
+              default=None,
+              help="Image to build with (must be in the wheel's imageset)")
 @click.option('--docker/--no-docker',
               default=True,
               help='Build under Docker')
@@ -64,8 +67,7 @@ GUEST_SHARE = '/share'
                    'even if a previous image fails)')
 @click.argument('wheel')
 @pass_context
-def cli(ctx, wheels_config, osk, sdist, docker, qemu, wheel, qemu_port,
-        exit_on_failure):
+def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, exit_on_failure):
     """ Build a wheel.
     """
     wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)
@@ -74,18 +76,18 @@ def cli(ctx, wheels_config, osk, sdist, docker, qemu, wheel, qemu_port,
         wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
     except KeyError:
         fatal('Package not found in %s: %s', wheels_config, wheel)
-    for (image_name, image) in iteritems(wheel_config.images):
-        if image.type == 'docker':
+    for (image_name, image_conf) in iteritems(wheel_config.images):
+        if image and image_name != image:
+            continue
+        if image_conf.type == 'docker':
             if not docker:
                 continue
-            ectx = DockerExecutionContext(image, ctx.config.docker)
-        elif image.type == 'qemu':
+            ectx = DockerExecutionContext(image_conf, ctx.config.docker)
+        elif image_conf.type == 'qemu':
             if not qemu:
                 continue
-            ectx = QEMUExecutionContext(image, ctx.config.qemu,
-                                        osk_file=osk, qemu_port=qemu_port)
-        forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context,
-                           image=image)
+            ectx = QEMUExecutionContext(image_conf, ctx.config.qemu, osk_file=osk, qemu_port=qemu_port)
+        forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image_conf)
         forge.cache_sources()
         build_wheel = False
         for name in forge.get_expected_names():
@@ -94,9 +96,7 @@ def cli(ctx, wheels_config, osk, sdist, docker, qemu, wheel, qemu_port,
             else:
                 build_wheel = True
         if build_wheel:
-            cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config,
-                                          BDIST_WHEEL_CMD_TEMPLATE, image,
-                                          wheel)
+            cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config, BDIST_WHEEL_CMD_TEMPLATE, image_conf, wheel)
             with ectx.run_context(share=share, env=env) as run:
                 run(cmd)
             missing = [n for n in forge.get_expected_names() if not exists(n)]
@@ -110,11 +110,10 @@ def cli(ctx, wheels_config, osk, sdist, docker, qemu, wheel, qemu_port,
     if not sdist:
         return
 
-    image = filter(lambda x: x.type == 'docker',
-                   itervalues(wheel_config.images))[0]
+    # FIXME: image here ignores --image. but just get rid of sdist building w/ wheel cmd
+    image = filter(lambda x: x.type == 'docker', itervalues(wheel_config.images))[0]
     ectx = DockerExecutionContext(image, ctx.config.docker)
-    forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context,
-                       image=image)
+    forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image)
     for name in forge.get_sdist_expected_names():
         if exists(name):
             info("sdist %s already built", name)
