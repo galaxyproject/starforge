@@ -10,7 +10,7 @@ import click
 import yaml
 from six import iteritems, itervalues
 
-from ..io import info, warn, fatal
+from ..io import debug, info, warn, fatal
 from ..cli import pass_context
 from ..config.wheels import WheelConfigManager
 from ..forge.wheels import ForgeWheel
@@ -79,6 +79,8 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
     for (image_name, image_conf) in iteritems(wheel_config.images):
         if image and image_name != image:
             continue
+        debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",
+              image_name, image_conf.image, image_conf.plat_name, image_conf.force_plat)
         if image_conf.type == 'docker':
             if not docker:
                 continue

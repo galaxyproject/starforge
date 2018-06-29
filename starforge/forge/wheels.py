@@ -96,13 +96,15 @@ class ForgeWheel(object):
             for python in self.image.pythons:
                 # FIXME: this forces a very specific naming (i.e.
                 # '/pythons/cp{py}{flags}-{arch}/')
-                abi = python.split('/')[2].split('-')[0]
-                py = abi[2:4]
-                whl = ('{name}-{version}-cp{py}-{abi}-{platform}.whl'
+                # FIXME: worse now
+                p = None
+                for p in python.split('/'):
+                    if p.startswith('cp'):
+                        break
+                whl = ('{name}-{version}-{py_abi}-{platform}.whl'
                        .format(name=self.name.replace('-', '_'),
                                version=str(parse_version(self.version)),
-                               py=py,
-                               abi=abi,
+                               py_abi=p,
                                platform=platform))
                 wheels.append(whl)
         return wheels
