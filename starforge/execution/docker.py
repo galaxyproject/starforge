@@ -36,12 +36,11 @@ class DockerExecutionContext(ExecutionContext):
             self.env = env
 
     def run(self, cmd, capture_output=False, **kwargs):
+        image = self.image.image
         if self.container_ids:
-            image = ':'.join(image.split(':')[0], self.container_ids[-1])
+            image = ':'.join([image.split(':')[0], self.container_ids[-1]])
             check_call(['docker', 'commit', self.container_ids[-1], image])
             self.image_ids.append(image)
-        else:
-            image = self.image.image
         cmd = self.normalize_cmd(cmd)
         run_cmd = 'docker run --cidfile __cid.txt'.split()
         run_cmd.extend(self.share_args)
