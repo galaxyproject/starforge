@@ -38,12 +38,12 @@ def cli(ctx, wheels_config, osk, image, qemu_port, wheel):
         for forge in build_forges(ctx.config, wheels_config, wheel, image=image, osk_file=osk, qemu_port=qemu_port):
             names = forge.get_expected_names()
             for py, name in zip(forge.image.pythons, names):
-                _test_wheel(py, name)
+                _test_wheel(forge, py, name, forge.wheel_config.skip_tests)
     except KeyError:
         fatal('Package not found in %s: %s', wheels_config, wheel)
 
 
-def _test_wheel(py, name)
+def _test_wheel(forge, py, name, skip):
     if not exists(name):
         fatal("%s: No such file or directory", name)
     pip = join(dirname(py), 'pip')
@@ -56,7 +56,7 @@ def _test_wheel(py, name)
         for pkg in pkgs:
             pkg = pkg.decode('utf-8')
             info('%s: import %s: ', py, pkg, nl=False)
-            if pkg not in wheel_config.skip_tests:
+            if pkg not in skip:
                 try:
                     run([py, '-c', 'import {pkg}; print({pkg})'.format(pkg=pkg)])
                     info('OK')

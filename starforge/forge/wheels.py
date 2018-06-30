@@ -28,6 +28,7 @@ from shutil import (
 from pkg_resources import parse_version
 from six import iteritems
 
+from ..cache import CacheManager
 from ..config.wheels import WheelConfigManager
 from ..execution.docker import DockerExecutionContext
 from ..execution.local import LocalExecutionContext
