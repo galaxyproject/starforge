@@ -2,6 +2,7 @@
 """
 from __future__ import absolute_import
 
+from os import unlink
 from subprocess import check_call
 try:
     from subprocess import check_output
@@ -57,6 +58,7 @@ class DockerExecutionContext(ExecutionContext):
         else:
             check_call(run_cmd)
         self.container_ids.append(open('__cid.txt').read().strip())
+        unlink('__cid.txt')
         return output
 
     def destroy(self, **kwargs):
