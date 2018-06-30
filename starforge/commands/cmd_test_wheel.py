@@ -5,7 +5,7 @@ from __future__ import absolute_import
 import tempfile
 import zipfile
 from os import getcwd
-from os.path import dirname, exists, join
+from os.path import abspath, dirname, exists, join
 
 import click
 from six import iteritems
@@ -58,8 +58,11 @@ def cli(ctx, wheels_config, image, wheel):
             pip = join(dirname(py), 'pip')
             top_level = '{}-{}.dist-info/top_level.txt'.format(*(name.split('-')[:2]))
             pkgs = zipfile.ZipFile(name).open(top_level).read().splitlines()
-            with ectx.run_context() as run:
-                run([pip, 'install', name])
+            cwd = abspath(getcwd())
+            share = [(cwd, cwd, 'ro')]
+            with ectx.run_context(share=share) as run:
+                run([pip, 'install', join(cwd, name)])
                 for pkg in pkgs:
+                    pkg = pkg.decode('utf-8')
                     info('Importing %s with %s', pkg, py)
                     run([py, '-c', 'import {pkg}; print({pkg})'.format(pkg=pkg)])
