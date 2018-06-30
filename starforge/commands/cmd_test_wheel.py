@@ -10,7 +10,7 @@ import click
 
 from ..cli import pass_context
 from ..forge.wheels import build_forges
-from ..io import fatal, info
+from ..io import error, fatal, info
 from ..util import xdg_config_file
 
 
@@ -61,7 +61,7 @@ def _test_wheel(forge, py, name, skip):
                     run([py, '-c', 'import {pkg}; print({pkg})'.format(pkg=pkg)])
                     info('OK')
                 except Exception:
-                    info('FAIL')
+                    error('FAIL')
                     raise
             else:
                 info('skipped')

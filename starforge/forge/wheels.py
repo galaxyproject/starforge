@@ -122,10 +122,10 @@ class ForgeWheel(object):
                                     ext=ext))
         return tarballs
 
-    def execute(self, cmd, cwd=None):
+    def execute(self, cmd, cwd=None, capture_output=False):
         debug('Executing: %s', ' '.join(cmd))
         with self.exec_context() as run:
-            run(cmd, cwd=cwd)
+            return run(cmd, cwd=cwd, capture_output=capture_output)
 
     def _get_prebuild_command(self, step):
         prebuild = self.wheel_config.prebuild
@@ -213,7 +213,11 @@ class ForgeWheel(object):
             elif pkgtool == 'brew':
                 if '/usr/local/bin' not in os.environ['PATH']:
                     os.environ['PATH'] = '/usr/local/bin:' + os.environ['PATH']
-                self.execute(['brew', 'install'] + pkgs, cwd='/tmp')
+                # brew exits 1 if a package is already installed
+                installed = set(self.execute(['brew', 'list', '-1'], cwd='/tmp', capture_output=True).splitlines())
+                needed = set(pkgs) - installed
+                if needed:
+                    self.execute(['brew', 'install'] + list(needed), cwd='/tmp')
             else:
                 warn('Skipping installation of dependencies: %s',
                      ', '.join(pkgs))
