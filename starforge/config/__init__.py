@@ -36,6 +36,7 @@ class Image(object):
         self.plat_specific = image.get('plat_specific', False)
         self.buildpy = expanduser(image.get('buildpy', 'python'))
         self.pythons = image.get('pythons', DEFAULT_IMAGE_PYTHONS)
+        self.py_abi_tags = image.get('py_abi_tags', [None] * len(self.pythons))
         self.run_cmd = image.get('run_cmd', None)
         self.run_args = image.get('run_args', {})
         self.postbuild = image.get('postbuild', None)

@@ -65,8 +65,7 @@ class ForgeWheel(object):
         py = 'py2'
         if self.wheel_config.purepy:
             # need to check universal
-            cached_source = self.cache_manager.pip_check(self.name,
-                                                         self.version)
+            cached_source = self.cache_manager.pip_check(self.name, self.version)
             missing = '%s %s' % (self.name, self.version)
             if cached_source is None:
                 if self.src_urls:
@@ -93,18 +92,16 @@ class ForgeWheel(object):
                     self.exec_context,
                     self.image.pythons[0],
                     self.image.plat_specific)
-            for python in self.image.pythons:
-                # FIXME: this forces a very specific naming (i.e.
-                # '/pythons/cp{py}{flags}-{arch}/')
-                # FIXME: worse now
-                p = None
-                for p in python.split('/'):
-                    if p.startswith('cp'):
-                        break
+            for python, py_abi_tag in zip(self.image.pythons, self.image.py_abi_tags):
+                if not py_abi_tag:
+                    # FIXME: this forces a very specific naming (i.e. '/pythons/cp{py}{flags}-{arch}/')
+                    for py_abi_tag in python.split('/'):
+                        if py_abi_tag.startswith('cp'):
+                            break
                 whl = ('{name}-{version}-{py_abi}-{platform}.whl'
                        .format(name=self.name.replace('-', '_'),
                                version=str(parse_version(self.version)),
-                               py_abi=p,
+                               py_abi=py_abi_tag,
                                platform=platform))
                 wheels.append(whl)
         return wheels
