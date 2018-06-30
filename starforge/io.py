@@ -22,7 +22,7 @@ def info(message, *args, **kwargs):
     if args:
         message = message % args
     fg = kwargs.get('fg', 'green')
-    click.echo(click.style(message, bold=True, fg=fg))
+    click.echo(click.style(message, bold=True, fg=fg), **kwargs)
 
 
 def error(message, *args):

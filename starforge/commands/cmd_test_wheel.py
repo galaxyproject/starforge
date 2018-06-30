@@ -7,15 +7,10 @@ from os import getcwd
 from os.path import abspath, dirname, exists, join
 
 import click
-from six import iteritems
 
 from ..cli import pass_context
-from ..config.wheels import WheelConfigManager
-from ..forge.wheels import ForgeWheel
-from ..execution.docker import DockerExecutionContext
-from ..execution.local import LocalExecutionContext
-from ..execution.qemu import QEMUExecutionContext
-from ..io import debug, fatal, info
+from ..forge.wheels import build_forges
+from ..io import fatal, info
 from ..util import xdg_config_file
 
 
@@ -39,35 +34,34 @@ from ..util import xdg_config_file
 def cli(ctx, wheels_config, osk, image, qemu_port, wheel):
     """ Test a wheel.
     """
-    wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)
     try:
-        wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
+        for forge in build_forges(ctx.config, wheels_config, wheel, image=image, osk_file=osk, qemu_port=qemu_port):
+            names = forge.get_expected_names()
+            for py, name in zip(forge.image.pythons, names):
+                _test_wheel(py, name)
     except KeyError:
         fatal('Package not found in %s: %s', wheels_config, wheel)
-    for (image_name, image_conf) in iteritems(wheel_config.images):
-        if image and image_name != image:
-            continue
-        debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",
-              image_name, image_conf.image, image_conf.plat_name, image_conf.force_plat)
-        if image_conf.type == 'local':
-            ectx = LocalExecutionContext(image_conf)
-        if image_conf.type == 'docker':
-            ectx = DockerExecutionContext(image_conf, ctx.config.docker)
-        elif image_conf.type == 'qemu':
-            ectx = QEMUExecutionContext(image_conf, ctx.config.qemu, osk_file=osk, qemu_port=qemu_port)
-        forge = ForgeWheel(wheel_config, None, ectx.run_context, image=image_conf)
-        names = forge.get_expected_names()
-        for py, name in zip(image_conf.pythons, names):
-            if not exists(name):
-                fatal("%s: No such file or directory", name)
-            pip = join(dirname(py), 'pip')
-            top_level = '{}-{}.dist-info/top_level.txt'.format(*(name.split('-')[:2]))
-            pkgs = zipfile.ZipFile(name).open(top_level).read().splitlines()
-            cwd = abspath(getcwd())
-            share = [(cwd, cwd, 'ro')]
-            with ectx.run_context(share=share) as run:
-                run([pip, 'install', join(cwd, name)])
-                for pkg in pkgs:
-                    pkg = pkg.decode('utf-8')
-                    info('Importing %s with %s', pkg, py)
+
+
+def _test_wheel(py, name)
+    if not exists(name):
+        fatal("%s: No such file or directory", name)
+    pip = join(dirname(py), 'pip')
+    top_level = '{}-{}.dist-info/top_level.txt'.format(*(name.split('-')[:2]))
+    pkgs = zipfile.ZipFile(name).open(top_level).read().splitlines()
+    cwd = abspath(getcwd())
+    share = [(cwd, cwd, 'ro')]
+    with forge.exec_context(share=share) as run:
+        run([pip, 'install', join(cwd, name)])
+        for pkg in pkgs:
+            pkg = pkg.decode('utf-8')
+            info('%s: import %s: ', py, pkg, nl=False)
+            if pkg not in wheel_config.skip_tests:
+                try:
                     run([py, '-c', 'import {pkg}; print({pkg})'.format(pkg=pkg)])
+                    info('OK')
+                except Exception:
+                    info('FAIL')
+                    raise
+            else:
+                info('skipped')

@@ -26,7 +26,12 @@ from shutil import (
 )
 
 from pkg_resources import parse_version
+from six import iteritems
 
+from ..config.wheels import WheelConfigManager
+from ..execution.docker import DockerExecutionContext
+from ..execution.local import LocalExecutionContext
+from ..execution.qemu import QEMUExecutionContext
 from ..io import debug, info, warn
 from ..util import Archive
 
@@ -281,3 +286,21 @@ class ForgeWheel(object):
             for f in listdir('dist'):
                 copy(join('dist', f), output)
                 chown(join(output, f), uid, gid)
+
+
+def build_forges(global_config, wheels_config, wheel, image=None, **kwargs):
+    wheel_cfgmgr = WheelConfigManager.open(global_config, wheels_config)
+    cachemgr = CacheManager(global_config.cache_path)
+    wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
+    for (image_name, image_conf) in iteritems(wheel_config.images):
+        if image and image_name != image:
+            continue
+        debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",
+              image_name, image_conf.image, image_conf.plat_name, image_conf.force_plat)
+        if image_conf.type == 'local':
+            ectx = LocalExecutionContext(image_conf, **kwargs)
+        if image_conf.type == 'docker':
+            ectx = DockerExecutionContext(image_conf, global_config.docker, **kwargs)
+        elif image_conf.type == 'qemu':
+            ectx = QEMUExecutionContext(image_conf, global_config.qemu, **kwargs)
+        yield ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image_conf)
