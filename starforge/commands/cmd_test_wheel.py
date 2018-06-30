@@ -2,7 +2,6 @@
 """
 from __future__ import absolute_import
 
-import tempfile
 import zipfile
 from os import getcwd
 from os.path import abspath, dirname, exists, join
@@ -13,7 +12,6 @@ from six import iteritems
 from ..cli import pass_context
 from ..config.wheels import WheelConfigManager
 from ..forge.wheels import ForgeWheel
-from ..cache import CacheManager
 from ..execution.docker import DockerExecutionContext
 from ..execution.local import LocalExecutionContext
 from ..execution.qemu import QEMUExecutionContext
@@ -26,12 +24,19 @@ from ..util import xdg_config_file
               default=xdg_config_file(name='wheels.yml'),
               type=click.Path(file_okay=True, writable=False, resolve_path=True),
               help='Path to wheels config file')
+@click.option('--osk',
+              default=xdg_config_file(name='osk.txt'),
+              type=click.Path(dir_okay=True, writable=False, resolve_path=False),
+              help='File containing OSK, if the guest requires it (default: %s)' % xdg_config_file(name='osk.txt'))
 @click.option('-i', '--image',
               default=None,
               help='Name of image (in wheels config) under which wheel is building')
+@click.option('--qemu-port',
+              default=None,
+              help='Connect to running QEMU instance on PORT')
 @click.argument('wheel')
 @pass_context
-def cli(ctx, wheels_config, image, wheel):
+def cli(ctx, wheels_config, osk, image, qemu_port, wheel):
     """ Test a wheel.
     """
     wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)

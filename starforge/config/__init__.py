@@ -4,7 +4,7 @@ import errno
 from os.path import join, abspath, expanduser, dirname
 try:
     from collections import OrderedDict
-except:
+except ImportError:
     from ordereddict import OrderedDict
 
 import yaml
