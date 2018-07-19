@@ -29,7 +29,7 @@ cd $build &&
 if [ "$dch_dist" != 'trusty' ]; then
     apt-get install -y dh-systemd
 fi &&
-if [ "$dch_dist" == 'yakkety' -o "$dch_dist" == 'xenial' -o "$dch_dist" == 'trusty' ]; then
+if [ "$dch_dist" == 'yakkety' -o "$dch_dist" == 'xenial' -o "$dch_dist" == 'trusty' -o "$dch_dist" == 'bionic' ]; then
     sed -i s'/# deb-src/deb-src/' /etc/apt/sources.list &&
     apt-get update
 elif [ "$NAME" == 'Debian GNU/Linux' ] && [ "$VERSION" == "8 (jessie)" ]; then
