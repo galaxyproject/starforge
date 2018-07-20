@@ -18,12 +18,16 @@ export DEBFULLNAME DEBEMAIL PPA GPG_KEY
 dch_dist=$(lsb_release -cs)
 build=/host/build.$(hostname)
 build_deps="git dpkg-dev debhelper debian-keyring devscripts dput ca-certificates build-essential fakeroot gnupg2"
+build_deps_bionic="libexpat-dev libgd-dev libgeoip-dev libhiredis-dev libluajit-5.1-dev libmhash-dev libpam0g-dev libpcre3-dev libperl-dev libssl-dev libxslt1-dev quilt zlib1g-dev"
 echo -e "Building for Ubuntu-$dch_dist\n"
 
 # set timezone for debian/changelog
 echo 'America/New_York' > /etc/timezone &&
 dpkg-reconfigure debconf -f noninteractive tzdata &&
 apt-get install --no-install-recommends -y $build_deps &&
+if [ "$dch_dist" == 'bionic' ]; then
+    apt-get install --no-install-recommends -y $build_deps_bionic
+fi &&
 mkdir -p $build &&
 cd $build &&
 if [ "$dch_dist" != 'trusty' ]; then
