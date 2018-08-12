@@ -212,6 +212,8 @@ purepy_packages:
         version: 0.13
     Fabric:
         version: 1.13.2
+    fcsparser:
+        version: 0.2.0
     futures:
         version: 3.1.1
     galaxy_sequence_utils:
