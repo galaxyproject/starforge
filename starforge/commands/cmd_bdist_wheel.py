@@ -11,6 +11,7 @@ from ..config.wheels import WheelConfigManager
 from ..forge.wheels import ForgeWheel
 from ..cache import CacheManager
 from ..execution.local import LocalExecutionContext
+from ..io import warn
 from ..util import xdg_config_file
 
 
@@ -59,7 +60,11 @@ def cli(ctx, wheels_config, image, output, uid, gid, fetch_srcs, wheel):
     cachemgr = CacheManager(ctx.config.cache_path)
     wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
     # `image` is an image_name until here
-    image = wheel_config.get_image(image)
+    try:
+        image = wheel_config.get_image(image)
+    except KeyError:
+        warn("Image '%s' is not in '%s' imageset, nothing to build", image, wheel_config.imageset)
+        return
     ectx = LocalExecutionContext(image)
     forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image)
     if fetch_srcs:
