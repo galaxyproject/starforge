@@ -63,7 +63,7 @@ def cli(ctx, wheels_config, image, output, uid, gid, fetch_srcs, wheel):
     try:
         image = wheel_config.get_image(image)
     except KeyError:
-        warn("Image '%s' is not in '%s' imageset, nothing to build", image, wheel_config.imageset)
+        warn("Image '%s' is not in '%s' imageset, nothing to build", image, wheel_config.imageset.name)
         return
     ectx = LocalExecutionContext(image)
     forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image)
