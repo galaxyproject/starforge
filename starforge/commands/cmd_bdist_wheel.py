@@ -24,12 +24,12 @@ from ..util import xdg_config_file
               help='Path to wheels config file')
 @click.option('-i', '--image',
               default=None,
-              help='Name of image (in wheels config) under which wheel is '
-                   'building')
+              help='Name of image (in wheels config) under which wheel is building')
 @click.option('-o', '--output',
               default=getcwd(),
               type=click.Path(file_okay=False),
               help='Copy output wheels to OUTPUT')
+# TODO: replace these with `docker run --user`
 @click.option('-u', '--uid',
               default=-1,
               type=click.STRING,
@@ -56,15 +56,18 @@ def cli(ctx, wheels_config, image, output, uid, gid, fetch_srcs, wheel):
     virtualization, this is not normally a concern, but if you are running it
     by hand, you should be aware of the security risk.
     """
-    wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)
+    wheel_config_manager = WheelConfigManager.open(ctx.config, wheels_config)
     cachemgr = CacheManager(ctx.config.cache_path)
-    wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
+    wheel_config = wheel_config_manager.get_wheel_config(wheel)
     # `image` is an image_name until here
     try:
         image = wheel_config.get_image(image)
     except KeyError:
-        warn("Image '%s' is not in '%s' imageset, nothing to build", image, wheel_config.imageset.name)
-        return
+        warn("Warning: Image '%s' is not in '%s' imageset", image, wheel_config.imageset.name)
+        # we could do imageset autodetection here but that seems like a waste of time, this command isn't supposed to be
+        # user facing like `wheel`. Just use whatever image is instructed.
+        wheel_config.set_imageset(imageset=ctx.config.make_imageset('_ephemeral_', [image]), force=True)
+        image = wheel_config.get_image(image)
     ectx = LocalExecutionContext(image)
     forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image)
     if fetch_srcs:

@@ -14,20 +14,31 @@ from ..io import debug, info, warn, fatal
 from ..cli import pass_context
 from ..config.wheels import WheelConfigManager
 from ..forge.wheels import ForgeWheel
-from ..cache import CacheManager
+from ..cache import CacheManager, cache_wheel_sources
 from ..execution.docker import DockerExecutionContext
+from ..execution.local import LocalExecutionContext
 from ..execution.qemu import QEMUExecutionContext
-from ..util import xdg_data_dir, xdg_config_file
+from ..util import PythonSdist, xdg_cache_dir, xdg_config_file
 
 
+LOCAL_BDIST_WHEEL_CMD_TEMPLATE = (
+    'starforge {debug} --config-file {config} bdist_wheel --wheels-config {wheels_config} -i {image} {name}')
 BDIST_WHEEL_CMD_TEMPLATE = (
-    'starforge {debug} --config-file {config} bdist_wheel --wheels-config '
-    '{wheels_config} -i {image} -o {output} -u {uid} -g {gid} {name}')
-SDIST_CMD_TEMPLATE = (
-    'starforge {debug} --config-file {config} sdist --wheels-config {wheels_config} '
-    '-i {image} -o {output} -u {uid} -g {gid} {name}')
+    'starforge {debug} --config-file {config} bdist_wheel --wheels-config {wheels_config} -i {image} -o {output} -u '
+    '{uid} -g {gid} {name}')
 GUEST_HOST = '/host'
 GUEST_SHARE = '/share'
+
+
+# FIXME: dedup
+UNIVERSAL = 'universal'
+PUREPY = 'purepy'
+C_EXTENSION = 'c-extension'
+TYPE_IMAGESET_MAP = {
+    UNIVERSAL: 'universal-wheel',
+    PUREPY: 'purepy-wheel',
+    C_EXTENSION: 'default-wheel',
+}
 
 
 @click.command('wheel')
@@ -71,14 +82,38 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
     """ Build a wheel.
     """
     wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)
-    cachemgr = CacheManager(ctx.config.cache_path)
+    cache_manager = CacheManager(ctx.config.cache_path)
     try:
         wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
     except KeyError:
         fatal('Package not found in %s: %s', wheels_config, wheel)
-    for (image_name, image_conf) in iteritems(wheel_config.images):
-        if image and image_name != image:
-            continue
+    wheel_type = wheel_config.configured_wheel_type
+    debug("Configured wheel type: %s", wheel_type)
+    # TODO: probably refactor this
+    if wheel_type is None:
+        sdist_tarball = cache_wheel_sources(cache_manager, wheel_config)[0]
+        sdist = PythonSdist.open(sdist_tarball)
+        wheel_type = sdist.wheel_type
+        imageset = TYPE_IMAGESET_MAP[wheel_type]
+        wheel_config.set_imageset(imageset=imageset)
+        if wheel_type == UNIVERSAL:
+            wheel_config.set_universal(True)
+            # sets purepy
+        elif wheel_type == PUREPY:
+            wheel_config.set_purepy(True)
+            wheel_config.set_universal(False)
+        else:
+            wheel_config.set_purepy(False)
+            # sets universal
+        debug("Detected wheel type '%s', using imageset '%s'", wheel_type, imageset)
+    images = wheel_config.images
+    if image:
+        try:
+            images = {image: wheel_config.get_image(image)}
+        except:
+            warn("Image '%s' is not in '%s' imageset, nothing to build", image, wheel_config.imageset.name)
+            return
+    for (image_name, image_conf) in iteritems(images):
         debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",
               image_name, image_conf.image, image_conf.plat_name, image_conf.force_plat)
         if image_conf.type == 'docker':
@@ -89,8 +124,9 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
             if not qemu:
                 continue
             ectx = QEMUExecutionContext(image_conf, ctx.config.qemu, osk_file=osk, qemu_port=qemu_port)
-        forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image_conf)
-        forge.cache_sources()
+        elif image_conf.type == 'local':
+            ectx = LocalExecutionContext(image_conf)
+        forge = ForgeWheel(wheel_config, cache_manager, ectx.run_context, image=image_conf)
         build_wheel = False
         for name in forge.get_expected_names():
             if exists(name):
@@ -98,7 +134,17 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
             else:
                 build_wheel = True
         if build_wheel:
-            cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config, BDIST_WHEEL_CMD_TEMPLATE, image_conf, wheel)
+            if image_conf.type != 'local':
+                cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config, BDIST_WHEEL_CMD_TEMPLATE, image_conf, wheel)
+            else:
+                cmd = LOCAL_BDIST_WHEEL_CMD_TEMPLATE.format(
+                    debug='--debug' if ctx.debug else '',
+                    config=ctx.config_file,
+                    wheels_config=wheels_config,
+                    image=image_name,
+                    name=wheel)
+                share = None
+                env = None
             with ectx.run_context(share=share, env=env) as run:
                 run(cmd)
             missing = [n for n in forge.get_expected_names() if not exists(n)]
@@ -109,38 +155,11 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
         else:
             info('All wheels from image %s already built', image_name)
 
-    if not sdist:
-        return
-
-    # FIXME: image here ignores --image. but just get rid of sdist building w/ wheel cmd
-    image = filter(lambda x: x.type == 'docker', itervalues(wheel_config.images))[0]
-    ectx = DockerExecutionContext(image, ctx.config.docker)
-    forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image)
-    for name in forge.get_sdist_expected_names():
-        if exists(name):
-            info("sdist %s already built", name)
-            break
-    else:
-        forge.cache_sources()
-        cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config,
-                                      SDIST_CMD_TEMPLATE, image, wheel)
-        with ectx.run_context(share=share, env=env) as run:
-            run(cmd)
-        for name in forge.get_sdist_expected_names():
-            if exists(name):
-                break
-        else:
-            msg = "Possible sdists missing, build failed?"
-            if exit_on_failure:
-                fatal(msg)
-            else:
-                warn(msg)
-
 
 def _prep_build(debug, global_config, wheels_config, template, image, wheel_name):
     # make wheels.yml accessible in guest
-    copy(wheels_config, join(xdg_data_dir(), 'wheels.yml'))
-    with open(join(xdg_data_dir(), 'config.yml'), 'w') as f:
+    copy(wheels_config, join(xdg_cache_dir(), 'wheels.yml'))
+    with open(join(xdg_cache_dir(), 'config.yml'), 'w') as f:
         yaml.dump(global_config.dump_config(), f)
     cmd = template.format(
         debug='--debug' if debug else '',
@@ -156,7 +175,7 @@ def _prep_build(debug, global_config, wheels_config, template, image, wheel_name
     if isabs(image.buildpy):
         cmd = join(dirname(image.buildpy), cmd)
     share = [(abspath(getcwd()), GUEST_HOST, 'rw'),
-             (abspath(xdg_data_dir()), join(GUEST_SHARE,
+             (abspath(xdg_cache_dir()), join(GUEST_SHARE,
                                             'galaxy-starforge'), 'ro')]
-    env = {'XDG_DATA_HOME': GUEST_SHARE}
+    env = {'XDG_CACHE_HOME': GUEST_SHARE}
     return (cmd, share, env)

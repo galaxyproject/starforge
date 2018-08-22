@@ -15,14 +15,16 @@ def debug(message, *args):
     if args:
         message = message % args
     if DEBUG:
-        click.echo(message)
+        click.echo(message, err=True)
 
 
 def info(message, *args, **kwargs):
     if args:
         message = message % args
-    fg = kwargs.get('fg', 'green')
-    click.echo(click.style(message, bold=True, fg=fg), **kwargs)
+    bold = kwargs.pop('bold', True)
+    fg = kwargs.pop('fg', 'green')
+    err = kwargs.pop('err', True)
+    click.echo(click.style(message, bold=bold, fg=fg), err=err, **kwargs)
 
 
 def error(message, *args):

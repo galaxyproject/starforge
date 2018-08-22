@@ -28,22 +28,16 @@ from shutil import (
 from pkg_resources import parse_version
 from six import iteritems
 
-from ..cache import CacheManager
+from ..cache import CacheManager, cache_wheel_sources, check_wheel_source
 from ..config.wheels import WheelConfigManager
 from ..execution.docker import DockerExecutionContext
 from ..execution.local import LocalExecutionContext
 from ..execution.qemu import QEMUExecutionContext
 from ..io import debug, info, warn
+from ..packaging.setup import check_setup, wrap_setup
 from ..util import Archive
 
 
-SETUP_PY_WRAPPER = '''#!/usr/bin/env python
-{import_interface_wheel}
-{import_setuptools}
-with open('setup_wrapped.py') as f:
-    code = compile(f.read(), 'setup_wrapped.py', 'exec')
-exec(code)
-'''
 AUDITWHEEL_CMD = 'for whl in dist/*.whl; do auditwheel {auditwheel_args} $whl; rm $whl; done'
 DELOCATE_CMD = 'for whl in dist/*.whl; do delocate-wheel {delocate_args} $whl; done'
 DEFAULT_AUDITWHEEL_ARGS = 'repair -w dist'
@@ -61,27 +55,19 @@ class ForgeWheel(object):
         self.image = image
 
     def cache_sources(self):
-        fail_ok = self.src_urls != []
-        self.cache_manager.pip_cache(self.name, self.version, fail_ok=fail_ok)
-        for src_url in self.src_urls:
-            self.cache_manager.url_cache(src_url)
+        return cache_wheel_sources(self.cache_manager, self.wheel_config)
 
     def get_expected_names(self):
         wheels = []
         py = 'py2'
         if self.wheel_config.purepy:
-            # need to check universal
-            cached_source = self.cache_manager.pip_check(self.name, self.version)
-            missing = '%s %s' % (self.name, self.version)
-            if cached_source is None:
-                if self.src_urls:
-                    cached_source = self.cache_manager.url_check(
-                        self.src_urls[0])
-                    missing = self.src_urls[0]
-            assert cached_source is not None, 'Cache failure on: %s' % missing
-            arc = Archive.open(cached_source)
-            if arc.universal:
+            if self.wheel_config.universal:
                 py = 'py2.py3'
+            else:
+                py = self.cache_manager.pyversion_cache(
+                    self.image.name,
+                    self.exec_context,
+                    self.image.pythons[0])
             whl = ('{name}-{version}-{py}-none-any.whl'
                    .format(name=self.name.replace('-', '_'),
                            version=str(parse_version(self.version)),
@@ -156,9 +142,7 @@ class ForgeWheel(object):
 
         for i, arc_path in enumerate(src_paths):
             arc = Archive.open(arc_path)
-            assert len(arc.roots) == 1, \
-                "Could not determine root directory in archive"
-            root_t = abspath(join(getcwd(), next(iter(arc.roots))))
+            root_t = abspath(join(getcwd(), arc.root))
             os.environ['SRC_ROOT_%d' % i] = root_t
             # will cd to first root
             if i == 0:
@@ -230,12 +214,10 @@ class ForgeWheel(object):
 
         chdir(join(build, root))
 
-        if self.wheel_config.insert_setuptools or self.image.plat_specific:
-            rename('setup.py', 'setup_wrapped.py')
-            with open('setup.py', 'w') as handle:
-                handle.write(SETUP_PY_WRAPPER.format(
-                    import_interface_wheel='import starforge.interface.wheel' if self.image.plat_specific else '',
-                    import_setuptools='import setuptools' if self.wheel_config.insert_setuptools else ''))
+        if self.wheel_config.insert_setuptools or self.image.plat_specific or not check_setup():
+            wrap_setup(
+                import_interface_wheel=self.image.plat_specific,
+                import_setuptools=self.wheel_config.insert_setuptools)
 
         for py in pythons:
             py = py.format(arch=arch)

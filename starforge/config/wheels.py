@@ -9,19 +9,28 @@ except ImportError:
     from ordereddict import OrderedDict
 
 import yaml
-from six import iteritems
+from six import iteritems, string_types
 
 
-DEFAULT_C_IMAGESET = 'default-wheel'
+DEFAULT_IMAGESET = 'default-wheel'
 DEFAULT_PUREPY_IMAGESET = 'purepy-wheel'
+DEFAULT_UNIVERSAL_IMAGESET = 'universal-wheel'
 DEFAULT_CONFIG_FILE = 'wheels.yml'
+
+# FIXME: dedup
+UNIVERSAL = 'universal'
+PUREPY = 'purepy'
+C_EXTENSION = 'c-extension'
 
 
 class WheelConfig(object):
-    def __init__(self, name, global_config, config, imagesets, purepy=False):
+    def __init__(self, name, global_config, config, imagesets, purepy=None, universal=None):
+        if purepy is False and universal is True:
+            fatal("ERROR: Wheel '%s' set purepy = False, universal = True, which is impossible")
         self.name = name
         self.config = config
-        self.purepy = purepy
+        self.purepy = purepy if purepy is not None else universal
+        self.universal = universal
         self.version = str(config['version'])
         self.sources = config.get('src', [])
         self.prebuild = config.get('prebuild', None)
@@ -32,12 +41,41 @@ class WheelConfig(object):
         self.skip_tests = config.get('skip_tests', [])
         self.auditwheel_args = config.get('auditwheel_args', None)
         self.delocate_args = config.get('delocate_args', None)
-        if not purepy:
-            default_imageset = DEFAULT_C_IMAGESET
-        else:
-            default_imageset = DEFAULT_PUREPY_IMAGESET
-        self.imageset = imagesets[config.get('imageset', default_imageset)]
+        self.imagesets = imagesets
+        self.configured_imageset = config.get('imageset')
+        self.configured_wheel_type = None
+        if self.universal:
+            self.configured_wheel_type = UNIVERSAL
+        elif self.purepy:
+            self.configured_wheel_type = PUREPY
+        elif self.purepy is False:
+            # explicitly set to false means it's being declared as C extension
+            self.configured_wheel_type = C_EXTENSION
+        self.set_imageset()
+
+    def set_imageset(self, imageset=None, force=False):
+        if self.configured_imageset is not None and not force:
+            # do not override configured_imageset
+            imageset = self.configured_imageset
+        elif imageset is None:
+            if self.universal:
+                imageset = DEFAULT_UNIVERSAL_IMAGESET
+            elif self.purepy:
+                imageset = DEFAULT_PUREPY_IMAGESET
+            else:
+                imageset = DEFAULT_IMAGESET
+        if isinstance(imageset, string_types):
+            imageset = self.imagesets[imageset]
+        self.imageset = imageset
         self.images = self.imageset.images
+
+    def set_purepy(self, purepy):
+        self.purepy = purepy
+        self.universal = False if purepy is False else self.universal
+
+    def set_universal(self, universal):
+        self.purepy = True if universal else self.purepy
+        self.universal = universal
 
     def get_images(self):
         return self.images
@@ -85,7 +123,7 @@ class WheelConfigManager(object):
         elif config_type == 'wheel':
             name = self.config['name']
             self.wheels[name] = WheelConfig(name, self.global_config, self.config, self.global_config.imagesets,
-                                            purepy=self.config.get('purepy', False))
+                                            purepy=self.config.get('purepy', None))
 
     def get_wheel_config(self, name):
         return self.wheels[name]
