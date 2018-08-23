@@ -3,6 +3,7 @@
 from __future__ import absolute_import
 
 import subprocess
+import sys
 
 from os import makedirs, listdir
 from os.path import exists, join, basename
@@ -174,7 +175,7 @@ class PipSourceCacher(TarballCacher):
                 ]
                 info('Fetching sdist: %s', name)
                 debug('Executing: %s', ' '.join(cmd))
-                subprocess.check_call(cmd)
+                subprocess.check_call(cmd, stdout=sys.stderr)
                 cfpath = self.check(name, version=version)
             except subprocess.CalledProcessError:
                 if not fail_ok:
