@@ -34,6 +34,8 @@ from ..util import xdg_config_file
 def cli(ctx, wheels_config, osk, image, qemu_port, wheel):
     """ Test a wheel.
     """
+    if not image:
+        fatal("At least one image must be specified")
     for i in image:
         try:
             for forge in build_forges(ctx.config, wheels_config, wheel, image=i, osk_file=osk, qemu_port=qemu_port):
