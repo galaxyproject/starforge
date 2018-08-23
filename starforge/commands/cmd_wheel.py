@@ -87,25 +87,7 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
         wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
     except KeyError:
         fatal('Package not found in %s: %s', wheels_config, wheel)
-    wheel_type = wheel_config.configured_wheel_type
-    debug("Configured wheel type: %s", wheel_type)
-    # TODO: probably refactor this
-    if wheel_type is None:
-        sdist_tarball = cache_wheel_sources(cache_manager, wheel_config)[0]
-        sdist = PythonSdist.open(sdist_tarball)
-        wheel_type = sdist.wheel_type
-        imageset = TYPE_IMAGESET_MAP[wheel_type]
-        wheel_config.set_imageset(imageset=imageset)
-        if wheel_type == UNIVERSAL:
-            wheel_config.set_universal(True)
-            # sets purepy
-        elif wheel_type == PUREPY:
-            wheel_config.set_purepy(True)
-            wheel_config.set_universal(False)
-        else:
-            wheel_config.set_purepy(False)
-            # sets universal
-        debug("Detected wheel type '%s', using imageset '%s'", wheel_type, imageset)
+    _set_imageset(cache_manager, wheel_config)
     images = wheel_config.images
     if image:
         try:
@@ -154,6 +136,33 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
                 fatal("Exiting due to missing wheels")
         else:
             info('All wheels from image %s already built', image_name)
+
+
+def _set_imageset(cache_manager, wheel_config):
+    debug("Configured wheel imageset: %s", wheel_config.configured_imageset)
+    wheel_type = wheel_config.configured_wheel_type
+    debug("Configured wheel type: %s", wheel_type)
+    # TODO: probably refactor this
+    if wheel_type is None:
+        sdist_tarball = cache_wheel_sources(cache_manager, wheel_config)[0]
+        sdist = PythonSdist.open(sdist_tarball)
+        wheel_type = sdist.wheel_type
+        debug("Detected wheel type: %s", wheel_type)
+    if wheel_type is None:
+        fatal("ERROR: Unable to determine wheel type of '%s', set `purepy`, `universal`, and/or `imageset` in wheel "
+              "config", wheel_config.name)
+    imageset = TYPE_IMAGESET_MAP[wheel_type]
+    debug("Using imageset: %s", wheel_config.configured_imageset or imageset)
+    wheel_config.set_imageset(imageset=imageset)
+    if wheel_type == UNIVERSAL:
+        wheel_config.set_universal(True)
+        # sets purepy
+    elif wheel_type == PUREPY:
+        wheel_config.set_purepy(True)
+        wheel_config.set_universal(False)
+    else:
+        wheel_config.set_purepy(False)
+        # sets universal
 
 
 def _prep_build(debug, global_config, wheels_config, template, image, wheel_name):
