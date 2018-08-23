@@ -24,8 +24,8 @@ from ..util import xdg_config_file
               type=click.Path(dir_okay=True, writable=False, resolve_path=False),
               help='File containing OSK, if the guest requires it (default: %s)' % xdg_config_file(name='osk.txt'))
 @click.option('-i', '--image',
-              default=None,
-              help='Name of image (in wheels config) under which wheel is building')
+              multiple=True,
+              help='Name of image(s) (in wheels config) under which wheel is building')
 @click.option('--qemu-port',
               default=None,
               help='Connect to running QEMU instance on PORT')
@@ -34,18 +34,20 @@ from ..util import xdg_config_file
 def cli(ctx, wheels_config, osk, image, qemu_port, wheel):
     """ Test a wheel.
     """
-    try:
-        for forge in build_forges(ctx.config, wheels_config, wheel, image=image, osk_file=osk, qemu_port=qemu_port):
-            names = forge.get_expected_names()
-            for py, name in zip(forge.image.pythons, names):
-                _test_wheel(forge, py, name, forge.wheel_config.skip_tests)
-    except KeyError:
-        fatal('Package not found in %s: %s', wheels_config, wheel)
+    for i in image:
+        try:
+            for forge in build_forges(ctx.config, wheels_config, wheel, image=i, osk_file=osk, qemu_port=qemu_port):
+                names = forge.get_expected_names()
+                for py, name in zip(forge.image.pythons, names):
+                    _test_wheel(forge, py, name, forge.wheel_config.skip_tests)
+        except KeyError:
+            fatal('Package not found in %s: %s', wheels_config, wheel)
 
 
 def _test_wheel(forge, py, name, skip):
     if not exists(name):
         fatal("%s: No such file or directory", name)
+    info('Testing wheel: %s', name)
     pip = join(dirname(py), 'pip')
     top_level = '{}-{}.dist-info/top_level.txt'.format(*(name.split('-')[:2]))
     pkgs = zipfile.ZipFile(name).open(top_level).read().splitlines()

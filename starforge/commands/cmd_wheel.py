@@ -60,8 +60,8 @@ TYPE_IMAGESET_MAP = {
               default=False,
               help='Build source distribution')
 @click.option('--image',
-              default=None,
-              help="Image to build with (must be in the wheel's imageset)")
+              multiple=True,
+              help="Image(s) to build with (must be in the wheel's imageset)")
 @click.option('--docker/--no-docker',
               default=True,
               help='Build under Docker')
@@ -90,10 +90,14 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
     _set_imageset(cache_manager, wheel_config)
     images = wheel_config.images
     if image:
-        try:
-            images = {image: wheel_config.get_image(image)}
-        except:
-            warn("Image '%s' is not in '%s' imageset, nothing to build", image, wheel_config.imageset.name)
+        images = {}
+        for i in image:
+            try:
+                images[i] = wheel_config.get_image(i)
+            except:
+                warn("Image '%s' is not in '%s' imageset", i, wheel_config.imageset.name)
+        if not images:
+            info("Nothing to build: none of the specified images are in the wheel's imageset")
             return
     for (image_name, image_conf) in iteritems(images):
         debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",
