@@ -1,6 +1,7 @@
 """ setuptools/distutils hackery
 """
 import json
+import sys
 from os import (
     getcwd,
     rename
@@ -72,7 +73,7 @@ def wheel_type(package_dir=None):
         wrap_setup(package_dir=package_dir)
     t = None
     try:
-        cmd = ['python', 'setup.py', '-q', 'wheel_info', '--json']
+        cmd = [sys.executable, 'setup.py', '-q', 'wheel_info', '--json']
         wheel_info = _check_output(cmd, cwd=package_dir)
         wheel_info = json.loads(wheel_info)
         if wheel_info['purepy']:
