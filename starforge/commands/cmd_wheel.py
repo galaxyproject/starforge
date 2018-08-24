@@ -99,6 +99,8 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
         if not images:
             info("Nothing to build: none of the specified images are in the wheel's imageset")
             return
+    # _set_imageset may or may not have already done this
+    cache_wheel_sources(cache_manager, wheel_config)
     for (image_name, image_conf) in iteritems(images):
         debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",
               image_name, image_conf.image, image_conf.plat_name, image_conf.force_plat)
