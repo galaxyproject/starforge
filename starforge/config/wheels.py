@@ -38,6 +38,7 @@ class WheelConfig(object):
         self.force_pythons = config.get('force_pythons', None)
         self.build_args = config.get('build_args', 'bdist_wheel')
         self.buildpy = config.get('buildpy', 'python')
+        self.buildenv = config.get('buildenv', {})
         self.skip_tests = config.get('skip_tests', [])
         self.auditwheel_args = config.get('auditwheel_args', None)
         self.delocate_args = config.get('delocate_args', None)

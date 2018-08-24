@@ -35,6 +35,7 @@ class Image(object):
         self.force_plat = image.get('force_plat', True)
         self.plat_specific = image.get('plat_specific', False)
         self.buildpy = expanduser(image.get('buildpy', 'python'))
+        self.buildenv = image.get('buildenv', {})
         self.pythons = image.get('pythons', DEFAULT_IMAGE_PYTHONS)
         self.py_abi_tags = image.get('py_abi_tags', [None] * len(self.pythons))
         self.run_cmd = image.get('run_cmd', None)
