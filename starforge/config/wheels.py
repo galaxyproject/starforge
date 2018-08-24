@@ -34,7 +34,7 @@ class WheelConfig(object):
         self.version = str(config['version'])
         self.sources = config.get('src', [])
         self.prebuild = config.get('prebuild', None)
-        self.insert_setuptools = config.get('insert_setuptools', False)
+        self.insert_setuptools = config.get('insert_setuptools', None)
         self.force_pythons = config.get('force_pythons', None)
         self.build_args = config.get('build_args', 'bdist_wheel')
         self.buildpy = config.get('buildpy', 'python')
