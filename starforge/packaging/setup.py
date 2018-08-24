@@ -56,7 +56,7 @@ def wrap_setup(package_dir=None, import_interface_wheel=False, import_setuptools
 
 def check_setup(package_dir=None):
     package_dir = package_dir or getcwd()
-    cmd = ['python', 'setup.py', '--help-commands']
+    cmd = [sys.executable, 'setup.py', '--help-commands']
     out = _check_output(cmd, cwd=package_dir)
     for line in out.splitlines():
         try:
