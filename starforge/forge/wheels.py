@@ -182,6 +182,13 @@ class ForgeWheel(object):
 
         info("Entered bdist_wheel forge, image '%s', wheel '%s-%s'", self.image.name, self.name, self.version)
 
+        for buildenv in (self.image.buildenv, self.wheel_config.buildenv):
+            if buildenv:
+                debug("Adding to build environment:")
+                for k, v in iteritems(buildenv):
+                    debug("%s=%s", k, v)
+                    os.environ[k] = str(v)
+
         pkgs = self.wheel_config.get_dependencies(self.image.name)
         if pkgs:
             if pkgtool == 'apt':
@@ -224,13 +231,6 @@ class ForgeWheel(object):
             wrap_setup(
                 import_interface_wheel=self.image.plat_specific,
                 import_setuptools=insert_setuptools)
-
-        for buildenv in (self.image.buildenv, self.wheel_config.buildenv):
-            if buildenv:
-                debug("Adding to build environment:")
-                for k, v in iteritems(buildenv):
-                    debug("%s=%s", k, v)
-                os.environ.update(buildenv)
 
         for py in pythons:
             py = py.format(arch=arch)
