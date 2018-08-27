@@ -224,7 +224,7 @@ class ForgeWheel(object):
         chdir(join(build, root))
 
         insert_setuptools = self.wheel_config.insert_setuptools
-        if not insert_setuptools and insert_setuptools is not False:
+        if insert_setuptools is None:
             # if set explicitly to false, do not override with check_setup()
             insert_setuptools = not check_setup()
         if insert_setuptools or self.image.plat_specific:
