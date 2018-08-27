@@ -91,6 +91,4 @@ def wheel_type(package_dir=None):
 def _check_output(cmd, cwd=None):
     debug('Executing in %s: %s', cwd, ' '.join(cmd))
     out = check_output(cmd, cwd=cwd)
-    if sys.version_info >= (3,):
-        out = out.decode('UTF-8')
-    return out
+    return out.decode('UTF-8')
