@@ -11,7 +11,7 @@ import click
 import yaml
 from six import iteritems, itervalues
 
-from ..io import debug, info, warn, fatal
+from ..io import debug, error, info, warn, fatal
 from ..cli import pass_context
 from ..config.wheels import WheelConfigManager
 from ..forge.wheels import ForgeWheel
@@ -102,6 +102,7 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
             sys.exit(2)
     # _set_imageset may or may not have already done this
     cache_wheel_sources(cache_manager, wheel_config)
+    failed = False
     for (image_name, image_conf) in iteritems(images):
         debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",
               image_name, image_conf.image, image_conf.plat_name, image_conf.force_plat)
@@ -135,14 +136,23 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
                 share = None
                 env = None
             with ectx.run_context(share=share, env=env) as run:
-                run(cmd)
+                try:
+                    run(cmd)
+                except Exception:
+                    failed = True
+                    error("Caught exception while building on image: %s", image_name, exception=True)
             missing = [n for n in forge.get_expected_names() if not exists(n)]
             for name in missing:
+                failed = True
                 warn("%s missing, build failed?", name)
-            if exit_on_failure and missing:
-                fatal("Exiting due to missing wheels")
+            if exit_on_failure and failed:
+                fatal("Exiting due to previous error(s)")
         else:
             info('All wheels from image %s already built', image_name)
+    if failed:
+        fatal("Build failed, see error(s) above")
+    else:
+        info("Build OK")
 
 
 def _set_imageset(cache_manager, wheel_config):

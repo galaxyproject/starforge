@@ -27,10 +27,10 @@ def info(message, *args, **kwargs):
     click.echo(click.style(message, bold=bold, fg=fg), err=err, **kwargs)
 
 
-def error(message, *args):
+def error(message, *args, **kwargs):
     if args:
         message = message % args
-    if DEBUG and sys.exc_info()[0] is not None:
+    if (DEBUG or kwargs.pop('exception', False)) and sys.exc_info()[0] is not None:
         click.echo(traceback.format_exc(), nl=False)
     click.echo(click.style(message, bold=True, fg='red'), err=True)
 
