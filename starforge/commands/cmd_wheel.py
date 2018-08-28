@@ -2,6 +2,7 @@
 """
 from __future__ import absolute_import
 
+import sys
 from os import getcwd, getuid, getgid
 from os.path import exists, abspath, join, isabs, dirname
 from shutil import copy
@@ -98,7 +99,7 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
                 warn("Image '%s' is not in '%s' imageset", i, wheel_config.imageset.name)
         if not images:
             info("Nothing to build: none of the specified images are in the wheel's imageset")
-            return
+            sys.exit(2)
     # _set_imageset may or may not have already done this
     cache_wheel_sources(cache_manager, wheel_config)
     for (image_name, image_conf) in iteritems(images):
