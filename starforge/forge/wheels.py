@@ -17,6 +17,7 @@ from os import (
 )
 from os.path import (
     abspath,
+    dirname,
     exists,
     join
 )
@@ -220,6 +221,20 @@ class ForgeWheel(object):
         prebuild = self._get_prebuild_command('wheel')
         if prebuild is not None:
             subprocess.check_call(prebuild, shell=True)
+
+        # TODO: caching from the host would be nice but that requires pip's cache dir to be writable and owned by the
+        # guest user, and with docker run --user, the pythons aren't writable
+        for pip_args in self.wheel_config.pip_install:
+            for py in pythons:
+                pip = join(dirname(py.format(arch=arch)), 'pip')
+                cmd = [pip, 'install']
+                if '--index-url' not in pip_args:
+                    cmd.extend(shlex.split(
+                        '--index-url https://wheels.galaxyproject.org/simple/ --extra-index-url '
+                        'https://pypi.python.org/simple/'
+                    ))
+                cmd.extend(shlex.split(pip_args))
+                self.execute(cmd)
 
         chdir(join(build, root))
 

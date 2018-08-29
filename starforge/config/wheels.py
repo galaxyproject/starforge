@@ -33,6 +33,7 @@ class WheelConfig(object):
         self.universal = universal
         self.version = str(config['version'])
         self.sources = config.get('src', [])
+        self.pip_install = config.get('pip_install', [])
         self.prebuild = config.get('prebuild', None)
         self.insert_setuptools = config.get('insert_setuptools', None)
         self.force_pythons = config.get('force_pythons', None)
