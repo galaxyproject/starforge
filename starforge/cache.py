@@ -168,10 +168,9 @@ class PipSourceCacher(TarballCacher):
             info('Using cached sdist: %s', cfpath)
         else:
             try:
-                # TODO: use the pip API
                 cmd = [
-                    'pip', '--no-cache-dir', 'download', '-d', self.cache_path,
-                    '--no-binary', ':all:', '--no-deps', name + '==' + version
+                    'pip', '--no-cache-dir', 'download', '-d', self.cache_path, '--no-binary', ':all:',
+                    name + '==' + version
                 ]
                 info('Fetching sdist: %s', name)
                 debug('Executing: %s', ' '.join(cmd))
