@@ -38,8 +38,10 @@ def cli(ctx, wheels_config, osk, image, qemu_port, wheel):
         fatal("At least one image must be specified")
     for i in image:
         try:
+            info("Testing wheel on image '%s': %s", i, wheel)
             for forge in build_forges(ctx.config, wheels_config, wheel, image=i, osk_file=osk, qemu_port=qemu_port):
                 names = forge.get_expected_names()
+                debug("Expecting wheel files:\n  %s", '\n  '.join(names))
                 for py, name in zip(forge.image.pythons, names):
                     _test_wheel(forge, py, name, forge.wheel_config.skip_tests)
         except KeyError:
