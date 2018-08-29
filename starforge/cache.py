@@ -170,7 +170,7 @@ class PipSourceCacher(TarballCacher):
             try:
                 cmd = [
                     'pip', '--no-cache-dir', 'download', '-d', self.cache_path, '--no-binary', ':all:',
-                    name + '==' + version
+                    '--no-deps', name + '==' + version
                 ]
                 info('Fetching sdist: %s', name)
                 debug('Executing: %s', ' '.join(cmd))
