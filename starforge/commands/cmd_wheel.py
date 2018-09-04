@@ -73,7 +73,9 @@ def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, e
             ran_build = True
             # _set_imageset may or may not have already done this
             # TODO: don't run repeatedly
-            if not check_wheel_source(forge.cache_manager, forge.wheel_config):
+            try:
+                check_wheel_source(forge.cache_manager, forge.wheel_config)
+            except AssertionError:
                 cache_wheel_sources(forge.cache_manager, forge.wheel_config)
             build_wheel = False
             for name in forge.get_expected_names():
