@@ -41,6 +41,6 @@ def warn(message, *args):
     click.echo(click.style(message, fg='red'), err=True)
 
 
-def fatal(message, *args):
-    error(message, *args)
+def fatal(message, *args, **kwargs):
+    error(message, *args, **kwargs)
     sys.exit(1)

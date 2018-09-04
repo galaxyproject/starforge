@@ -321,6 +321,19 @@ def build_forges(global_config, wheels_config, wheel, images=None, **kwargs):
     wheel_cfgmgr = WheelConfigManager.open(global_config, wheels_config)
     cachemgr = CacheManager(global_config.cache_path)
     wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
+    if images:
+        _images = {}
+        for i in images:
+            try:
+                _images[i] = wheel_config.get_image(i)
+            except Exception:
+                warn("Image '%s' is not in '%s' imageset", i, wheel_config.imageset.name)
+        if not _images:
+            info("Nothing to do: none of the specified images are in the wheel's imageset")
+            return
+        images = _images
+    else:
+        images = wheel_config.images
     images = images or wheel_config.images
     for (image_name, image_conf) in iteritems(images):
         debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",

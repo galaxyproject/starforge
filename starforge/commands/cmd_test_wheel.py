@@ -10,7 +10,7 @@ import click
 
 from ..cli import pass_context
 from ..forge.wheels import build_forges
-from ..io import error, fatal, info
+from ..io import debug, error, fatal, info
 from ..util import xdg_config_file
 
 
@@ -36,16 +36,20 @@ def cli(ctx, wheels_config, osk, image, qemu_port, wheel):
     """
     if not image:
         fatal("At least one image must be specified")
-    for i in image:
-        try:
-            info("Testing wheel on image '%s': %s", i, wheel)
-            for forge in build_forges(ctx.config, wheels_config, wheel, image=i, osk_file=osk, qemu_port=qemu_port):
-                names = forge.get_expected_names()
-                debug("Expecting wheel files:\n  %s", '\n  '.join(names))
-                for py, name in zip(forge.image.pythons, names):
-                    _test_wheel(forge, py, name, forge.wheel_config.skip_tests)
-        except KeyError:
-            fatal('Package not found in %s: %s', wheels_config, wheel)
+    try:
+        ran_tests = False
+        for forge in build_forges(ctx.config, wheels_config, wheel, images=image, osk_file=osk, qemu_port=qemu_port):
+            info("Testing wheel on image '%s': %s", forge.image.name, wheel)
+            names = forge.get_expected_names()
+            debug("Expecting wheel files:\n  %s", '\n  '.join(names))
+            for py, name in zip(forge.image.pythons, names):
+                _test_wheel(forge, py, name, forge.wheel_config.skip_tests)
+                ran_tests = True
+        assert ran_tests, 'No tests ran'
+    except KeyError:
+        fatal('Package not found in %s: %s', wheels_config, wheel)
+    except Exception:
+        fatal('Tests failed', exception=True)
 
 
 def _test_wheel(forge, py, name, skip):
