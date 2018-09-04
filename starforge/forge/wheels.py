@@ -318,9 +318,10 @@ class ForgeWheel(object):
 
 
 def build_forges(global_config, wheels_config, wheel, images=None, **kwargs):
-    wheel_cfgmgr = WheelConfigManager.open(global_config, wheels_config)
-    cachemgr = CacheManager(global_config.cache_path)
-    wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
+    wheel_config_manager = WheelConfigManager.open(global_config, wheels_config)
+    cache_manager = CacheManager(global_config.cache_path)
+    wheel_config = wheel_config_manager.get_wheel_config(wheel)
+    wheel_config.detect_imageset(cache_manager)
     if images:
         _images = {}
         for i in images:
@@ -344,4 +345,4 @@ def build_forges(global_config, wheels_config, wheel, images=None, **kwargs):
             ectx = DockerExecutionContext(image_conf, global_config.docker, **kwargs)
         elif image_conf.type == 'qemu':
             ectx = QEMUExecutionContext(image_conf, global_config.qemu, **kwargs)
-        yield ForgeWheel(wheel_config, cachemgr, ectx.run_context, image=image_conf)
+        yield ForgeWheel(wheel_config, cache_manager, ectx.run_context, image=image_conf)

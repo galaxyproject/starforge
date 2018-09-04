@@ -47,7 +47,7 @@ def cli(ctx, wheels_config, osk, image, qemu_port, wheel):
                 ran_tests = True
         assert ran_tests, 'No tests ran'
     except KeyError:
-        fatal('Package not found in %s: %s', wheels_config, wheel)
+        fatal('Package not found in %s: %s', wheels_config, wheel, exception=True)
     except Exception:
         fatal('Tests failed', exception=True)
 

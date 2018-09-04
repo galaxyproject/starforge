@@ -11,6 +11,10 @@ except ImportError:
 import yaml
 from six import iteritems, string_types
 
+from ..cache import cache_wheel_sources
+from ..io import debug, info, fatal
+from ..util import PythonSdist
+
 
 DEFAULT_IMAGESET = 'default-wheel'
 DEFAULT_PUREPY_IMAGESET = 'purepy-wheel'
@@ -21,6 +25,11 @@ DEFAULT_CONFIG_FILE = 'wheels.yml'
 UNIVERSAL = 'universal'
 PUREPY = 'purepy'
 C_EXTENSION = 'c-extension'
+TYPE_IMAGESET_MAP = {
+    UNIVERSAL: 'universal-wheel',
+    PUREPY: 'purepy-wheel',
+    C_EXTENSION: 'default-wheel',
+}
 
 
 class WheelConfig(object):
@@ -56,6 +65,34 @@ class WheelConfig(object):
             # explicitly set to false means it's being declared as C extension
             self.configured_wheel_type = C_EXTENSION
         self.set_imageset()
+
+
+    def detect_imageset(self, cache_manager):
+        debug("Configured wheel imageset: %s", self.configured_imageset)
+        wheel_type = self.configured_wheel_type
+        debug("Configured wheel type: %s", wheel_type)
+        # TODO: probably refactor this
+        if wheel_type is None:
+            sdist_tarball = cache_wheel_sources(cache_manager, self)[0]
+            sdist = PythonSdist.open(sdist_tarball)
+            wheel_type = sdist.wheel_type
+            debug("Detected wheel type: %s", wheel_type)
+        assert wheel_type is not None, \
+            "Unable to determine wheel type of '%s', set `purepy`, `universal`, and/or `imageset` in wheel config" \
+            % self.name
+        imageset = TYPE_IMAGESET_MAP[wheel_type]
+        info("Using imageset: %s", self.configured_imageset or imageset)
+        self.set_imageset(imageset=imageset)
+        if wheel_type == UNIVERSAL:
+            self.set_universal(True)
+            # sets purepy
+        elif wheel_type == PUREPY:
+            self.set_purepy(True)
+            self.set_universal(False)
+        else:
+            self.set_purepy(False)
+            # sets universal
+
 
     def set_imageset(self, imageset=None, force=False):
         if self.configured_imageset is not None and not force:
