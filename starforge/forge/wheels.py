@@ -35,8 +35,8 @@ from ..execution.docker import DockerExecutionContext
 from ..execution.local import LocalExecutionContext
 from ..execution.qemu import QEMUExecutionContext
 from ..io import debug, info, warn
-from ..packaging.setup import check_setup, wrap_setup
-from ..util import Archive
+from ..packaging.setup import check_setup, wheel_info, wrap_setup
+from ..util import Archive, pip_install, py_to_pip
 
 
 AUDITWHEEL_CMD = 'for whl in dist/*.whl; do auditwheel {auditwheel_args} $whl; rm $whl; done'
@@ -161,6 +161,13 @@ class ForgeWheel(object):
 
         return root
 
+    def _build_py_pip_install(self, pythons, packages, dependency_type=None):
+        if not packages:
+            return
+        for py in pythons:
+            info("Installing %s dependencies for build Python '%s': %s", dependency_type, py, ', '.join(packages))
+            pip_install(pip=py_to_pip(py), packages=packages, executor=self.execute)
+
     def bdist_wheel(self, output=None, uid=-1, gid=-1):
         # TODO: a lot of stuff in this method like installing from the package
         # manager and changing permissions should be abstracted out for
@@ -171,6 +178,9 @@ class ForgeWheel(object):
         build = abspath(getcwd())
         pythons = []
         if self.image:
+            pythons = []
+            for py in self.image.pythons:
+                pythons.append(py.format(arch=arch))
             pythons = self.image.pythons
             platform = self.image.plat_name
             pkgtool = self.image.pkgtool
@@ -222,33 +232,37 @@ class ForgeWheel(object):
         if prebuild is not None:
             subprocess.check_call(prebuild, shell=True)
 
+        chdir(join(build, root))
+
         # TODO: caching from the host would be nice but that requires pip's cache dir to be writable and owned by the
         # guest user, and with docker run --user, the pythons aren't writable
-        for pip_args in self.wheel_config.pip_install:
-            for py in pythons:
-                pip = join(dirname(py.format(arch=arch)), 'pip')
-                cmd = [pip, 'install']
-                if '--index-url' not in pip_args:
-                    cmd.extend(shlex.split(
-                        '--index-url https://wheels.galaxyproject.org/simple/ --extra-index-url '
-                        'https://pypi.python.org/simple/'
-                    ))
-                cmd.extend(shlex.split(pip_args))
-                self.execute(cmd)
 
-        chdir(join(build, root))
+        # install setup requirements (these can be defined by the setup script but that presents a catch-22, so only
+        # check the wheel config
+        self._build_py_pip_install([self.image.buildpy], self.wheel_config.setup_requires,
+            dependency_type='Starforge image Python setup_requires')
+        self._build_py_pip_install(pythons, self.wheel_config.setup_requires, dependency_type='setup_requires')
 
         insert_setuptools = self.wheel_config.insert_setuptools
         if insert_setuptools is None:
             # if set explicitly to false, do not override with check_setup()
             insert_setuptools = not check_setup()
+
         if insert_setuptools or self.image.plat_specific:
             wrap_setup(
                 import_interface_wheel=self.image.plat_specific,
                 import_setuptools=insert_setuptools)
 
+        # install anything defined by the package itself, overrideable by the wheel config
+        install_requires = self.wheel_config.install_requires
+        if install_requires is None:
+            install_requires = wheel_info()['install_requires']
+        self._build_py_pip_install(pythons, install_requires, dependency_type='install_requires')
+
+        # install anything else the wheel config author wants installed
+        self._build_py_pip_install(pythons, self.wheel_config.pip_install, dependency_type='wheel config pip_install')
+
         for py in pythons:
-            py = py.format(arch=arch)
             build_args = []
             if pkgs and pkgtool == 'brew':
                 build_args.extend(['build_ext',
@@ -303,13 +317,12 @@ class ForgeWheel(object):
                 chown(join(output, f), uid, gid)
 
 
-def build_forges(global_config, wheels_config, wheel, image=None, **kwargs):
+def build_forges(global_config, wheels_config, wheel, images=None, **kwargs):
     wheel_cfgmgr = WheelConfigManager.open(global_config, wheels_config)
     cachemgr = CacheManager(global_config.cache_path)
     wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
-    for (image_name, image_conf) in iteritems(wheel_config.images):
-        if image and image_name != image:
-            continue
+    images = images or wheel_config.images
+    for (image_name, image_conf) in iteritems(images):
         debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",
               image_name, image_conf.image, image_conf.plat_name, image_conf.force_plat)
         if image_conf.type == 'local':

@@ -46,6 +46,8 @@ def wrap_setup(package_dir=None, import_interface_wheel=False, import_setuptools
         warn("Wrapped setup.py already exists, not overwriting: %s", wrapped)
         return
     rename(setup, wrapped)
+    info("Wrapping setup.py: import_interface_wheel=%s, import_setuptools=%s", import_interface_wheel,
+         import_setuptools)
     with open(setup, 'w') as fh:
         fh.write(SETUP_PY_WRAPPER.format(
             import_interface_wheel=IMPORT_INTERFACE_WHEEL if import_interface_wheel else '',
@@ -61,6 +63,7 @@ def check_setup(package_dir=None):
     for line in out.splitlines():
         try:
             if line.strip().split()[0] == 'bdist_wheel':
+                debug("Package uses setuptools")
                 return True
         except IndexError:
             pass
@@ -68,24 +71,25 @@ def check_setup(package_dir=None):
 
 
 def wheel_type(package_dir=None):
+    info = wheel_info(package_dir=package_dir)
+    if info['purepy']:
+        if info['universal']:
+            return UNIVERSAL
+        else:
+            return PUREPY
+    else:
+        return C_EXTENSION
+
+
+def wheel_info(package_dir=None):
     package_dir = package_dir or getcwd()
-    if not check_setup(package_dir=package_dir):
-        wrap_setup(package_dir=package_dir)
-    t = None
     try:
         cmd = [sys.executable, 'setup.py', '-q', 'wheel_info', '--json']
         wheel_info = _check_output(cmd, cwd=package_dir)
         wheel_info = json.loads(wheel_info)
-        if wheel_info['purepy']:
-            if wheel_info['universal']:
-                t = UNIVERSAL
-            else:
-                t = PUREPY
-        else:
-            t = C_EXTENSION
     except (CalledProcessError, ValueError) as exc:
         error("Failed to get wheel info: %s", exc)
-    return t
+    return wheel_info
 
 
 def _check_output(cmd, cwd=None):

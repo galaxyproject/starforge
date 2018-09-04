@@ -19,6 +19,7 @@ from pkg_resources import parse_version
 from six import with_metaclass
 
 from .io import warn, info, debug, fatal
+from .util import pip_install, py_to_pip
 
 
 class BaseCacher(with_metaclass(ABCMeta, object)):
@@ -226,6 +227,11 @@ class CacheManager(object):
 def cache_wheel_sources(cache_manager, wheel_config):
     fail_ok = wheel_config.sources != []
     sources = []
+    if wheel_config.setup_requires:
+        # this is done due to pypa/pip#1884 - `pip download` fails under certain circumstances if setup_requires is set
+        info("Installing packages to Starforge Python at '%s' for '%s' setup requirements: %s",
+            sys.executable, wheel_config.name, ', '.join(wheel_config.setup_requires))
+        pip_install(pip=py_to_pip(sys.executable), packages=wheel_config.setup_requires)
     sources.append(cache_manager.pip_cache(wheel_config.name, wheel_config.version, fail_ok=fail_ok))
     for src_url in wheel_config.sources:
         sources.append(cache_manager.url_cache(src_url))

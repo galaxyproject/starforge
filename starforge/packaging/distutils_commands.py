@@ -7,8 +7,7 @@ from functools import partial
 
 import yaml
 from setuptools import Command
-
-#from wheel.bdist_wheel import bdist_wheel
+from six import iteritems
 
 OUTPUT_TEMPLATE = """Distribution: {distribution}
 Implementation: {implementation}
@@ -17,7 +16,18 @@ Platform: {platform}
 Tag: {tag}
 Pure Python: {purepy}
 Universal: {universal}
+Requires Python version: {python_requires}
+Running setup.py requires: {setup_requires}
+Install requires: {install_requires}
+Extras require: {extras_require}
 """
+
+DISTRIBUTION_KEYS = (
+    'extras_require',
+    'install_requires',
+    'python_requires',
+    'setup_requires',
+)
 
 
 class wheel_info(Command):
@@ -81,16 +91,31 @@ class wheel_info(Command):
                 'str': '-'.join(tag),
             },
         }
+        for key in DISTRIBUTION_KEYS:
+            info[key] = getattr(bdist_wheel.distribution, key)
         print(self.dump(info), end=self.end)
 
 
 def dump_human(info):
-    return OUTPUT_TEMPLATE.format(
-        distribution=info['distribution'],
-        implementation=info['tag']['implementation'],
-        abi=info['tag']['abi'],
-        platform=info['tag']['platform'],
-        purepy='Yes' if info['purepy'] else 'No',
-        universal='Yes' if info['universal'] else 'No',
-        tag=info['tag']['str']
-    )
+    format_data = info.copy()
+    format_data.update({
+        'implementation': info['tag']['implementation'],
+        'abi': info['tag']['abi'],
+        'platform': info['tag']['platform'],
+        'purepy': 'Yes' if info['purepy'] else 'No',
+        'universal': 'Yes' if info['universal'] else 'No',
+        'tag': info['tag']['str']
+    })
+    for key in DISTRIBUTION_KEYS:
+        if isinstance(info[key], list):
+            val = ', '.join(info[key])
+        elif isinstance(info[key], dict):
+            val = ['']
+            for k, v in iteritems(info[key]):
+                val.append(('%s: ' % k) + ', '.join(v))
+            val = '\n  '.join(val)
+        else:
+            val = info[key]
+        val = val or ''
+        format_data[key] = val
+    return OUTPUT_TEMPLATE.format(**format_data)

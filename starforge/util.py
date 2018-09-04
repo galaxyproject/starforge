@@ -4,11 +4,24 @@ Utility things
 from __future__ import absolute_import
 
 import os
+import shlex
 import tarfile
 import zipfile
 from os import pardir
-from os.path import isabs, join, abspath, expanduser, normpath
-from subprocess import Popen, CalledProcessError, PIPE
+from os.path import (
+    abspath,
+    dirname,
+    expanduser,
+    isabs,
+    join,
+    normpath
+)
+from subprocess import (
+    CalledProcessError,
+    PIPE,
+    Popen,
+    check_call
+)
 try:
     import lzma
 except ImportError:
@@ -77,6 +90,30 @@ def check_output(*popenargs, **kwargs):
             cmd = popenargs[0]
         raise CalledProcessError(retcode, cmd, output=output)
     return output
+
+
+def py_to_pip(py):
+    if dirname(py):
+        return join(dirname(py), 'pip')
+    else:
+        return 'pip'
+
+
+def pip_install(pip='pip', args=None, packages=None, executor=check_call, add_galaxy_index=True, **kwargs):
+    args = args or []
+    packages = packages or []
+    cmd = [pip, 'install']
+    if add_galaxy_index and '--index-url' not in args:
+        cmd.extend(shlex.split(
+            '--index-url https://wheels.galaxyproject.org/simple/ --extra-index-url https://pypi.python.org/simple/'
+        ))
+    if not isinstance(args, list):
+        args = shlex.split(args)
+    cmd.extend(args)
+    if not isinstance(packages, list):
+        packages = shlex.split(packages)
+    cmd.extend(packages)
+    return executor(cmd, **kwargs)
 
 
 # asbool implementation pulled from PasteDeploy
