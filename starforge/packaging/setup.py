@@ -83,6 +83,7 @@ def wheel_type(package_dir=None):
 
 def wheel_info(package_dir=None):
     package_dir = package_dir or getcwd()
+    wheel_info = None
     try:
         cmd = [sys.executable, 'setup.py', '-q', 'wheel_info', '--json']
         wheel_info = _check_output(cmd, cwd=package_dir)
