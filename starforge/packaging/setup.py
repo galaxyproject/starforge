@@ -15,6 +15,7 @@ from subprocess import check_output, CalledProcessError
 from ..io import (
     debug,
     error,
+    info,
     warn
 )
 
@@ -72,6 +73,8 @@ def check_setup(package_dir=None):
 
 def wheel_type(package_dir=None):
     info = wheel_info(package_dir=package_dir)
+    if not info:
+        return None
     if info['purepy']:
         if info['universal']:
             return UNIVERSAL
