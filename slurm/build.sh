@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
+set -x
 
 munge_version='0.5.13'
 munge_src="https://github.com/dun/munge/releases/download/munge-${munge_version}/munge-${munge_version}.tar.xz"
-slurm_version='17.11.5'
-slurm_src="https://www.schedmd.com/downloads/latest/slurm-${slurm_version}.tar.bz2"
-slurm_drmaa_version='1.2.0-dev.83fc288'
+slurm_version='17.11.9-2'
+slurm_src="https://download.schedmd.com/slurm/slurm-${slurm_version}.tar.bz2"
+slurm_drmaa_version='1.2.0-dev.44cc67e'
 slurm_drmaa_rpm_version=${slurm_drmaa_version/-/_}
 slurm_drmaa_src="https://github.com/natefoo/slurm-drmaa/releases/download/${slurm_drmaa_version}/slurm-drmaa-${slurm_drmaa_version}.tar.gz"
 
