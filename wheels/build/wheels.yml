@@ -1,5 +1,11 @@
 ---
 
+#
+# THIS FILE IS DEPRECATED
+#
+# See https://github.com/galaxyproject/starforge-recipes
+#
+
 packages:
     biopython:
         version: 1.66

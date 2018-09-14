@@ -2,30 +2,26 @@
 """
 from __future__ import absolute_import
 
+import sys
 from os import getcwd, getuid, getgid
 from os.path import exists, abspath, join, isabs, dirname
 from shutil import copy
 
 import click
 import yaml
-from six import iteritems, itervalues
 
-from ..io import info, warn, fatal
+from ..io import debug, error, info, warn, fatal
 from ..cli import pass_context
-from ..config.wheels import WheelConfigManager
-from ..forge.wheels import ForgeWheel
-from ..cache import CacheManager
-from ..execution.docker import DockerExecutionContext
-from ..execution.qemu import QEMUExecutionContext
-from ..util import xdg_data_dir, xdg_config_file
+from ..forge.wheels import build_forges
+from ..cache import cache_wheel_sources, check_wheel_source
+from ..util import xdg_cache_dir, xdg_config_file
 
 
+LOCAL_BDIST_WHEEL_CMD_TEMPLATE = (
+    'starforge {debug} --config-file {config} bdist_wheel --wheels-config {wheels_config} -i {image} {name}')
 BDIST_WHEEL_CMD_TEMPLATE = (
-    'starforge {debug} --config-file {config} bdist_wheel --wheels-config '
-    '{wheels_config} -i {image} -o {output} -u {uid} -g {gid} {name}')
-SDIST_CMD_TEMPLATE = (
-    'starforge {debug} --config-file {config} sdist --wheels-config {wheels_config} '
-    '-i {image} -o {output} -u {uid} -g {gid} {name}')
+    'starforge {debug} --config-file {config} bdist_wheel --wheels-config {wheels_config} -i {image} -o {output} -u '
+    '{uid} -g {gid} {name}')
 GUEST_HOST = '/host'
 GUEST_SHARE = '/share'
 
@@ -48,12 +44,15 @@ GUEST_SHARE = '/share'
 @click.option('--sdist/--no-sdist',
               default=False,
               help='Build source distribution')
+@click.option('--image',
+              multiple=True,
+              help="Image(s) to build with (must be in the wheel's imageset)")
 @click.option('--docker/--no-docker',
               default=True,
-              help='Build under Docker')
+              help='REMOVED: Use --image. (Build under Docker)')
 @click.option('--qemu/--no-qemu',
               default=True,
-              help='Build under QEMU')
+              help='REMOVED: Use --image. (Build under QEMU)')
 @click.option('--qemu-port',
               default=None,
               help='Connect to running QEMU instance on PORT')
@@ -64,82 +63,70 @@ GUEST_SHARE = '/share'
                    'even if a previous image fails)')
 @click.argument('wheel')
 @pass_context
-def cli(ctx, wheels_config, osk, sdist, docker, qemu, wheel, qemu_port,
-        exit_on_failure):
+def cli(ctx, wheels_config, osk, sdist, image, docker, qemu, wheel, qemu_port, exit_on_failure):
     """ Build a wheel.
     """
-    wheel_cfgmgr = WheelConfigManager.open(ctx.config, wheels_config)
-    cachemgr = CacheManager(ctx.config.cache_path)
     try:
-        wheel_config = wheel_cfgmgr.get_wheel_config(wheel)
+        ran_build = False
+        failed = False
+        for forge in build_forges(ctx.config, wheels_config, wheel, images=image, osk_file=osk, qemu_port=qemu_port):
+            ran_build = True
+            # _set_imageset may or may not have already done this
+            # TODO: don't run repeatedly
+            try:
+                check_wheel_source(forge.cache_manager, forge.wheel_config)
+            except AssertionError:
+                cache_wheel_sources(forge.cache_manager, forge.wheel_config)
+            build_wheel = False
+            for name in forge.get_expected_names():
+                if exists(name):
+                    info("%s already built", name)
+                else:
+                    build_wheel = True
+            if build_wheel:
+                if forge.image.type != 'local':
+                    cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config, BDIST_WHEEL_CMD_TEMPLATE,
+                                                  forge.image, wheel)
+                else:
+                    cmd = LOCAL_BDIST_WHEEL_CMD_TEMPLATE.format(
+                        debug='--debug' if ctx.debug else '',
+                        config=ctx.config_file,
+                        wheels_config=wheels_config,
+                        image=forge.image.name,
+                        name=wheel)
+                    share = None
+                    env = None
+                with forge.exec_context(share=share, env=env) as run:
+                    try:
+                        run(cmd)
+                    except Exception:
+                        failed = True
+                        error("Caught exception while building on image: %s", forge.image.name, exception=True)
+                missing = [n for n in forge.get_expected_names() if not exists(n)]
+                for name in missing:
+                    failed = True
+                    warn("%s missing, build failed?", name)
+                if exit_on_failure and failed:
+                    fatal("Exiting due to previous error(s)")
+            else:
+                info('All wheels from image %s already built', forge.image.name)
+        if not ran_build:
+            info("Nothing to build: none of the specified images are in the wheel's imageset")
+            sys.exit(2)
+        if failed:
+            fatal("Build failed, see error(s) above")
+        else:
+            info("Build OK")
     except KeyError:
-        fatal('Package not found in %s: %s', wheels_config, wheel)
-    for (image_name, image) in iteritems(wheel_config.images):
-        if image.type == 'docker':
-            if not docker:
-                continue
-            ectx = DockerExecutionContext(image, ctx.config.docker)
-        elif image.type == 'qemu':
-            if not qemu:
-                continue
-            ectx = QEMUExecutionContext(image, ctx.config.qemu,
-                                        osk_file=osk, qemu_port=qemu_port)
-        forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context,
-                           image=image)
-        forge.cache_sources()
-        build_wheel = False
-        for name in forge.get_expected_names():
-            if exists(name):
-                info("%s already built", name)
-            else:
-                build_wheel = True
-        if build_wheel:
-            cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config,
-                                          BDIST_WHEEL_CMD_TEMPLATE, image,
-                                          wheel)
-            with ectx.run_context(share=share, env=env) as run:
-                run(cmd)
-            missing = [n for n in forge.get_expected_names() if not exists(n)]
-            for name in missing:
-                warn("%s missing, build failed?", name)
-            if exit_on_failure and missing:
-                fatal("Exiting due to missing wheels")
-        else:
-            info('All wheels from image %s already built', image_name)
-
-    if not sdist:
-        return
-
-    image = filter(lambda x: x.type == 'docker',
-                   itervalues(wheel_config.images))[0]
-    ectx = DockerExecutionContext(image, ctx.config.docker)
-    forge = ForgeWheel(wheel_config, cachemgr, ectx.run_context,
-                       image=image)
-    for name in forge.get_sdist_expected_names():
-        if exists(name):
-            info("sdist %s already built", name)
-            break
-    else:
-        forge.cache_sources()
-        cmd, share, env = _prep_build(ctx.debug, ctx.config, wheels_config,
-                                      SDIST_CMD_TEMPLATE, image, wheel)
-        with ectx.run_context(share=share, env=env) as run:
-            run(cmd)
-        for name in forge.get_sdist_expected_names():
-            if exists(name):
-                break
-        else:
-            msg = "Possible sdists missing, build failed?"
-            if exit_on_failure:
-                fatal(msg)
-            else:
-                warn(msg)
+        fatal('Package not found in %s: %s', wheels_config, wheel, exception=True)
+    except Exception:
+        fatal('Build failed', exception=True)
 
 
 def _prep_build(debug, global_config, wheels_config, template, image, wheel_name):
     # make wheels.yml accessible in guest
-    copy(wheels_config, join(xdg_data_dir(), 'wheels.yml'))
-    with open(join(xdg_data_dir(), 'config.yml'), 'w') as f:
+    copy(wheels_config, join(xdg_cache_dir(), 'wheels.yml'))
+    with open(join(xdg_cache_dir(), 'config.yml'), 'w') as f:
         yaml.dump(global_config.dump_config(), f)
     cmd = template.format(
         debug='--debug' if debug else '',
@@ -155,7 +142,7 @@ def _prep_build(debug, global_config, wheels_config, template, image, wheel_name
     if isabs(image.buildpy):
         cmd = join(dirname(image.buildpy), cmd)
     share = [(abspath(getcwd()), GUEST_HOST, 'rw'),
-             (abspath(xdg_data_dir()), join(GUEST_SHARE,
+             (abspath(xdg_cache_dir()), join(GUEST_SHARE,
                                             'galaxy-starforge'), 'ro')]
-    env = {'XDG_DATA_HOME': GUEST_SHARE}
+    env = {'XDG_CACHE_HOME': GUEST_SHARE}
     return (cmd, share, env)

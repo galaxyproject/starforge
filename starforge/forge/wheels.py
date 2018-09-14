@@ -17,6 +17,7 @@ from os import (
 )
 from os.path import (
     abspath,
+    dirname,
     exists,
     join
 )
@@ -26,18 +27,18 @@ from shutil import (
 )
 
 from pkg_resources import parse_version
+from six import iteritems
 
+from ..cache import CacheManager, cache_wheel_sources
+from ..config.wheels import WheelConfigManager
+from ..execution.docker import DockerExecutionContext
+from ..execution.local import LocalExecutionContext
+from ..execution.qemu import QEMUExecutionContext
 from ..io import debug, info, warn
-from ..util import Archive
+from ..packaging.setup import check_setup, wheel_info, wrap_setup
+from ..util import Archive, pip_install, py_to_pip
 
 
-SETUP_PY_WRAPPER = '''#!/usr/bin/env python
-{import_interface_wheel}
-{import_setuptools}
-with open('setup_wrapped.py') as f:
-    code = compile(f.read(), 'setup_wrapped.py', 'exec')
-exec(code)
-'''
 AUDITWHEEL_CMD = 'for whl in dist/*.whl; do auditwheel {auditwheel_args} $whl; rm $whl; done'
 DELOCATE_CMD = 'for whl in dist/*.whl; do delocate-wheel {delocate_args} $whl; done'
 DEFAULT_AUDITWHEEL_ARGS = 'repair -w dist'
@@ -55,28 +56,19 @@ class ForgeWheel(object):
         self.image = image
 
     def cache_sources(self):
-        fail_ok = self.src_urls != []
-        self.cache_manager.pip_cache(self.name, self.version, fail_ok=fail_ok)
-        for src_url in self.src_urls:
-            self.cache_manager.url_cache(src_url)
+        return cache_wheel_sources(self.cache_manager, self.wheel_config)
 
     def get_expected_names(self):
         wheels = []
         py = 'py2'
         if self.wheel_config.purepy:
-            # need to check universal
-            cached_source = self.cache_manager.pip_check(self.name,
-                                                         self.version)
-            missing = '%s %s' % (self.name, self.version)
-            if cached_source is None:
-                if self.src_urls:
-                    cached_source = self.cache_manager.url_check(
-                        self.src_urls[0])
-                    missing = self.src_urls[0]
-            assert cached_source is not None, 'Cache failure on: %s' % missing
-            arc = Archive.open(cached_source)
-            if arc.universal:
+            if self.wheel_config.universal:
                 py = 'py2.py3'
+            else:
+                py = self.cache_manager.pyversion_cache(
+                    self.image.name,
+                    self.exec_context,
+                    self.image.pythons[0])
             whl = ('{name}-{version}-{py}-none-any.whl'
                    .format(name=self.name.replace('-', '_'),
                            version=str(parse_version(self.version)),
@@ -93,16 +85,16 @@ class ForgeWheel(object):
                     self.exec_context,
                     self.image.pythons[0],
                     self.image.plat_specific)
-            for python in self.image.pythons:
-                # FIXME: this forces a very specific naming (i.e.
-                # '/pythons/cp{py}{flags}-{arch}/')
-                abi = python.split('/')[2].split('-')[0]
-                py = abi[2:4]
-                whl = ('{name}-{version}-cp{py}-{abi}-{platform}.whl'
+            for python, py_abi_tag in zip(self.image.pythons, self.image.py_abi_tags):
+                if not py_abi_tag:
+                    # FIXME: this forces a very specific naming (i.e. '/pythons/cp{py}{flags}-{arch}/')
+                    for py_abi_tag in python.split('/'):
+                        if py_abi_tag.startswith('cp'):
+                            break
+                whl = ('{name}-{version}-{py_abi}-{platform}.whl'
                        .format(name=self.name.replace('-', '_'),
                                version=str(parse_version(self.version)),
-                               py=py,
-                               abi=abi,
+                               py_abi=py_abi_tag,
                                platform=platform))
                 wheels.append(whl)
         return wheels
@@ -117,10 +109,10 @@ class ForgeWheel(object):
                                     ext=ext))
         return tarballs
 
-    def execute(self, cmd, cwd=None):
+    def execute(self, cmd, cwd=None, capture_output=False):
         debug('Executing: %s', ' '.join(cmd))
         with self.exec_context() as run:
-            run(cmd, cwd=cwd)
+            return run(cmd, cwd=cwd, capture_output=capture_output)
 
     def _get_prebuild_command(self, step):
         prebuild = self.wheel_config.prebuild
@@ -151,9 +143,7 @@ class ForgeWheel(object):
 
         for i, arc_path in enumerate(src_paths):
             arc = Archive.open(arc_path)
-            assert len(arc.roots) == 1, \
-                "Could not determine root directory in archive"
-            root_t = abspath(join(getcwd(), next(iter(arc.roots))))
+            root_t = abspath(join(getcwd(), arc.root))
             os.environ['SRC_ROOT_%d' % i] = root_t
             # will cd to first root
             if i == 0:
@@ -171,6 +161,13 @@ class ForgeWheel(object):
 
         return root
 
+    def _build_py_pip_install(self, pythons, packages, dependency_type=None):
+        if not packages:
+            return
+        for py in pythons:
+            info("Installing %s dependencies for build Python '%s': %s", dependency_type, py, ', '.join(packages))
+            pip_install(pip=py_to_pip(py), packages=packages, executor=self.execute)
+
     def bdist_wheel(self, output=None, uid=-1, gid=-1):
         # TODO: a lot of stuff in this method like installing from the package
         # manager and changing permissions should be abstracted out for
@@ -181,6 +178,9 @@ class ForgeWheel(object):
         build = abspath(getcwd())
         pythons = []
         if self.image:
+            pythons = []
+            for py in self.image.pythons:
+                pythons.append(py.format(arch=arch))
             pythons = self.image.pythons
             platform = self.image.plat_name
             pkgtool = self.image.pkgtool
@@ -190,6 +190,15 @@ class ForgeWheel(object):
             pkgtool = None
         if platform is not None and self.image.force_plat:
             info('Platform name forced to: %s', platform)
+
+        info("Entered bdist_wheel forge, image '%s', wheel '%s-%s'", self.image.name, self.name, self.version)
+
+        for buildenv in (self.image.buildenv, self.wheel_config.buildenv):
+            if buildenv:
+                debug("Adding to build environment:")
+                for k, v in iteritems(buildenv):
+                    debug("%s=%s", k, v)
+                    os.environ[k] = str(v)
 
         pkgs = self.wheel_config.get_dependencies(self.image.name)
         if pkgs:
@@ -208,9 +217,11 @@ class ForgeWheel(object):
             elif pkgtool == 'brew':
                 if '/usr/local/bin' not in os.environ['PATH']:
                     os.environ['PATH'] = '/usr/local/bin:' + os.environ['PATH']
-                # FIXME: this sudo usage is specific to the macOS images in use in the Galaxy Jenkins architecture.
-                self.execute(['sudo', '-i', '-u', 'admin',
-                              'brew', 'install'] + pkgs, cwd='/tmp')
+                # brew exits 1 if a package is already installed
+                installed = set(self.execute(['brew', 'list', '-1'], cwd='/tmp', capture_output=True).splitlines())
+                needed = set(pkgs) - installed
+                if needed:
+                    self.execute(['brew', 'install'] + list(needed), cwd='/tmp')
             else:
                 warn('Skipping installation of dependencies: %s',
                      ', '.join(pkgs))
@@ -223,15 +234,35 @@ class ForgeWheel(object):
 
         chdir(join(build, root))
 
-        if self.wheel_config.insert_setuptools or self.image.plat_specific:
-            rename('setup.py', 'setup_wrapped.py')
-            with open('setup.py', 'w') as handle:
-                handle.write(SETUP_PY_WRAPPER.format(
-                    import_interface_wheel='import starforge.interface.wheel' if self.image.plat_specific else '',
-                    import_setuptools='import setuptools' if self.wheel_config.insert_setuptools else ''))
+        # TODO: caching from the host would be nice but that requires pip's cache dir to be writable and owned by the
+        # guest user, and with docker run --user, the pythons aren't writable
+
+        # install setup requirements (these can be defined by the setup script but that presents a catch-22, so only
+        # check the wheel config
+        self._build_py_pip_install([self.image.buildpy], self.wheel_config.setup_requires,
+            dependency_type='Starforge image Python setup_requires')
+        self._build_py_pip_install(pythons, self.wheel_config.setup_requires, dependency_type='setup_requires')
+
+        insert_setuptools = self.wheel_config.insert_setuptools
+        if insert_setuptools is None:
+            # if set explicitly to false, do not override with check_setup()
+            insert_setuptools = not check_setup()
+
+        if insert_setuptools or self.image.plat_specific:
+            wrap_setup(
+                import_interface_wheel=self.image.plat_specific,
+                import_setuptools=insert_setuptools)
+
+        # install anything defined by the package itself, overrideable by the wheel config
+        install_requires = self.wheel_config.install_requires
+        if install_requires is None:
+            install_requires = wheel_info()['install_requires']
+        self._build_py_pip_install(pythons, install_requires, dependency_type='install_requires')
+
+        # install anything else the wheel config author wants installed
+        self._build_py_pip_install(pythons, self.wheel_config.pip_install, dependency_type='wheel config pip_install')
 
         for py in pythons:
-            py = py.format(arch=arch)
             build_args = []
             if pkgs and pkgtool == 'brew':
                 build_args.extend(['build_ext',
@@ -284,3 +315,34 @@ class ForgeWheel(object):
             for f in listdir('dist'):
                 copy(join('dist', f), output)
                 chown(join(output, f), uid, gid)
+
+
+def build_forges(global_config, wheels_config, wheel, images=None, **kwargs):
+    wheel_config_manager = WheelConfigManager.open(global_config, wheels_config)
+    cache_manager = CacheManager(global_config.cache_path)
+    wheel_config = wheel_config_manager.get_wheel_config(wheel)
+    wheel_config.detect_imageset(cache_manager)
+    if images:
+        _images = {}
+        for i in images:
+            try:
+                _images[i] = wheel_config.get_image(i)
+            except Exception:
+                warn("Image '%s' is not in '%s' imageset", i, wheel_config.imageset.name)
+        if not _images:
+            info("Nothing to do: none of the specified images are in the wheel's imageset")
+            return
+        images = _images
+    else:
+        images = wheel_config.images
+    images = images or wheel_config.images
+    for (image_name, image_conf) in iteritems(images):
+        debug("Read image config: %s, image: %s, plat_name: %s, force_plat: %s",
+              image_name, image_conf.image, image_conf.plat_name, image_conf.force_plat)
+        if image_conf.type == 'local':
+            ectx = LocalExecutionContext(image_conf, **kwargs)
+        if image_conf.type == 'docker':
+            ectx = DockerExecutionContext(image_conf, global_config.docker, **kwargs)
+        elif image_conf.type == 'qemu':
+            ectx = QEMUExecutionContext(image_conf, global_config.qemu, **kwargs)
+        yield ForgeWheel(wheel_config, cache_manager, ectx.run_context, image=image_conf)

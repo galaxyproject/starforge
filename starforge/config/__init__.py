@@ -4,13 +4,13 @@ import errno
 from os.path import join, abspath, expanduser, dirname
 try:
     from collections import OrderedDict
-except:
+except ImportError:
     from ordereddict import OrderedDict
 
 import yaml
 from six import iteritems
 
-from ..util import dict_merge, xdg_data_dir
+from ..util import dict_merge, xdg_cache_dir
 
 
 DEFAULT_CONFIG_FILE = abspath(join(dirname(__file__), 'default.yml'))
@@ -18,20 +18,26 @@ DEFAULT_IMAGE_TYPE = 'docker'
 DEFAULT_IMAGE_PKGTOOL = 'apt'
 DEFAULT_IMAGE_PYTHONS = [
     '/python/cp27m-{arch}/bin/python',
-    '/python/cp27mu-{arch}/bin/python'
+    '/python/cp27mu-{arch}/bin/python',
+    '/python/cp34m-{arch}/bin/python',
+    '/python/cp35m-{arch}/bin/python',
+    '/python/cp36m-{arch}/bin/python',
 ]
 
 
 class Image(object):
     def __init__(self, name, image):
         self.name = name
+        self.image = image.get('image', name)
         self.type = image.get('type', DEFAULT_IMAGE_TYPE)
         self.pkgtool = image.get('pkgtool', DEFAULT_IMAGE_PKGTOOL)
         self.plat_name = image.get('plat_name', None)
         self.force_plat = image.get('force_plat', True)
         self.plat_specific = image.get('plat_specific', False)
-        self.buildpy = image.get('buildpy', 'python')
+        self.buildpy = expanduser(image.get('buildpy', 'python'))
+        self.buildenv = image.get('buildenv', {})
         self.pythons = image.get('pythons', DEFAULT_IMAGE_PYTHONS)
+        self.py_abi_tags = image.get('py_abi_tags', [None] * len(self.pythons))
         self.run_cmd = image.get('run_cmd', None)
         self.run_args = image.get('run_args', {})
         self.postbuild = image.get('postbuild', None)
@@ -54,8 +60,7 @@ class Imageset(object):
         self.name = name
         self.images = OrderedDict()
         for image_name in imageset:
-            self.images[image_name] = Image(image_name,
-                                            images.get(image_name, {}))
+            self.images[image_name] = images[image_name]
 
 
 class ConfigManager(object):
@@ -65,9 +70,10 @@ class ConfigManager(object):
 
     def __init__(self, config_file=None):
         self.config_file = config_file
-        self.cache_path = xdg_data_dir()
+        self.cache_path = xdg_cache_dir()
         self.docker = {}
         self.qemu = {}
+        self.images = {}
         self.imagesets = {}
         self.load_config()
 
@@ -92,12 +98,18 @@ class ConfigManager(object):
         if 'cache_path' in config:
             self.cache_path = abspath(expanduser(config['cache_path']))
 
+        if 'images' in config:
+            for (name, image) in iteritems(config['images']):
+                self.images[name] = Image(name, image)
+
         if 'imagesets' in config:
             for (name, imageset) in iteritems(config['imagesets']):
-                self.imagesets[name] = Imageset(name, imageset,
-                                                config.get('images', {}))
+                self.imagesets[name] = self.make_imageset(name, imageset)
 
         self.config = config
 
     def dump_config(self):
         return self.config
+
+    def make_imageset(self, name, image_names):
+        return Imageset(name, image_names, self.images)

@@ -9,6 +9,8 @@ qemu:
     btrfs_use_sudo: no
 
 imagesets:
+    universal-wheel:
+        - starforge/manylinux1:universal
     purepy-wheel:
         - starforge/manylinux1:purepy
     default-wheel:
@@ -54,8 +56,11 @@ images:
         pkgtool: yum
         buildpy: /opt/wheelenv/bin/python
         pythons:
-            - /python/cp27m-x86_64/bin/python
-            - /python/cp27mu-x86_64/bin/python
+            - /opt/python/cp27-cp27m/bin/python
+            - /opt/python/cp27-cp27mu/bin/python
+            - /opt/python/cp34-cp34m/bin/python
+            - /opt/python/cp35-cp35m/bin/python
+            - /opt/python/cp36-cp36m/bin/python
         plat_name: manylinux1_x86_64
         force_plat: false
         use_auditwheel: true
@@ -63,15 +68,27 @@ images:
         pkgtool: yum
         buildpy: /opt/wheelenv/bin/python
         pythons:
-            - /python/cp27m-i686/bin/python
-            - /python/cp27mu-i686/bin/python
+            - /opt/python/cp27-cp27m/bin/python
+            - /opt/python/cp27-cp27mu/bin/python
+            - /opt/python/cp34-cp34m/bin/python
+            - /opt/python/cp35-cp35m/bin/python
+            - /opt/python/cp36-cp36m/bin/python
         plat_name: manylinux1_i686
         force_plat: false
         use_auditwheel: true
+    starforge/manylinux1:universal:
+        buildpy: /opt/wheelenv/bin/python
+        pythons:
+            - /opt/python/cp36-cp36m/bin/python
+        plat_name: any
+        force_plat: false
     starforge/manylinux1:purepy:
         buildpy: /opt/wheelenv/bin/python
         pythons:
-            - /python/cp27mu-{arch}/bin/python
+            - /opt/python/cp27-cp27m/bin/python
+            - /opt/python/cp36-cp36m/bin/python
+        plat_name: any
+        force_plat: false
     starforge/debian-wheel:7:
         plat_specific: true
     starforge/debian-wheel:8:

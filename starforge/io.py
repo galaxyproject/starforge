@@ -15,20 +15,22 @@ def debug(message, *args):
     if args:
         message = message % args
     if DEBUG:
-        click.echo(message)
+        click.echo(message, err=True)
 
 
 def info(message, *args, **kwargs):
     if args:
         message = message % args
-    fg = kwargs.get('fg', 'green')
-    click.echo(click.style(message, bold=True, fg=fg))
+    bold = kwargs.pop('bold', True)
+    fg = kwargs.pop('fg', 'green')
+    err = kwargs.pop('err', True)
+    click.echo(click.style(message, bold=bold, fg=fg), err=err, **kwargs)
 
 
-def error(message, *args):
+def error(message, *args, **kwargs):
     if args:
         message = message % args
-    if DEBUG and sys.exc_info()[0] is not None:
+    if (DEBUG or kwargs.pop('exception', False)) and sys.exc_info()[0] is not None:
         click.echo(traceback.format_exc(), nl=False)
     click.echo(click.style(message, bold=True, fg='red'), err=True)
 
@@ -39,6 +41,6 @@ def warn(message, *args):
     click.echo(click.style(message, fg='red'), err=True)
 
 
-def fatal(message, *args):
-    error(message, *args)
+def fatal(message, *args, **kwargs):
+    error(message, *args, **kwargs)
     sys.exit(1)

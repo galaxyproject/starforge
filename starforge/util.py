@@ -4,10 +4,24 @@ Utility things
 from __future__ import absolute_import
 
 import os
+import shlex
 import tarfile
 import zipfile
-from os.path import join, abspath, expanduser
-from subprocess import Popen, CalledProcessError, PIPE
+from os import pardir
+from os.path import (
+    abspath,
+    dirname,
+    expanduser,
+    isabs,
+    join,
+    normpath
+)
+from subprocess import (
+    CalledProcessError,
+    PIPE,
+    Popen,
+    check_call
+)
 try:
     import lzma
 except ImportError:
@@ -16,11 +30,19 @@ except ImportError:
     except ImportError:
         lzma = None
 try:
+    from tempfile import TemporaryDirectory
+except ImportError:
+    from backports.tempfile import TemporaryDirectory
+
+try:
     from configparser import ConfigParser, NoSectionError, NoOptionError
 except ImportError:
     from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
 from six import iteritems, string_types
+
+from .io import debug
+from .packaging.setup import wheel_type
 
 UNSUPPORTED_ARCHIVE_MESSAGE = "Missing support for '{arctype}' archives, use `pip install starforge[{extra}]` to install"
 
@@ -49,6 +71,11 @@ def xdg_data_dir():
     return abspath(join(data_home, 'galaxy-starforge'))
 
 
+def xdg_cache_dir():
+    cache_home = expanduser(os.environ.get('XDG_CACHE_HOME', '~/.cache/'))
+    return abspath(join(cache_home, 'galaxy-starforge'))
+
+
 def check_output(*popenargs, **kwargs):
     """ From Python 2.7
     """
@@ -63,6 +90,30 @@ def check_output(*popenargs, **kwargs):
             cmd = popenargs[0]
         raise CalledProcessError(retcode, cmd, output=output)
     return output
+
+
+def py_to_pip(py):
+    if dirname(py):
+        return join(dirname(py), 'pip')
+    else:
+        return 'pip'
+
+
+def pip_install(pip='pip', args=None, packages=None, executor=check_call, add_galaxy_index=True, **kwargs):
+    args = args or []
+    packages = packages or []
+    cmd = [pip, 'install']
+    if add_galaxy_index and '--index-url' not in args:
+        cmd.extend(shlex.split(
+            '--index-url https://wheels.galaxyproject.org/simple/ --extra-index-url https://pypi.python.org/simple/'
+        ))
+    if not isinstance(args, list):
+        args = shlex.split(args)
+    cmd.extend(args)
+    if not isinstance(packages, list):
+        packages = shlex.split(packages)
+    cmd.extend(packages)
+    return executor(cmd, **kwargs)
 
 
 # asbool implementation pulled from PasteDeploy
@@ -84,6 +135,7 @@ def asbool(obj):
 
 class Archive(object):
     def __init__(self, arcfile):
+        self._arcfile = arcfile
         self.__roots = set()
         if tarfile.is_tarfile(arcfile):
             self.arctype = 'tar'
@@ -108,25 +160,42 @@ class Archive(object):
                 self.__roots.add(name.split(os.sep, 1)[0])
         return self.__roots
 
+    @property
+    def root(self):
+        """ For archives that are expected to only contain a single root.
+        """
+        assert len(self.roots) == 1, "Could not determine root directory in archive: %s" % self._arcfile
+        return next(iter(self.roots))
+
+    @property
     def getnames(self):
         if self.arctype == 'tar':
-            return self.arc.getnames()
+            return self.arc.getnames
         elif self.arctype == 'zip':
-            return self.arc.namelist()
+            return self.arc.namelist
 
-    def extractfile(self, member):
+    @property
+    def extractfile(self):
         if self.arctype == 'tar':
-            return self.arc.extractfile(member)
+            return self.arc.extractfile
         elif self.arctype == 'zip':
-            return self.arc.open(member)
+            return self.arc.open
+
+    @property
+    def extract(self):
+        return self.arc.extract
 
     def extractall(self, path):
-        # FIXME: replace with a safe extraction
-        return self.arc.extractall(path)
+        for name in self.getnames():
+            debug(name)
+            assert safe_relpath(name), "%s: path is outside its root: %s" % (self._arcfile, name)
+            self.extract(name, path)
 
     @property
     def universal(self):
-        """ Return true if this archive contains an sdist for a universal wheel
+        """ DEPRECATED: Return true if this archive contains an sdist for a universal wheel
+
+        This method should be replaced with `wheel.bdist_wheel`.
         """
         assert len(self.roots) == 1, 'Cannot check archives with != 1 root'
         root = next(iter(self.roots))
@@ -145,6 +214,16 @@ class Archive(object):
             return False
 
 
+class PythonSdist(Archive):
+    @property
+    def wheel_type(self):
+        with TemporaryDirectory(prefix='starforge_sdist_wheel_type_') as td:
+            debug("Extracting '%s' to '%s'", self._arcfile, td)
+            self.extractall(td)
+            root = join(td, self.root)
+            return wheel_type(root)
+
+
 class UnsupportedArchiveModule(object):
     def __init__(self, arctype, extra):
         self.arctype = arctype
@@ -161,6 +240,10 @@ class UnsupportedArchiveModule(object):
 
 class UnsupportedArchiveType(Exception):
     pass
+
+
+def safe_relpath(path):
+    return not (isabs(path) or normpath(path).startswith(pardir))
 
 
 if lzma is None:

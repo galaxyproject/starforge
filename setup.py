@@ -47,6 +47,9 @@ setup(
     entry_points = {
         'console_scripts': [
             'starforge = starforge.cli:starforge'
+        ],
+        'distutils.commands': [
+            'wheel_info=starforge.packaging.distutils_commands:wheel_info'
         ]
     },
     classifiers = [
