@@ -18,18 +18,22 @@ export DEBFULLNAME DEBEMAIL PPA GPG_KEY
 dch_dist=$(lsb_release -cs)
 build=/host/build.$(hostname)
 build_deps="git dpkg-dev debhelper debian-keyring devscripts dput ca-certificates build-essential fakeroot gnupg2"
+build_deps_bionic="libexpat-dev libgd-dev libgeoip-dev libhiredis-dev libluajit-5.1-dev libmhash-dev libpam0g-dev libpcre3-dev libperl-dev libssl-dev libxslt1-dev quilt zlib1g-dev"
 echo -e "Building for Ubuntu-$dch_dist\n"
 
 # set timezone for debian/changelog
 echo 'America/New_York' > /etc/timezone &&
 dpkg-reconfigure debconf -f noninteractive tzdata &&
 apt-get install --no-install-recommends -y $build_deps &&
+if [ "$dch_dist" == 'bionic' ]; then
+    apt-get install --no-install-recommends -y $build_deps_bionic
+fi &&
 mkdir -p $build &&
 cd $build &&
 if [ "$dch_dist" != 'trusty' ]; then
     apt-get install -y dh-systemd
 fi &&
-if [ "$dch_dist" == 'yakkety' -o "$dch_dist" == 'xenial' -o "$dch_dist" == 'trusty' ]; then
+if [ "$dch_dist" == 'yakkety' -o "$dch_dist" == 'xenial' -o "$dch_dist" == 'trusty' -o "$dch_dist" == 'bionic' ]; then
     sed -i s'/# deb-src/deb-src/' /etc/apt/sources.list &&
     apt-get update
 elif [ "$NAME" == 'Debian GNU/Linux' ] && [ "$VERSION" == "8 (jessie)" ]; then
@@ -46,11 +50,13 @@ git clone -b 2.2 --single-branch https://github.com/vkholodkov/nginx-upload-modu
     nginx-${nginx_version}/debian/modules/nginx-upload &&
 upload_module_shortrev=$(git --git-dir=nginx-${nginx_version}/debian/modules/nginx-upload/.git rev-parse --short HEAD) &&
 rm -rf nginx/debian/modules/nginx-upload/.git &&
-sed -e '/^ #Removed as it no longer works with 1.3.x and above.$/d' \
-    -e 's/^ #\(nginx-upload\)$/ \1/' \
-    -e 's%^ #\( Homepage: https://github.com/vkholodkov/nginx-upload-module\)$% \1/tree/2.2%' \
-    -e "s/^ # Version: 2.2.0.*$/  Version: 2.2.1-${upload_module_shortrev}/" \
-    -i nginx-${nginx_version}/debian/modules/README.Modules-versions &&
+if [ "$dch_dist" != 'bionic' ]; then
+    sed -e '/^ #Removed as it no longer works with 1.3.x and above.$/d' \
+        -e 's/^ #\(nginx-upload\)$/ \1/' \
+        -e 's%^ #\( Homepage: https://github.com/vkholodkov/nginx-upload-module\)$% \1/tree/2.2%' \
+        -e "s/^ # Version: 2.2.0.*$/  Version: 2.2.1-${upload_module_shortrev}/" \
+        -i nginx-${nginx_version}/debian/modules/README.Modules-versions
+fi &&
 if [ "$dch_dist" == 'trusty' ]; then
     sed -e 's#\(^\t    --add-module=$(MODULESDIR)/nginx-upload-progress \\\)#\t    --add-module=$(MODULESDIR)/nginx-upload \\\n\1#' \
     -i nginx-${nginx_version}/debian/rules

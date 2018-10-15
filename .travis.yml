@@ -8,6 +8,7 @@ env:
   matrix:
   - CODENAME="ubuntu:trusty"
   - CODENAME="ubuntu:xenial"
+  - CODENAME="ubuntu:bionic"
   global:
   - DEBFULLNAME="Marius van den Beek (travis-ci)"
   - DEBEMAIL="m.vandenbeek@gmail.com"
