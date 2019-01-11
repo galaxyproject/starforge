@@ -12,9 +12,9 @@ DEBUG = False
 
 
 def debug(message, *args):
-    if args:
-        message = message % args
     if DEBUG:
+        if args:
+            message = message % args
         click.echo(message, err=True)
 
 
