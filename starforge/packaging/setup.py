@@ -2,6 +2,7 @@
 """
 import json
 import sys
+import tempfile
 from os import (
     getcwd,
     rename
@@ -88,9 +89,10 @@ def wheel_info(package_dir=None):
     package_dir = package_dir or getcwd()
     wheel_info = None
     try:
-        cmd = [sys.executable, 'setup.py', '-q', 'wheel_info', '--json']
-        wheel_info = _check_output(cmd, cwd=package_dir)
-        wheel_info = json.loads(wheel_info)
+        with tempfile.NamedTemporaryFile(mode='w+') as tfh:
+            cmd = [sys.executable, 'setup.py', '-q', 'wheel_info', '--json', '--output', tfh.name]
+            wheel_info = _check_output(cmd, cwd=package_dir)
+            wheel_info = json.load(tfh)
     except (CalledProcessError, ValueError) as exc:
         error("Failed to get wheel info: %s", exc)
     return wheel_info
