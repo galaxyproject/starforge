@@ -7,9 +7,10 @@ set -e
 
 apt-get -qq update && apt-get install -y lsb-release tzdata
 
+TAG=2.3.0
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 pkg=nginx
-dch_message="Restore the nginx-upload module from 2.2 branch in Github, compatible with nginx 1.x."
+dch_message="Restore the nginx-upload module from tag $TAG in Github, compatible with nginx 1.x."
 DEBFULLNAME="${DEBFULLNAME:-Nathan Coraor}"
 DEBEMAIL="${DEBEMAIL:-nate@bx.psu.edu}"
 PPA="${PPA:-ppa:natefoo/nginx}"
@@ -46,15 +47,15 @@ apt-get source $pkg &&
 distrib_version=$(grep Version: *.dsc| cut -d' ' -f2-| head -n1) &&
 nginx_version=$(ls *.orig.tar.gz|sed 's/\.orig\.tar\.gz//'|sed 's/nginx_//g') &&
 ppa_version=${distrib_version}ppa1 &&
-git clone -b 2.2 --single-branch https://github.com/vkholodkov/nginx-upload-module.git/ \
+git clone -b "$TAG" --single-branch https://github.com/fdintino/nginx-upload-module.git/ \
     nginx-${nginx_version}/debian/modules/nginx-upload &&
 upload_module_shortrev=$(git --git-dir=nginx-${nginx_version}/debian/modules/nginx-upload/.git rev-parse --short HEAD) &&
 rm -rf nginx/debian/modules/nginx-upload/.git &&
 if [ "$dch_dist" != 'bionic' ]; then
     sed -e '/^ #Removed as it no longer works with 1.3.x and above.$/d' \
         -e 's/^ #\(nginx-upload\)$/ \1/' \
-        -e 's%^ #\( Homepage: https://github.com/vkholodkov/nginx-upload-module\)$% \1/tree/2.2%' \
-        -e "s/^ # Version: 2.2.0.*$/  Version: 2.2.1-${upload_module_shortrev}/" \
+        -e "s%^ #\( Homepage: https://github.com\)/vkholodkov/nginx-upload-module$% \1/fdintino/nginx-upload-module/tree/$TAG%" \
+        -e "s/^ # Version: 2.2.0.*$/  Version: ${TAG}-${upload_module_shortrev}/" \
         -i nginx-${nginx_version}/debian/modules/README.Modules-versions
 fi &&
 if [ "$dch_dist" == 'trusty' ]; then
