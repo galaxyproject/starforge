@@ -13,6 +13,21 @@ env:
   - DEBFULLNAME="Marius van den Beek (travis-ci)"
   - DEBEMAIL="m.vandenbeek@gmail.com"
   - PPA="ppa:galaxyproject/nginx"
+before_install:
+  - echo 'Detecting changes to nginx/...'
+  - git diff --quiet "$TRAVIS_COMMIT_RANGE" --; GIT_DIFF_EXIT_CODE=$?
+  - |
+    if [ "$GIT_DIFF_EXIT_CODE" -gt 1 ]; then
+        git remote set-branches --add origin master
+        git fetch
+        TRAVIS_COMMIT_RANGE=origin/master...
+    fi
+  - echo "\$TRAVIS_COMMIT_RANGE is $TRAVIS_COMMIT_RANGE"
+  - |
+    if [[ ! $(git diff --color=never --name-status "$TRAVIS_COMMIT_RANGE" -- nginx/) ]]; then
+        echo 'No nginx changes, terminating'
+        travis_terminate 0
+    fi
 install:
 - docker pull $CODENAME
 script:
