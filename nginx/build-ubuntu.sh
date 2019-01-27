@@ -1,4 +1,5 @@
 #!/bin/bash
+
 # tested for ubuntu trusty, wily and xenial
 set -e
 
