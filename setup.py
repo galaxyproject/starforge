@@ -25,26 +25,25 @@ with open(init) as f:
 
 
 setup(
-    name = 'starforge',
-    version = __version__,
-    packages = find_packages(),
-    description = 'Build Galaxy things in virtualized environments',
-    long_description = long_description,
-    url = 'https://github.com/galaxyproject/starforge',
-    author = 'The Galaxy Community',
-    author_email = 'galaxy-dev@lists.galaxyproject.org',
-    license = 'MIT',
-    keywords = 'starforge galaxy docker qemu',
-    package_data = {'': [
+    name='starforge',
+    version=__version__,
+    packages=find_packages(),
+    description='Build Galaxy things in virtualized environments',
+    long_description=long_description,
+    url='https://github.com/galaxyproject/starforge',
+    author='The Galaxy Community',
+    author_email='galaxy-dev@lists.galaxyproject.org',
+    license='MIT',
+    keywords='starforge galaxy docker qemu',
+    package_data={'': [
         'config/default.yml',
     ]},
-    install_requires = requirements,
-    extras_require = {
-        ':python_version=="2.6"': ["ordereddict"],
+    install_requires=requirements,
+    extras_require={
         'lzma:python_version<="3.3"': ['backports.lzma'],
         'platform_specific': ["lionshead"],
     },
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'starforge = starforge.cli:starforge'
         ],
@@ -52,7 +51,7 @@ setup(
             'wheel_info=starforge.packaging.distutils_commands:wheel_info'
         ]
     },
-    classifiers = [
+    classifiers=[
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Operating System :: POSIX',
@@ -61,5 +60,5 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3'
     ],
-    zip_safe = False
+    zip_safe=False
 )

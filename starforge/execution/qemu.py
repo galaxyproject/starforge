@@ -8,12 +8,13 @@ import tempfile
 import uuid
 from os import sep
 from os.path import exists, join
-from subprocess import check_call, CalledProcessError, Popen
+from subprocess import (
+    CalledProcessError,
+    check_call,
+    check_output,
+    Popen
+)
 from time import sleep
-try:
-    from subprocess import check_output
-except ImportError:
-    from ..util import check_output
 
 from six import iteritems, b
 
