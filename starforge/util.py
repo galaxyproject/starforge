@@ -16,12 +16,8 @@ from os.path import (
     join,
     normpath
 )
-from subprocess import (
-    CalledProcessError,
-    PIPE,
-    Popen,
-    check_call
-)
+from subprocess import check_call
+
 try:
     import lzma
 except ImportError:
@@ -74,22 +70,6 @@ def xdg_data_dir():
 def xdg_cache_dir():
     cache_home = expanduser(os.environ.get('XDG_CACHE_HOME', '~/.cache/'))
     return abspath(join(cache_home, 'galaxy-starforge'))
-
-
-def check_output(*popenargs, **kwargs):
-    """ From Python 2.7
-    """
-    if 'stdout' in kwargs:
-        raise ValueError('stdout argument not allowed, it will be overridden.')
-    process = Popen(stdout=PIPE, *popenargs, **kwargs)
-    output, unused_err = process.communicate()
-    retcode = process.poll()
-    if retcode:
-        cmd = kwargs.get("args")
-        if cmd is None:
-            cmd = popenargs[0]
-        raise CalledProcessError(retcode, cmd, output=output)
-    return output
 
 
 def py_to_pip(py):
