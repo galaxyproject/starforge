@@ -13,11 +13,20 @@ from os.path import (
 )
 from subprocess import check_output, CalledProcessError
 
+try:
+    from tempfile import TemporaryDirectory
+except ImportError:
+    from backports.tempfile import TemporaryDirectory
+
 from ..io import (
     debug,
     error,
     info,
     warn
+)
+from ..util import (
+    Archive,
+    stringify_cmd
 )
 
 
@@ -99,6 +108,16 @@ def wheel_info(package_dir=None):
 
 
 def _check_output(cmd, cwd=None):
-    debug('Executing in %s: %s', cwd, ' '.join(cmd))
+    debug('Executing in %s: %s', cwd, stringify_cmd(cmd))
     out = check_output(cmd, cwd=cwd)
     return out.decode('UTF-8')
+
+
+class PythonSdist(Archive):
+    @property
+    def wheel_type(self):
+        with TemporaryDirectory(prefix='starforge_sdist_wheel_type_') as td:
+            debug("Extracting '%s' to '%s'", self._arcfile, td)
+            self.extractall(td)
+            root = join(td, self.root)
+            return wheel_type(root)

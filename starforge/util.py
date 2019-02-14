@@ -25,20 +25,19 @@ except ImportError:
         import backports.lzma as lzma
     except ImportError:
         lzma = None
-try:
-    from tempfile import TemporaryDirectory
-except ImportError:
-    from backports.tempfile import TemporaryDirectory
 
 try:
     from configparser import ConfigParser, NoSectionError, NoOptionError
 except ImportError:
     from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 
-from six import iteritems, string_types
+from six import (
+    iteritems,
+    string_types
+)
+from six.moves import shlex_quote
 
 from .io import debug
-from .packaging.setup import wheel_type
 
 UNSUPPORTED_ARCHIVE_MESSAGE = "Missing support for '{arctype}' archives, use `pip install starforge[{extra}]` to install"
 
@@ -55,6 +54,12 @@ def dict_merge(old, new):
                 old[k] = v
         else:
             old[k] = v
+
+
+def stringify_cmd(cmd):
+    if isinstance(cmd, string_types):
+        return cmd
+    return ' '.join(map(shlex_quote, cmd))
 
 
 def xdg_config_file(name='config.yml'):
@@ -192,16 +197,6 @@ class Archive(object):
             return asbool(universal)
         except (KeyError, NoSectionError, NoOptionError):
             return False
-
-
-class PythonSdist(Archive):
-    @property
-    def wheel_type(self):
-        with TemporaryDirectory(prefix='starforge_sdist_wheel_type_') as td:
-            debug("Extracting '%s' to '%s'", self._arcfile, td)
-            self.extractall(td)
-            root = join(td, self.root)
-            return wheel_type(root)
 
 
 class UnsupportedArchiveModule(object):

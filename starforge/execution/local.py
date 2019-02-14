@@ -2,14 +2,14 @@
 """
 from __future__ import absolute_import
 
-from subprocess import check_call
-try:
-    from subprocess import check_output
-except ImportError:
-    from ..util import check_output
+from subprocess import (
+    check_call,
+    check_output
+)
 
-from ..io import info
 from . import ExecutionContext
+from ..io import info
+from ..util import stringify_cmd
 
 
 class LocalExecutionContext(ExecutionContext):
@@ -21,7 +21,7 @@ class LocalExecutionContext(ExecutionContext):
 
     def run(self, cmd, cwd=None, capture_output=False, **kwargs):
         cmd = self.normalize_cmd(cmd)
-        info('Running local: %s', ' '.join(cmd))
+        info('Running local: %s', stringify_cmd(cmd))
         if capture_output:
             return check_output(cmd, cwd=cwd)
         else:

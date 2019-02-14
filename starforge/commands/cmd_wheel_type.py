@@ -14,8 +14,9 @@ import click
 from ..cache import CacheManager, cache_wheel_sources
 from ..cli import pass_context
 from ..config.wheels import WheelConfigManager
-from ..io import debug, fatal, info
-from ..util import PythonSdist, xdg_config_file
+from ..io import fatal, info
+from ..packaging.setup import PythonSdist
+from ..util import xdg_config_file
 
 
 # FIXME: dedup

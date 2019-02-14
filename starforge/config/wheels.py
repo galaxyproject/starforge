@@ -13,7 +13,7 @@ from six import iteritems, string_types
 
 from ..cache import cache_wheel_sources
 from ..io import debug, info, fatal
-from ..util import PythonSdist
+from ..packaging.setup import PythonSdist
 
 
 DEFAULT_IMAGESET = 'default-wheel'
