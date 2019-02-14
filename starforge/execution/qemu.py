@@ -18,8 +18,13 @@ from time import sleep
 
 from six import iteritems, b
 
-from ..io import warn, info, error
 from . import ExecutionContext
+from ..io import (
+    info,
+    error,
+    warn
+)
+from ..util import stringify_cmd
 
 
 SSH_EXEC_TEMPLATE = '''from subprocess import Popen
@@ -147,11 +152,11 @@ class QEMUExecutionContext(ExecutionContext):
                           '--', self.image.buildpy, guest_temp])
             if cmd:
                 info('%s %s executes: %s',
-                     self.image.buildpy, guest_temp, self.stringify_cmd(cmd))
+                     self.image.buildpy, guest_temp, stringify_cmd(cmd))
             else:
                 info('%s %s executes with args: %s',
                      self.image.buildpy, guest_temp, str(args))
-        info('Executing: %s', self.stringify_cmd(ssh_cmd))
+        info('Executing: %s', stringify_cmd(ssh_cmd))
         try:
             if capture_output:
                 return check_output(ssh_cmd)
@@ -172,7 +177,7 @@ class QEMUExecutionContext(ExecutionContext):
     def _scp(self, cmd):
         cmd = self.normalize_cmd(cmd)
         cmd = ['scp'] + self.ssh_args + cmd
-        info('Executing: %s', self.stringify_cmd(cmd))
+        info('Executing: %s', stringify_cmd(cmd))
         check_call(cmd)
 
     def start(self, share=None, env=None, **kwargs):
@@ -244,7 +249,7 @@ class QEMUExecutionContext(ExecutionContext):
             run_cmd.append('-device')
             run_cmd.append('isa-applesmc,osk={osk}'.format(osk=self.osk))
             display_cmd.extend(['-device', 'isa-applesmc,osk=redacted'])
-        info('Running qemu-system: %s', self.stringify_cmd(display_cmd))
+        info('Running qemu-system: %s', stringify_cmd(display_cmd))
 
         # snapshot the source image for this run
         cmd = ('btrfs subvolume snapshot {src} {dest}'

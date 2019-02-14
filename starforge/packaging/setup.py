@@ -2,6 +2,7 @@
 """
 import json
 import sys
+import tempfile
 from os import (
     getcwd,
     rename
@@ -10,13 +11,26 @@ from os.path import (
     exists,
     join
 )
-from subprocess import check_output, CalledProcessError
+from subprocess import (
+    CalledProcessError,
+    check_call,
+    check_output
+)
+
+try:
+    from tempfile import TemporaryDirectory
+except ImportError:
+    from backports.tempfile import TemporaryDirectory
 
 from ..io import (
     debug,
     error,
     info,
     warn
+)
+from ..util import (
+    Archive,
+    stringify_cmd
 )
 
 
@@ -88,15 +102,27 @@ def wheel_info(package_dir=None):
     package_dir = package_dir or getcwd()
     wheel_info = None
     try:
-        cmd = [sys.executable, 'setup.py', '-q', 'wheel_info', '--json']
-        wheel_info = _check_output(cmd, cwd=package_dir)
-        wheel_info = json.loads(wheel_info)
+        with tempfile.NamedTemporaryFile(mode='w+') as tfh:
+            cmd = [sys.executable, 'setup.py', '-q', 'wheel_info', '--json', '--output', tfh.name]
+            debug('Executing in %s: %s', package_dir, stringify_cmd(cmd))
+            check_call(cmd, cwd=package_dir)
+            wheel_info = json.load(tfh)
     except (CalledProcessError, ValueError) as exc:
         error("Failed to get wheel info: %s", exc)
     return wheel_info
 
 
-def _check_output(cmd, cwd=None):
-    debug('Executing in %s: %s', cwd, ' '.join(cmd))
+def _check_output(cmd, cwd):
+    debug('Executing in %s: %s', cwd, stringify_cmd(cmd))
     out = check_output(cmd, cwd=cwd)
     return out.decode('UTF-8')
+
+
+class PythonSdist(Archive):
+    @property
+    def wheel_type(self):
+        with TemporaryDirectory(prefix='starforge_sdist_wheel_type_') as td:
+            debug("Extracting '%s' to '%s'", self._arcfile, td)
+            self.extractall(td)
+            root = join(td, self.root)
+            return wheel_type(root)

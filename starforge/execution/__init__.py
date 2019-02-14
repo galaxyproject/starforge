@@ -5,12 +5,11 @@ from __future__ import absolute_import
 import shlex
 from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
-try:
-    from shlex import quote
-except ImportError:
-    from pipes import quote
 
-from six import with_metaclass, string_types
+from six import (
+    string_types,
+    with_metaclass
+)
 
 
 class ExecutionContext(with_metaclass(ABCMeta, object)):
@@ -21,14 +20,6 @@ class ExecutionContext(with_metaclass(ABCMeta, object)):
         if isinstance(cmd, string_types):
             cmd = shlex.split(cmd)
         return cmd
-
-    def stringify_cmd(self, cmd):
-        if isinstance(cmd, string_types):
-            return cmd
-        r = ''
-        for e in cmd:
-            r += quote(e) + ' '
-        return r.strip()
 
     @contextmanager
     def run_context(self, **kwargs):

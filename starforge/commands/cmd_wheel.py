@@ -10,7 +10,7 @@ from shutil import copy
 import click
 import yaml
 
-from ..io import debug, error, info, warn, fatal
+from ..io import error, info, warn, fatal
 from ..cli import pass_context
 from ..forge.wheels import build_forges
 from ..cache import cache_wheel_sources, check_wheel_source
@@ -142,7 +142,6 @@ def _prep_build(debug, global_config, wheels_config, template, image, wheel_name
     if isabs(image.buildpy):
         cmd = join(dirname(image.buildpy), cmd)
     share = [(abspath(getcwd()), GUEST_HOST, 'rw'),
-             (abspath(xdg_cache_dir()), join(GUEST_SHARE,
-                                            'galaxy-starforge'), 'ro')]
+             (abspath(xdg_cache_dir()), join(GUEST_SHARE, 'galaxy-starforge'), 'ro')]
     env = {'XDG_CACHE_HOME': GUEST_SHARE}
     return (cmd, share, env)

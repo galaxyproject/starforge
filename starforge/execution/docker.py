@@ -3,16 +3,16 @@
 from __future__ import absolute_import
 
 from os import unlink
-from subprocess import check_call
-try:
-    from subprocess import check_output
-except ImportError:
-    from ..util import check_output
+from subprocess import (
+    check_call,
+    check_output
+)
 
 from six import iteritems
 
-from ..io import info
 from . import ExecutionContext
+from ..io import info
+from ..util import stringify_cmd
 
 
 class DockerExecutionContext(ExecutionContext):
@@ -50,7 +50,7 @@ class DockerExecutionContext(ExecutionContext):
         run_cmd.extend(cmd)
         if self.use_sudo:
             run_cmd = ['sudo'] + run_cmd
-        info('Running docker: %s', ' '.join(run_cmd))
+        info('Running docker: %s', stringify_cmd(run_cmd))
         output = None
         if capture_output:
             output = check_output(run_cmd)

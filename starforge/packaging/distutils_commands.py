@@ -34,16 +34,20 @@ class wheel_info(Command):
 
     description = 'output wheel info'
 
-    user_options = [('yaml', None,
-                     "output YAML"
-                     " (default: false)"),
-                    ('json', None,
-                     "output JSON"
-                     " (default: false)"),
-                    ('pretty', None,
-                     "pretty output"
-                     " (default: false)"),
-                   ]
+    user_options = [
+        ('yaml', None,
+         "output YAML"
+         " (default: false)"),
+        ('json', None,
+         "output JSON"
+         " (default: false)"),
+        ('pretty', None,
+         "pretty output"
+         " (default: false)"),
+        ('output=', None,
+         "output file"
+         " (default: stdout)"),
+    ]
 
     boolean_options = ['yaml', 'json', 'pretty']
 
@@ -51,6 +55,7 @@ class wheel_info(Command):
         self.yaml = False
         self.json = False
         self.pretty = False
+        self.output = None
         self.dump = None
         self.end = ''
 
@@ -78,7 +83,6 @@ class wheel_info(Command):
 
     def run(self):
         bdist_wheel = self.get_finalized_command('bdist_wheel')
-        #bdist_wheel.finalize_options()
         tag = bdist_wheel.get_tag()
         info = {
             'distribution': bdist_wheel.wheel_dist_name,
@@ -93,7 +97,12 @@ class wheel_info(Command):
         }
         for key in DISTRIBUTION_KEYS:
             info[key] = getattr(bdist_wheel.distribution, key)
-        print(self.dump(info), end=self.end)
+        fh = None
+        if self.output:
+            with open(self.output, 'w') as fh:
+                print(self.dump(info), end=self.end, file=fh)
+        else:
+            print(self.dump(info), end=self.end)
 
 
 def dump_human(info):
