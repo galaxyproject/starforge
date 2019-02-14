@@ -66,7 +66,6 @@ class WheelConfig(object):
             self.configured_wheel_type = C_EXTENSION
         self.set_imageset()
 
-
     def detect_imageset(self, cache_manager):
         debug("Configured wheel imageset: %s", self.configured_imageset)
         wheel_type = self.configured_wheel_type
@@ -92,7 +91,6 @@ class WheelConfig(object):
         else:
             self.set_purepy(False)
             # sets universal
-
 
     def set_imageset(self, imageset=None, force=False):
         if self.configured_imageset is not None and not force:

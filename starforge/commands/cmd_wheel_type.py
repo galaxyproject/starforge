@@ -2,13 +2,6 @@
 """
 from __future__ import absolute_import
 
-from os.path import join
-
-try:
-    from tempfile import TemporaryDirectory
-except ImportError:
-    from backports.tempfile import TemporaryDirectory
-
 import click
 
 from ..cache import CacheManager, cache_wheel_sources

@@ -12,12 +12,10 @@ from os import (
     getcwd,
     listdir,
     makedirs,
-    rename,
     uname
 )
 from os.path import (
     abspath,
-    dirname,
     exists,
     join
 )
@@ -240,7 +238,7 @@ class ForgeWheel(object):
         # install setup requirements (these can be defined by the setup script but that presents a catch-22, so only
         # check the wheel config
         self._build_py_pip_install([self.image.buildpy], self.wheel_config.setup_requires,
-            dependency_type='Starforge image Python setup_requires')
+                                   dependency_type='Starforge image Python setup_requires')
         self._build_py_pip_install(pythons, self.wheel_config.setup_requires, dependency_type='setup_requires')
 
         insert_setuptools = self.wheel_config.insert_setuptools
