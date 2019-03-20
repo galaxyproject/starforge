@@ -1,0 +1,5 @@
+slurm-drmaa (1.1.0-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Nathan Coraor <nate@bx.psu.edu>  Wed, 20 Mar 2019 18:51:36 -0400

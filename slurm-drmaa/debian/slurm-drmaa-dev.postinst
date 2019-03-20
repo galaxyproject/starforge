@@ -1,0 +1,11 @@
+#!/bin/sh
+
+set -e
+
+update-alternatives \
+        --install /usr/lib/libdrmaa.so libdrmaa.so /usr/lib/slurm-drmaa/lib/libdrmaa.so 40 \
+	--slave /usr/include/drmaa.h drmaa.h /usr/lib/slurm-drmaa/include/drmaa.h
+
+#DEBHELPER#
+
+exit 0

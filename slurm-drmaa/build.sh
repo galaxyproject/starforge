@@ -3,16 +3,24 @@
 # For EL, see the slurm directory. Since there are no upstream slurm packages, we
 # build slurm, munge, and slurm-drmaa all in one.
 #
+# On Ubuntu we only build the source package, for uploading to a PPA.
 set -e
 #set -xv
 
 pkg=slurm-drmaa
 
-upstream_version='1.0.7'
-version='1.2.0-dev.57ebc0c'
+# increment $pkg_build when all dists/versions need a rebuild of the same upstream
+pkg_build=1
+# set/increment $series_build when just a particular dist/version needs a rebuild
+#series_build=1
+
+# upstream slurm-drmaa version
+version='1.1.0'
+
 url="https://github.com/natefoo/slurm-drmaa/releases/download/${version}/slurm-drmaa-${version}.tar.gz"
 
-builddeps='bison gperf ragel libslurm-dev libslurmdb-dev'
+# NOTE: if this does not match debian/control, Launchpad builds will likely fail
+builddeps='bison gperf ragel libslurm-dev libslurmdb-dev bats'
 
 DEBFULLNAME="Nathan Coraor"
 DEBEMAIL="nate@bx.psu.edu"
@@ -22,29 +30,40 @@ build=/host/build.$(hostname)
 
 . /etc/os-release
 
-case $VERSION_ID in
-    14.04)
-        upstream_version='1.0.6'
-        libvers='26'
-        # later versions set this in os-release
-        UBUNTU_CODENAME="trusty"
+
+function unsupported() {
+    echo "Don't know how to build for $NAME $VERSION [$ID] ($VERSION_ID)"
+    exit 1
+}
+
+
+case $ID in
+    ubuntu)
+        dch_dist_arg="--distribution $UBUNTU_CODENAME"
+        debuild_args='-S'
         ;;
-    16.04)
-        libvers='29'
-        ;;
-    8)
-        libvers='27'
-        ;;
-    9)
-        libvers='30'
+    debian)
+        dch_dist_arg='--distribution unstable'
         ;;
     *)
-        echo "Don't know how to build for $NAME $VERSION ($VERSION_ID)"
-        exit 1
+        unsupported
         ;;
 esac
 
-[ "$ID" = 'ubuntu' ] && dch_dist_arg="-D $UBUNTU_CODENAME" || dch_dist_arg=''
+case "$PRETTY_NAME" in
+    *buster*)
+        VERSION_ID=10
+        ;;
+esac
+
+# can be used to set any version-specific vars
+case $VERSION_ID in
+    16.04|18.04|18.10|9|10)
+        ;;
+    *)
+        unsupported
+        ;;
+esac
 
 . /util/utility_functions.sh
 
@@ -55,9 +74,12 @@ uid=$(stat -c %u /host)
 if [ -z "$__STARFORGE_RUN_AS" -a $uid -ne 0 ]; then
     # set timezone for debian/changelog
     echo 'America/New_York' > /etc/timezone
-    dpkg-reconfigure tzdata
 
     apt-get -qq update
+    apt-get install --no-install-recommends -y wget tzdata sudo build-essential devscripts debhelper quilt fakeroot ca-certificates dh-systemd
+
+    dpkg-reconfigure tzdata
+
     apt-get install --no-install-recommends -y $builddeps
 
     [ $gid -ne 0 ] && groupadd -g $gid build
@@ -67,13 +89,70 @@ elif [ -z "$__STARFORGE_RUN_AS" ]; then
     mkdir $build
 fi
 
+case $version in
+    *-dev.*)
+        dch_version=${version%.*}${pkg_build}.${version/*.}
+        ;;
+    *)
+        dch_version=${version}-${pkg_build}
+        ;;
+esac
+
+# the logic for setting this isn't flawless but dput fails if the .orig.tar.gz has already been uploaded, so we can only
+# use -sa once per upstream version? if this build adds the change to changelog.natefoo and the package build id is 1,
+# this indicates a new upstream version and -sa will be set, otherwise -sd.
+source_arg='-sd'
+
 cd $build
-apt-get source $pkg
 download_tarball "$url"
 ln -s "slurm-drmaa-${version}.tar.gz" "slurm-drmaa_${version%-*}.orig.tar.gz"
 extract_tarball "slurm-drmaa-${version}.tar.gz"
-mv slurm-drmaa-${upstream_version}/debian slurm-drmaa-${version}
+cp -r $(dirname $0)/debian slurm-drmaa-${version}
 cd slurm-drmaa-${version}
-rm -rf debian/patches
-dch -v ${version} ${dch_dist_arg} "Package version ${version}"
-debuild -us -uc
+
+# use specific rules if provided
+rules="debian/rules.${ID}-${VERSION_ID}"
+[ -f "$rules" ] && mv ${rules} debian/rules
+# remove others so they're not included in the debian tarball
+rm -f debian/rules.*
+
+# the distribution needs to be correct in the .changes file for launchpad to build the PPA packages (but otherwise
+# doesn't matter), the distribution is derived from the changelog, and we don't want to maintain a bunch of changelogs
+#dch -v ${dch_version} ${dch_dist_arg} "New upstream release"
+if ! grep -q "^slurm-drmaa (${dch_version})" debian/changelog.natefoo; then
+    if [ $pkg_build -eq 1 ]; then
+        source_arg='-sa'
+        : ${DCH_MESSAGE:=New upstream release}
+    else
+        : ${DCH_MESSAGE:=New package build}
+    fi
+
+    cd debian
+    [ ! -f changelog.natefoo ] && dch_create_args="--create --package=${pkg}"
+    dch ${dch_create_args} -v ${dch_version} --distribution unstable --force-distribution --changelog changelog.natefoo "$DCH_MESSAGE"
+    cd ..
+
+    cp debian/changelog.natefoo $(dirname $0)/debian/changelog.natefoo
+fi
+
+# now create this package's changelog
+case "$ID" in
+    ubuntu)
+        dch_version+="ubuntu${series_build:-1}~${VERSION_ID}"
+        ;;
+    debian)
+        dch_version+="+deb${VERSION_ID}u${series_build:-1}"
+        ;;
+esac
+cat debian/changelog.natefoo debian/changelog.${ID} > debian/changelog
+dch -v "${dch_version}" $dch_dist_arg "Series package"
+rm debian/changelog.*
+
+# -S to build source package
+# -sa to include source, -sd to exclude source and only include the diff
+# -us to not sign source, -uc to not sign changes
+debuild ${debuild_args} ${source_arg} -us -uc
+echo "packages in ${pkg}/$(basename $build)"
+echo "To sign: debsign -S ${pkg}_${dch_version}_source.changes" &&
+echo "To push: dput ${PPA:=ppa:natefoo/slurm-drmaa-test} ${pkg}_${dch_version}_source.changes"
+echo " or on Debian: dput -c ../dput.cf ${PPA:=ppa:natefoo/slurm-drmaa-test} ${pkg}_${dch_version}_source.changes"

@@ -1,0 +1,19 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+%:
+	dh $@ --with autoreconf
+
+override_dh_auto_configure:
+	# https://bugs.launchpad.net/ubuntu/+source/slurm-llnl/+bug/1802374
+	mkdir _include
+	cp -r /usr/include/slurm-wlm _include/slurm
+	./configure --with-slurm-inc=$(CURDIR)/_include/ --with-slurm-lib=/usr/lib/libslurm.so --prefix=/usr/lib/slurm-drmaa
+
+
+get-orig-source:
+	# Uscan will read debian/watch, grab the correct version, repack, and leave it in the
+	# current directory
+	uscan --noconf --force-download --rename --repack --download-current-version --destdir=.
