@@ -1,0 +1,48 @@
+slurm-drmaa (1.0.7-1) unstable; urgency=medium
+
+  * New upstream release
+  * Updated Standards-Version: 3.9.5
+  * Updated Vcs-* fields
+  * Updated Format field in debian/copyright
+
+ -- Dominique Belhachemi <domibel@debian.org>  Tue, 30 Sep 2014 15:55:05 -0400
+
+slurm-drmaa (1.0.6-2.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Use dh-autoreconf in build to support new architectures (Closes: #750692)
+
+ -- Chen Baozi <baozich@gmail.com>  Fri, 13 Jun 2014 15:46:14 +0800
+
+slurm-drmaa (1.0.6-2) unstable; urgency=low
+
+  * debian/compat: increase compat level to 9
+  * debian/control: set Standards-Version: 3.9.4
+
+ -- Dominique Belhachemi <domibel@debian.org>  Wed, 23 Jan 2013 08:25:09 -0500
+
+slurm-drmaa (1.0.6-1) unstable; urgency=low
+
+  * new release
+  * removed unused lintian override
+
+ -- Dominique Belhachemi <domibel@debian.org>  Mon, 21 Jan 2013 22:11:56 -0500
+
+slurm-drmaa (1.0.4-3) unstable; urgency=low
+
+  * use Debian's alternative system
+    (update-alternatives --display libdrmaa.so)
+
+ -- Dominique Belhachemi <domibel@debian.org>  Sun, 22 Apr 2012 17:57:44 -0400
+
+slurm-drmaa (1.0.4-2) unstable; urgency=low
+
+  * upload to unstable
+
+ -- Dominique Belhachemi <domibel@debian.org>  Fri, 13 Apr 2012 20:14:02 -0400
+
+slurm-drmaa (1.0.4-1) experimental; urgency=low
+
+  * Initial release (Closes: #668467)
+
+ -- Dominique Belhachemi <domibel@debian.org>  Wed, 11 Apr 2012 20:48:29 -0400

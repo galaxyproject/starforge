@@ -1,0 +1,13 @@
+[ppa:natefoo/slurm-drmaa-test]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~natefoo/ubuntu/slurm-drmaa-test/
+login = anonymous
+allow_unsigned_uploads = 0
+
+[ppa:natefoo/slurm-drmaa]
+fqdn = ppa.launchpad.net
+method = ftp
+incoming = ~natefoo/ubuntu/slurm-drmaa/
+login = anonymous
+allow_unsigned_uploads = 0

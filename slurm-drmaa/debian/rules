@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+%:
+	dh $@ --with autoreconf
+
+override_dh_auto_configure:
+	./configure --with-slurm-inc=/usr/include/slurm/ --with-slurm-lib=/usr/lib/libslurm.so --prefix=/usr/lib/slurm-drmaa
+
+
+override_dh_auto_test:
+	# Can't run functional tests as slurm is not installed/configured, and if slurm.conf
+	# does not exist, the config reading functions wait 60 seconds for it to exist.
+	SLURM_CONF=/dev/null $(MAKE) check
+
+
+get-orig-source:
+	# Uscan will read debian/watch, grab the correct version, repack, and leave it in the
+	# current directory
+	uscan --noconf --force-download --rename --repack --download-current-version --destdir=.

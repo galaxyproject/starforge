@@ -1,0 +1,36 @@
+Source: slurm-drmaa
+Priority: optional
+Maintainer: Nate Coraor <nate@bx.psu.edu>
+Build-Depends: debhelper (>= 9), dh-autoreconf, bison, gperf, ragel, libslurm-dev, libslurmdb-dev, bats
+Standards-Version: 3.9.5
+Section: libs
+Homepage: https://github.com/natefoo/slurm-drmaa.git/
+Vcs-Browser: https://github.com/natefoo/slurm-drmaa.git/
+Vcs-Git: https://github.com/natefoo/slurm-drmaa.git/
+
+Package: slurm-drmaa-dev
+Section: libdevel
+Architecture: any
+Conflicts: libdrmaa-dev (<< 6.2u5-3), pbs-drmaa-dev (<< 1.0.10-2)
+Depends: slurm-drmaa1 (= ${binary:Version}), ${misc:Depends}
+Description: DRMAA for Slurm - devel
+  DRMAA for Slurm Workload Manager (Slurm) is an implementation of
+  Open Grid Forum Distributed Resource Management Application API
+  (DRMAA) version 1 for submission and control of jobs to Slurm. Using
+  DRMAA, grid applications builders, portal developers and ISVs can
+  use the same high-level API to link their software with different
+  cluster/resource management systems.
+ .
+ This package contains the development files for slurm-drmaa.
+
+Package: slurm-drmaa1
+Architecture: any
+Conflicts: libdrmaa1.0 (<< 6.2u5-3), pbs-drmaa1 (<< 1.0.10-2)
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: DRMAA for Slurm - runtime
+  DRMAA for Slurm Workload Manager (Slurm) is an implementation of
+  Open Grid Forum Distributed Resource Management Application API
+  (DRMAA) version 1 for submission and control of jobs to Slurm. Using
+  DRMAA, grid applications builders, portal developers and ISVs can
+  use the same high-level API to link their software with different
+  cluster/resource management systems.
