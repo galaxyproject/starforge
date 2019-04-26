@@ -12,31 +12,13 @@ packages:
         prebuild:
             wheel: "for py in /python/cp*-`uname -m`; do ${py}/bin/easy_install pip; ${py}/bin/pip install --upgrade pip ; ${py}/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy || exit 1; done"
         insert_setuptools: true
-    bx-python:
-        version: 0.8.1
-        prebuild:
-            wheel: "for py in /python/cp*-`uname -m`; do ${py}/bin/pip install --index-url https://wheels.galaxyproject.org/simple/ numpy python-lzo || exit 1; done"
-        apt:
-            - git
-        yum:
-            # manylinux1 images don't preinstall these, which is probably the
-            # way they should all work
-            - zlib-devel
     Cheetah3:
         version: 3.1.0
-    MarkupSafe:
-        version: 1.0
     mercurial:
         version: 3.7.3
         insert_setuptools: true
     netifaces:
         version: 0.10.6
-    numpy:
-        version: 1.9.2
-        yum:
-            - atlas-devel
-    psutil:
-        version: 5.4.3
     psycopg2:
         version: 2.6.1
         src:
@@ -54,23 +36,6 @@ packages:
     pycrypto:
         version: 2.6.1
         insert_setuptools: true
-    pysam:
-        version: 0.14.1
-        prebuild:
-            wheel: >
-              sed -i'' -e 's/^HTSLIB_CONFIGURE_OPTIONS = .*/HTSLIB_CONFIGURE_OPTIONS = "--disable-libcurl"/' ${SRC_ROOT}/setup.py;
-              for py in /python/cp*-`uname -m`; do
-                  ${py}/bin/pip install 'cython' || exit 1;
-              done
-        auditwheel_args: 'repair -w dist -L .'
-        # manylinux1 x86_64 wheels are in PyPI
-        imageset: linux32-macos-wheel
-        brew:
-            - xz
-        yum:
-            - bzip2-devel
-            - xz-devel
-            - zlib-devel
     pysqlite:
         # pysqlite is dropped because SQLAlchemy will just use sqlite3 from
         # Python's stdlib, but keeping the rule here in case we have to add it
@@ -131,43 +96,8 @@ packages:
             - groff
             - cyrus-sasl-devel
             - libidn-devel
-    python-lzo:
-        version: 1.11
-        src:
-            - http://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz
-        insert_setuptools: true
-        prebuild:
-            wheel: cd ${SRC_ROOT_1} && CFLAGS=-fpic ./configure --prefix=${SRC_ROOT_0}/lzo --disable-shared && make install && sed -i -e 's/\["lzo"\]/\["lzo2"\]/' ${SRC_ROOT_0}/setup.py
-        build_args: build_ext -I lzo/include:lzo/include/lzo -L lzo/lib bdist_wheel
-    PyYAML:
-        version: 3.12
-        insert_setuptools: true
-        apt:
-            - libyaml-dev
-        yum:
-            - libyaml-devel
-    subprocess32:
-        version: 3.5.0
-        insert_setuptools: true
     SQLAlchemy:
         version: 1.2.2
-    uWSGI:
-        version: 2.0.17
-        prebuild:
-            all: cp ${SRC_ROOT_0}/setup.cpyext.py ${SRC_ROOT_0}/setup.py
-            wheel: >
-              [ `uname -s` != 'Darwin' ] ||
-              curl https://github.com/natefoo/uwsgi/commit/24c49361613fa3dbd0b61eb1a97733d48c00ff39.patch |
-              patch -d ${SRC_ROOT_0} -p1
-        apt:
-            - libpcre2-dev
-        yum:
-            - pcre-devel
-        brew:
-            - pcre
-    watchdog:
-        version: 0.8.3
-        imageset: macos-wheel
 purepy_packages:
     amqp:
         version: 1.4.8
@@ -184,27 +114,15 @@ purepy_packages:
     bagit:
         version: 1.6.4
         insert_setuptools: true
-    bdbag:
-        version: 1.2.4
     Beaker:
         version: 1.7.0
-    bioblend:
-        version: 0.7.0
     bz2file:
         version: 0.98
         insert_setuptools: true
-    boto:
-        version: 2.38.0
-    certifi:
-        version: 2017.7.27.1
     chardet:
         version: 3.0.4
     chronos-python:
         version: 0.38.0
-    cloudauthz:
-        version: 0.0.2    
-    cloudbridge:
-        version: 0.3.3
     decorator:
         version: 4.0.2
     dictobj:
@@ -232,8 +150,6 @@ purepy_packages:
         version: 0.4
     kamaki:
         version: 0.15
-    kombu:
-        version: 3.0.30
     Mako:
         version: 1.0.2
     Markdown:
@@ -252,8 +168,6 @@ purepy_packages:
     Parsley:
         version: 1.3
         insert_setuptools: true
-    Paste:
-        version: 2.0.2
     PasteDeploy:
         version: 1.5.2
     pbr:
@@ -286,22 +200,8 @@ purepy_packages:
     python-openid:
         version: 2.2.5
         insert_setuptools: true
-    pytz:
-        version: 2015.4
     repoze.lru:
         version: 0.7
-    requests:
-        version: 2.18.4
-    requests-oauthlib:
-        version: 0.6.1
-    requests-toolbelt:
-        version: 0.8.0
-    Routes:
-        version: 2.4.1
-    selenium:
-        version: 3.0.1
-    six:
-        version: 1.10.0
     sqlalchemy-migrate:
         version: 0.11.0
     SQLAlchemy-Utils:
@@ -312,8 +212,6 @@ purepy_packages:
         version: 1.5.0
     starforge:
         version: 0.3.4
-    statsd:
-        version: 3.2.1
     svgwrite:
         version: 1.1.6
     Tempita:
@@ -322,8 +220,6 @@ purepy_packages:
         version: 4.10.0
     twill:
         version: 0.9.1
-    urllib3:
-        version: 1.22
     wchartype:
         version: 0.1
         insert_setuptools: true
@@ -331,15 +227,5 @@ purepy_packages:
         version: 0.12
     WebHelpers:
         version: 1.3
-    WebOb:
-        version: 1.7.3
-    wheel:
-        version: 0.26.0+gx1
-        src:
-            - https://bitbucket.org/natefoo/wheel/get/795314b825f9.tar.gz
-        prebuild: sed -i -e 's/__version__ = "0\.26\.0"/__version__ = "0.26.0+gx1"/' ${SRC_ROOT}/wheel/__init__.py
     Whoosh:
         version: 2.7.4
-#    Whoosh:
-#        version: 2.4.1
-#        prebuild: sed -i -e 's/self\.results\.docterms\[self\.docnum\]/self.results.docterms.get(self.docnum, [])/' ${SRC_ROOT}/src/whoosh/searching.py && sed -i -e 's/versionstring()/"2.4.1+gx1"/' ${SRC_ROOT}/setup.py
