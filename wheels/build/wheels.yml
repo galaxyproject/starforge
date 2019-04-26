@@ -302,6 +302,10 @@ purepy_packages:
         version: 3.0.1
     six:
         version: 1.10.0
+    social-auth-core:
+        version: 3.0.0+gx0
+        src:
+            - https://github.com/python-social-auth/social-core/archive/master.zip
     sqlalchemy-migrate:
         version: 0.11.0
     SQLAlchemy-Utils:
