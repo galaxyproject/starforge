@@ -18,7 +18,7 @@ from ..util import xdg_cache_dir, xdg_config_file
 
 
 LOCAL_BDIST_WHEEL_CMD_TEMPLATE = (
-    'starforge {debug} --config-file {config} bdist_wheel --wheels-config {wheels_config} -i {image} {name}')
+    'starforge {debug} --config-file {config} bdist_wheel --wheels-config {wheels_config} -i {image} -o {output} {name}')
 BDIST_WHEEL_CMD_TEMPLATE = (
     'starforge {debug} --config-file {config} bdist_wheel --wheels-config {wheels_config} -i {image} -o {output} -u '
     '{uid} -g {gid} {name}')
@@ -100,6 +100,7 @@ def cli(ctx, wheels_config, wheel_dir, osk, sdist, image, docker, qemu, wheel, q
                         config=ctx.config_file,
                         wheels_config=wheels_config,
                         image=forge.image.name,
+                        output=wheel_dir,
                         name=wheel)
                     share = None
                     env = None
