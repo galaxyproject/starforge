@@ -1,7 +1,7 @@
 Source: slurm-drmaa
 Priority: optional
 Maintainer: Nate Coraor <nate@bx.psu.edu>
-Build-Depends: debhelper (>= 9), dh-autoreconf, bison, gperf, ragel, libslurm-dev, libslurmdb-dev, bats
+Build-Depends: debhelper (>= 9), dh-autoreconf, bison, gperf, ragel, libslurm-dev, bats
 Standards-Version: 3.9.5
 Section: libs
 Homepage: https://github.com/natefoo/slurm-drmaa.git/

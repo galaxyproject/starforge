@@ -15,12 +15,12 @@ pkg_build=1
 #series_build=1
 
 # upstream slurm-drmaa version
-version='1.1.0'
+version='1.1.3'
 
 url="https://github.com/natefoo/slurm-drmaa/releases/download/${version}/slurm-drmaa-${version}.tar.gz"
 
 # NOTE: if this does not match debian/control, Launchpad builds will likely fail
-builddeps='bison gperf ragel libslurm-dev libslurmdb-dev bats'
+builddeps='bison gperf ragel libslurm-dev bats'
 
 DEBFULLNAME="Nathan Coraor"
 DEBEMAIL="nate@bx.psu.edu"
@@ -58,7 +58,7 @@ esac
 
 # can be used to set any version-specific vars
 case $VERSION_ID in
-    16.04|18.04|18.10|9|10)
+    20.04|11|12)
         ;;
     *)
         unsupported
