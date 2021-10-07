@@ -51,14 +51,20 @@ case $ID in
 esac
 
 case "$PRETTY_NAME" in
-    *buster*)
-        VERSION_ID=10
+    *bullseye*)
+        VERSION_ID=11
+        ;;
+    *bookworm*)
+        VERSION_ID=12
         ;;
 esac
 
 # can be used to set any version-specific vars
 case $VERSION_ID in
-    20.04|11|12)
+    20.04)
+        builddeps="dh-systemd ${builddeps}"
+        ;;
+    11|12)
         ;;
     *)
         unsupported
@@ -76,7 +82,7 @@ if [ -z "$__STARFORGE_RUN_AS" -a $uid -ne 0 ]; then
     echo 'America/New_York' > /etc/timezone
 
     apt-get -qq update
-    apt-get install --no-install-recommends -y wget tzdata sudo build-essential devscripts debhelper quilt fakeroot ca-certificates dh-systemd
+    apt-get install --no-install-recommends -y wget tzdata sudo build-essential devscripts debhelper quilt fakeroot ca-certificates
 
     dpkg-reconfigure tzdata
 
@@ -110,11 +116,13 @@ extract_tarball "slurm-drmaa-${version}.tar.gz"
 cp -r $(dirname $0)/debian slurm-drmaa-${version}
 cd slurm-drmaa-${version}
 
-# use specific rules if provided
-rules="debian/rules.${ID}-${VERSION_ID}"
-[ -f "$rules" ] && mv ${rules} debian/rules
-# remove others so they're not included in the debian tarball
-rm -f debian/rules.*
+# use specific overrides if provided
+for base in rules control; do
+    override="debian/${base}.${ID}-${VERSION_ID}"
+    [ -f "$override" ] && cp "${override}" "debian/${base}"
+    # remove this and others so they're not included in the debian tarball
+    rm -f debian/${base}.*
+done
 
 # the distribution needs to be correct in the .changes file for launchpad to build the PPA packages (but otherwise
 # doesn't matter), the distribution is derived from the changelog, and we don't want to maintain a bunch of changelogs

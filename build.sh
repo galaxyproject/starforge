@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-usage="usage: $(basename $0) <galaxy|ubuntu[:tag]|debian[:tag]> <PACKAGE>"
+usage="usage: $(basename $0) <galaxy|ubuntu[:tag]|debian[:tag]> <PACKAGE> [buildscript]"
 
 [ -z "$2" ] && echo "$usage" && exit 2
 
@@ -28,10 +28,15 @@ case "$repo" in
         build_image_repository='natefoo/galaxy_build'
         buildpkgs='gfortran bzip2 patch'
         ;;
-    ubuntu|debian)
+    ubuntu)
         baseimg="$1"
         build_image_repository="natefoo/${repo}_build"
         buildpkgs='devscripts debhelper socat quilt fakeroot ca-certificates dh-systemd'
+        ;;
+    debian)
+        baseimg="$1"
+        build_image_repository="natefoo/${repo}_build"
+        buildpkgs='devscripts debhelper socat quilt fakeroot ca-certificates'
         ;;
     starforge/*)
         docker_args='--cap-add=SYS_ADMIN'
@@ -69,6 +74,12 @@ fi
 
 base=$(readlink -f $2)
 
-runcmd="docker run $docker_args --rm --volume=$base/:/host/ --volume=`pwd`/util/:/util/ $build_image_repository"
+buildscript=
+if [ -n "$3" ]; then
+    buildscript="--volume=$base/$3:/host/build.sh"
+fi
+
+
+runcmd="docker run $docker_args --rm --volume=$base/:/host/ --volume=`pwd`/util/:/util/ $buildscript $build_image_repository"
 echo "$runcmd $@"
 $runcmd $@
