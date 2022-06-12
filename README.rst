@@ -1,3 +1,11 @@
+DEPRECATED
+----------
+
+This project is now deprecated in favour of
+`wheelforge <https://github.com/galaxyproject/wheelforge/>`_, which uses
+`PyPA <https://www.pypa.io/>`_ projects (like cibuildwheel) to build wheels for
+Python packages.
+
 .. figure:: https://raw.githubusercontent.com/galaxyproject/starforge/master/docs/starforge_logo.png
    :alt: Starforge Logo
    :align: center
