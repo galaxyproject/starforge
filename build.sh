@@ -31,7 +31,7 @@ case "$repo" in
     ubuntu)
         baseimg="$1"
         build_image_repository="natefoo/${repo}_build"
-        buildpkgs='devscripts debhelper socat quilt fakeroot ca-certificates dh-systemd'
+        buildpkgs='devscripts debhelper socat quilt fakeroot ca-certificates'
         ;;
     debian)
         baseimg="$1"

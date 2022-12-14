@@ -64,7 +64,7 @@ case $VERSION_ID in
     20.04)
         builddeps="dh-systemd ${builddeps}"
         ;;
-    11|12)
+    11|12|22.04)
         ;;
     *)
         unsupported
