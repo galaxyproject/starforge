@@ -15,7 +15,7 @@ pkg_build=1
 #series_build=1
 
 # upstream slurm-drmaa version
-version='1.1.3'
+version='1.1.5'
 
 url="https://github.com/natefoo/slurm-drmaa/releases/download/${version}/slurm-drmaa-${version}.tar.gz"
 
@@ -57,6 +57,9 @@ case "$PRETTY_NAME" in
     *bookworm*)
         VERSION_ID=12
         ;;
+    *trixie*)
+        VERSION_ID=13
+        ;;
 esac
 
 # can be used to set any version-specific vars
@@ -64,7 +67,7 @@ case $VERSION_ID in
     20.04)
         builddeps="dh-systemd ${builddeps}"
         ;;
-    11|12|22.04)
+    11|12|13|22.04|24.04)
         ;;
     *)
         unsupported
